@@ -1,10 +1,10 @@
-[![Ensure compliance with Ledger guidelines](https://github.com/LedgerHQ/app-boilerplate/actions/workflows/guidelines_enforcer.yml/badge.svg)](https://github.com/LedgerHQ/app-boilerplate/actions/workflows/guidelines_enforcer.yml)
+[![Ensure compliance with Ledger guidelines](https://github.com/LedgerHQ/app-hyperliquid/actions/workflows/guidelines_enforcer.yml/badge.svg)](https://github.com/LedgerHQ/app-hyperliquid/actions/workflows/guidelines_enforcer.yml)
 
-[![Build and run functional tests using ragger through reusable workflow](https://github.com/LedgerHQ/app-boilerplate/actions/workflows/build_and_functional_tests.yml/badge.svg?branch=master)](https://github.com/LedgerHQ/app-boilerplate/actions/workflows/build_and_functional_tests.yml)
+[![Build and run functional tests using ragger through reusable workflow](https://github.com/LedgerHQ/app-hyperliquid/actions/workflows/build_and_functional_tests.yml/badge.svg?branch=master)](https://github.com/LedgerHQ/app-hyperliquid/actions/workflows/build_and_functional_tests.yml)
 
-# Ledger Boilerplate Application
+# Ledger Hyperliquid Application
 
-This is a boilerplate application which can be forked to start a new project for the Ledger devices.
+This is a hyperliquid application which can be forked to start a new project for the Ledger devices.
 
 ## Quick start guide
 
@@ -26,8 +26,8 @@ It will allow you, whether you are developing on macOS, Windows or Linux to quic
   * On Windows, install and launch [VcXsrv](https://sourceforge.net/projects/vcxsrv/)
     (make sure to configure it to disable access control).
 * Install [VScode](https://code.visualstudio.com/download) and add [Ledger's extension](https://marketplace.visualstudio.com/items?itemName=LedgerHQ.ledger-dev-tools).
-* Open a terminal and clone `app-boilerplate` with `git clone git@github.com:LedgerHQ/app-boilerplate.git`.
-* Open the `app-boilerplate` folder with VSCode.
+* Open a terminal and clone `app-hyperliquid` with `git clone git@github.com:LedgerHQ/app-hyperliquid.git`.
+* Open the `app-hyperliquid` folder with VSCode.
 * Use Ledger extension's sidebar menu or open the tasks menu with `ctrl + shift + b`
   (`command + shift + b` on a Mac) to conveniently execute actions :
   * Build the app for the device model of your choice with `Build`.
@@ -156,7 +156,7 @@ python3 -m ledgerblue.runScript --scp --fileName bin/app.apdu --elfFile bin/app.
 
 ## Test
 
-The boilerplate app comes with functional tests implemented with Ledger's [Ragger](https://github.com/LedgerHQ/ragger)
+The hyperliquid app comes with functional tests implemented with Ledger's [Ragger](https://github.com/LedgerHQ/ragger)
 test framework.
 
 ### macOS / Windows
@@ -238,12 +238,3 @@ It outputs 3 artifacts:
 * `compiled_app_binaries` within binary files of the build process for each device
 * `code-coverage` within HTML details of code coverage
 * `documentation` within HTML auto-generated documentation
-
-## Are you developing an application for Ledger devices?
-
-If so, This boilerplate will help you get started.
-
-For a smooth and quick integration:
-
-* See the developers’ documentation on the [Developer Portal](https://developers.ledger.com/), and
-* [Go on Discord](https://developers.ledger.com/discord-pro/) to chat with developer support and the developer community.
