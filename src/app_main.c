@@ -20,17 +20,12 @@
 
 #include "os.h"
 #include "ux.h"
-#include "swap.h"
+#include "status_words.h"
 
-#include "types.h"
 #include "globals.h"
 #include "io.h"
-#include "sw.h"
 #include "menu.h"
 #include "dispatcher.h"
-#include "dynamic_token_info.h"
-
-global_ctx_t G_context;
 
 const internal_storage_t N_storage_real;
 
@@ -44,28 +39,14 @@ void app_main() {
     command_t cmd;
 
     io_init();
-
-#ifdef HAVE_SWAP
-    // When called in swap context as a library, we don't want to show the menu
-    if (!G_called_from_swap) {
-#endif
-        ui_menu_main();
-#ifdef HAVE_SWAP
-    }
-#endif
-
-    // Reset context
-    explicit_bzero(&G_context, sizeof(G_context));
-
-    init_dynamic_token_storage();
+    ui_menu_main();
 
     // Initialize the NVM data if required
-    if (N_storage.initialized != 0x01) {
+    if (!N_storage.initialized) {
         internal_storage_t storage;
-        storage.dummy1_allowed = 0x00;
-        storage.dummy2_allowed = 0x00;
-        storage.initialized = 0x01;
-        nvm_write((void *) &N_storage, &storage, sizeof(internal_storage_t));
+        explicit_bzero(&storage, sizeof(storage));
+        storage.initialized = true;
+        nvm_write((void *) &N_storage, &storage, sizeof(storage));
     }
 
     for (;;) {
