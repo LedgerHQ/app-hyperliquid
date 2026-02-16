@@ -14,6 +14,7 @@ CLA: int = 0xE0
 class InsType(IntEnum):
     GET_ADDRESS = 0x01
     PROVIDE_ACTION_METADATA = 0x02
+    SET_ACTION = 0x03
 
 def split_message(message: bytes) -> list[bytes]:
     return [message[x:x + MAX_APDU_LEN] for x in range(0, len(message), MAX_APDU_LEN)]
@@ -40,6 +41,14 @@ class CommandSender:
         payload = obj.serialize()
         return self.backend.exchange(cla=CLA,
                                      ins=InsType.PROVIDE_ACTION_METADATA,
+                                     p1=0x01,
+                                     p2=0x00,
+                                     data=struct.pack(">H", len(payload)) + payload)
+
+    def set_action(self, obj: TlvSerializable) -> RAPDU:
+        payload = obj.serialize()
+        return self.backend.exchange(cla=CLA,
+                                     ins=InsType.SET_ACTION,
                                      p1=0x01,
                                      p2=0x00,
                                      data=struct.pack(">H", len(payload)) + payload)
