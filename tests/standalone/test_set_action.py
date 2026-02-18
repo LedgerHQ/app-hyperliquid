@@ -1,3 +1,4 @@
+from application_client.bulk_cancel import BulkCancel
 from application_client.bulk_modify import BulkModify
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
@@ -44,6 +45,18 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
                 False,
                 Tif.IOC,
             ),
+            42,
+        ),
+    ))
+
+def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.set_action(SetAction(
+        1,
+        ActionType.CANCEL,
+        1770816625873,
+        BulkCancel(
+            1,
             42,
         ),
     ))
