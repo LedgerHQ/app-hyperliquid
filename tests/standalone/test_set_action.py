@@ -1,3 +1,4 @@
+from application_client.bulk_modify import BulkModify
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order import Order, OrderType, Tif
@@ -24,5 +25,25 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
             Grouping.NA,
             builder_addr=bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
             builder_fee=100,
+        ),
+    ))
+
+def test_set_action_bulk_modify(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.set_action(SetAction(
+        1,
+        ActionType.MODIFY,
+        1770816625873,
+        BulkModify(
+            Order(
+                OrderType.LIMIT,
+                1,
+                True,
+                "1992",
+                "0.512",
+                False,
+                Tif.IOC,
+            ),
+            42,
         ),
     ))
