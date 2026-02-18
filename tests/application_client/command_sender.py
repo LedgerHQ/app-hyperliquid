@@ -15,6 +15,7 @@ class InsType(IntEnum):
     GET_ADDRESS = 0x01
     PROVIDE_ACTION_METADATA = 0x02
     SET_ACTION = 0x03
+    SIGN_ACTION = 0x04
 
 def split_message(message: bytes) -> list[bytes]:
     return [message[x:x + MAX_APDU_LEN] for x in range(0, len(message), MAX_APDU_LEN)]
@@ -52,3 +53,10 @@ class CommandSender:
                                      p1=0x01,
                                      p2=0x00,
                                      data=struct.pack(">H", len(payload)) + payload)
+
+    def sign_action(self, bip32_path: str) -> RAPDU:
+        return self.backend.exchange(cla=CLA,
+                                     ins=InsType.SIGN_ACTION,
+                                     p1=0x00,
+                                     p2=0x00,
+                                     data=pack_derivation_path(bip32_path))
