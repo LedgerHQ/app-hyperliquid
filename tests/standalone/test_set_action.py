@@ -4,6 +4,7 @@ from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order import Order, OrderType, Tif
 from application_client.set_action import ActionType, SetAction
+from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
 
 
@@ -58,5 +59,18 @@ def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
         BulkCancel(
             1,
             42,
+        ),
+    ))
+
+def test_set_action_update_leverage(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.set_action(SetAction(
+        1,
+        ActionType.UPDATE_LEVERAGE,
+        1770816625873,
+        UpdateLeverage(
+            1,
+            False,
+            8,
         ),
     ))
