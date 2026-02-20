@@ -78,6 +78,42 @@ for proper clear-signing). The metadata includes a signature, which is cryptogra
 
 None
 
+### SET_ACTION
+
+#### Description
+
+This command gives a hyperliquid action.
+
+#### Coding
+
+##### `Command`
+
+| CLA | INS   | P1                   | P2  | Lc       | Le       |
+| --- | ---   | -------------------- | --- | ---      | ---      |
+| E0  |  03   | 01: first chunk      | 00  | variable | variable |
+|     |       | 00: following chunk  |     |          |          |
+
+##### `Input data`
+
+###### first chunk
+
+| Description                      | Length   |
+| ---                              | ---      |
+| Struct length (big endian)       | 2        |
+| [SET_ACTION](#set_action) struct | variable |
+
+###### following chunk
+
+:warning: Multi-chunk payloads are currently not supported by the app, but for future-proofing it was specified this way.
+
+| Description                      | Length   |
+| ---                              | ---      |
+| [SET_ACTION](#set_action) struct | variable |
+
+##### `Output data`
+
+None
+
 ## TLV structs
 
 ### ACTION_METADATA
@@ -108,3 +144,13 @@ None
 | ----    | ----- |
 | MAINNET | 0x00  |
 | TESTNET | 0x01  |
+
+### SET_ACTION
+
+| Name           | Tag  | Type                           | Optional |
+| ----           | ---  | ----                           | -------- |
+| STRUCT_TYPE    | 0x01 | uint8                          |          |
+| STRUCT_VERSION | 0x02 | uint8                          |          |
+| ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
+| NONCE          | 0xda | uint64                         |          |
+| ACTION         | 0xdb |                                |          |
