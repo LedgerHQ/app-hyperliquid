@@ -114,6 +114,38 @@ This command gives a hyperliquid action.
 
 None
 
+### SIGN_ACTION
+
+#### Description
+
+This command signs a previously given hyperliquid action (in the same order).
+
+#### Coding
+
+##### `Command`
+
+| CLA | INS   | P1  | P2  | Lc       | Le       |
+| --- | ---   | --- | --- | ---      | ---      |
+| E0  |  04   | 00  | 00  | variable | variable |
+
+##### `Input data`
+
+| Description                                             | Length |
+| ---                                                     | ---    |
+| Number of BIP 32 derivations to perform (max 10 levels) | 1      |
+| First derivation index (big endian)                     | 4      |
+| ...                                                     | 4      |
+| Last derivation index (big endian)                      | 4      |
+
+##### `Output data`
+
+| Description               | Length |
+| ---                       | ---    |
+| Remaining actions to sign | 1      |
+| signature v               | 1      |
+| signature r               | 32     |
+| signature s               | 32     |
+
 ## TLV structs
 
 ### ACTION_METADATA
