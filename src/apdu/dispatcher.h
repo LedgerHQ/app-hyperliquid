@@ -6,7 +6,7 @@
  * Enumeration with expected INS of APDU commands.
  */
 typedef enum {
-    NONE = 0x00,
+    GET_ADDRESS = 0x01,
 } command_e;
 
 /**

@@ -27,6 +27,8 @@
 #include "constants.h"
 #include "globals.h"
 
+#include "get_addr.h"
+
 #define P1_FIRST     0x01
 #define P1_FOLLOWING 0x00
 
@@ -40,6 +42,17 @@ int apdu_dispatcher(const command_t *cmd) {
     buffer_t buf = {0};
 
     switch (cmd->ins) {
+        case GET_ADDRESS:
+            if ((cmd->p1 != 0) || (cmd->p2 != 0)) {
+                return io_send_sw(SWO_INCORRECT_P1_P2);
+            }
+            if (!cmd->data || (cmd->lc < 1)) {
+                return io_send_sw(SWO_WRONG_DATA_LENGTH);
+            }
+            buf.size = cmd->lc;
+            buf.ptr = cmd->data;
+            return handler_get_addr(&buf);
+
         default:
             return io_send_sw(SWO_INVALID_INS);
     }
