@@ -20,7 +20,7 @@ from ecdsa.util import sigencode_der  # type: ignore[import-untyped]
 class Key(Enum):
     """Available signing keys for CAL dynamic token descriptors."""
 
-    NONE = auto()
+    ACTION_METADATA = auto()
 
 
 def _load_key(key: Key) -> SigningKey:
