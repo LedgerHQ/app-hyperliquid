@@ -1,3 +1,4 @@
+from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel
 from application_client.bulk_modify import BulkModify
 from application_client.bulk_order import BulkOrder, Grouping
@@ -72,5 +73,18 @@ def test_set_action_update_leverage(backend: BackendInterface) -> None:
             1,
             False,
             8,
+        ),
+    ))
+
+def test_set_action_approval_builder_fee(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.set_action(SetAction(
+        1,
+        ActionType.APPROVAL_BUILDER_FEE,
+        1770816625903,
+        ApproveBuilderFee(
+            42161,
+            "0.15%",
+            bytes.fromhex("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"),
         ),
     ))
