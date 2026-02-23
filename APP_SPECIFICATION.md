@@ -137,6 +137,7 @@ None
 | MODIFY               | 0x01  |
 | CANCEL               | 0x02  |
 | LEVERAGE             | 0x03  |
+| APPROVE_BUILDER_FEE  | 0x04  |
 
 #### Network enum
 
@@ -230,3 +231,11 @@ None
 | ---- | ----- |
 | TP   | 0x00  |
 | SL   | 0x01  |
+
+### APPROVE_BUILDER_FEE
+
+| Name               | Tag  | Type      | Optional |
+| ----               | ---  | ----      | -------- |
+| SIGNATURE_CHAIN_ID | 0x23 | uint64    |          |
+| MAX_FEE_RATE       | 0xb0 | char[]    |          |
+| BUILDER            | 0xd3 | uint8[20] |          |
