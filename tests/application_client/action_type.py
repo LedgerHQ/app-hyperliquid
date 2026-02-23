@@ -6,3 +6,4 @@ class ActionType(IntEnum):
     MODIFY = 0x01
     CANCEL = 0x02
     UPDATE_LEVERAGE = 0x03
+    APPROVAL_BUILDER_FEE = 0x04
