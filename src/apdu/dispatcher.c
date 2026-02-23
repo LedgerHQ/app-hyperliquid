@@ -22,12 +22,14 @@
 #include "io.h"
 #include "ledger_assert.h"
 #include "status_words.h"
+#include "read.h"
 
 #include "dispatcher.h"
 #include "constants.h"
 #include "globals.h"
 
 #include "get_addr.h"
+#include "provide_action_metadata.h"
 
 #define P1_FIRST     0x01
 #define P1_FOLLOWING 0x00
@@ -52,6 +54,21 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.size = cmd->lc;
             buf.ptr = cmd->data;
             return handler_get_addr(&buf);
+
+        case PROVIDE_ACTION_METADATA:
+            if ((cmd->p1 != P1_FIRST) || (cmd->p2 != 0)) {
+                return io_send_sw(SWO_INCORRECT_P1_P2);
+            }
+            if (!cmd->data || (cmd->lc < 2)) {
+                return io_send_sw(SWO_WRONG_DATA_LENGTH);
+            }
+            buf.size = read_u16_be(cmd->data, 0);
+            if (buf.size != (cmd->lc - sizeof(uint16_t))) {
+                // for now only handle command fitting on one APDU
+                return io_send_sw(SWO_WRONG_DATA_LENGTH);
+            }
+            buf.ptr = cmd->data + sizeof(uint16_t);
+            return handler_provide_action_metadata(&buf);
 
         default:
             return io_send_sw(SWO_INVALID_INS);

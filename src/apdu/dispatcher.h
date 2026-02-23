@@ -7,6 +7,7 @@
  */
 typedef enum {
     GET_ADDRESS = 0x01,
+    PROVIDE_ACTION_METADATA = 0x02,
 } command_e;
 
 /**
