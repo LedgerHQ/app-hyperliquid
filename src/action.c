@@ -12,6 +12,7 @@ typedef struct {
     s_action action;
     union {
         s_bulk_order_ctx bulk_order_ctx;
+        s_bulk_modify_ctx bulk_modify_ctx;
     };
 } s_action_ctx;
 
@@ -49,6 +50,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
     }
     switch (out->action.type) {
         case ACTION_TYPE_ORDER:
+        case ACTION_TYPE_MODIFY:
             break;
         default:
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
@@ -85,6 +87,10 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
             out->bulk_order_ctx.bulk_order = &out->action.bulk_order;
             ret = parse_bulk_order(&data->value, &out->bulk_order_ctx);
             break;
+        case ACTION_TYPE_MODIFY:
+            out->bulk_modify_ctx.bulk_modify = &out->action.bulk_modify;
+            ret = parse_bulk_modify(&data->value, &out->bulk_modify_ctx);
+            break;
         default:
             ret = false;
     }
@@ -115,6 +121,9 @@ static void dump_action(const s_action *action) {
         case ACTION_TYPE_ORDER:
             dump_bulk_order(&action->bulk_order);
             break;
+        case ACTION_TYPE_MODIFY:
+            dump_bulk_modify(&action->bulk_modify);
+            break;
         default:
             PRINTF("Error: cannot dump unknown action type\n");
     }
@@ -140,6 +149,9 @@ static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
     switch (action->type) {
         case ACTION_TYPE_ORDER:
             ret = bulk_order_serialize(&action->bulk_order, cmp_ctx);
+            break;
+        case ACTION_TYPE_MODIFY:
+            ret = bulk_modify_serialize(&action->bulk_modify, cmp_ctx);
             break;
         default:
             ret = false;

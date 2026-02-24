@@ -5,12 +5,14 @@
 #include "buffer.h"
 #include "action_type.h"
 #include "bulk_order.h"
+#include "bulk_modify.h"
 
 typedef struct {
     e_action_type type;
     uint64_t nonce;
     union {
         s_bulk_order bulk_order;
+        s_bulk_modify bulk_modify;
     };
 } s_action;
 
