@@ -14,6 +14,7 @@ typedef struct {
         s_bulk_order_ctx bulk_order_ctx;
         s_bulk_modify_ctx bulk_modify_ctx;
         s_bulk_cancel_ctx bulk_cancel_ctx;
+        s_update_leverage_ctx update_leverage_ctx;
     };
 } s_action_ctx;
 
@@ -53,6 +54,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
         case ACTION_TYPE_ORDER:
         case ACTION_TYPE_MODIFY:
         case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_UPDATE_LEVERAGE:
             break;
         default:
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
@@ -97,6 +99,10 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
             out->bulk_cancel_ctx.bulk_cancel = &out->action.bulk_cancel;
             ret = parse_bulk_cancel(&data->value, &out->bulk_cancel_ctx);
             break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            out->update_leverage_ctx.update_leverage = &out->action.update_leverage;
+            ret = parse_update_leverage(&data->value, &out->update_leverage_ctx);
+            break;
         default:
             ret = false;
     }
@@ -133,6 +139,9 @@ static void dump_action(const s_action *action) {
         case ACTION_TYPE_CANCEL:
             dump_bulk_cancel(&action->bulk_cancel);
             break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            dump_update_leverage(&action->update_leverage);
+            break;
         default:
             PRINTF("Error: cannot dump unknown action type\n");
     }
@@ -164,6 +173,9 @@ static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
             break;
         case ACTION_TYPE_CANCEL:
             ret = bulk_cancel_serialize(&action->bulk_cancel, cmp_ctx);
+            break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            ret = update_leverage_serialize(&action->update_leverage, cmp_ctx);
             break;
         default:
             ret = false;
