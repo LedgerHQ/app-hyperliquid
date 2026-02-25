@@ -9,6 +9,7 @@
 #include "bulk_cancel.h"
 #include "update_leverage.h"
 #include "approve_builder_fee.h"
+#include "action_metadata.h"
 
 typedef struct {
     e_action_type type;
@@ -23,4 +24,7 @@ typedef struct {
 } s_action;
 
 bool parse_action(const buffer_t *payload);
-bool action_hash(const s_action *action, uint8_t *domain_hash, uint8_t *message_hash);
+bool action_hash(const s_action *action,
+                 const s_action_metadata *metadata,
+                 uint8_t *domain_hash,
+                 uint8_t *message_hash);

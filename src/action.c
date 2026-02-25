@@ -4,8 +4,13 @@
 #include "write.h"
 #include "cmp.h"
 #include "action.h"
+#include "hl_context.h"
+#include "eip712_builder_fee.h"
+#include "eip712_cid.h"
 
 #define STRUCT_TYPE 0x2c
+
+#define MAX_SERIALIZED_ACTION_SIZE 512
 
 typedef struct {
     TLV_reception_t received_tags;
@@ -190,4 +195,87 @@ static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
             ret = false;
     }
     return ret;
+}
+
+static size_t ser_writer(cmp_ctx_t *ctx, const void *data, size_t count) {
+    buffer_t *buf = ctx->buf;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    if ((buf->offset + count) > buf->size) {
+        return 0;
+    }
+    memcpy(&buf->ptr[buf->offset], data, count);
+    buf->offset += count;
+    return count;
+}
+
+static bool compute_connection_id(const s_action *action, uint8_t end_byte, uint8_t *out) {
+    cmp_ctx_t cmp_ctx;
+    uint8_t raw_buf[MAX_SERIALIZED_ACTION_SIZE];
+    buffer_t buf;
+    uint8_t nonce_buf[sizeof(action->nonce)];
+    cx_sha3_t hash_ctx;
+
+    buf.ptr = raw_buf;
+    buf.size = sizeof(raw_buf);
+    buf.offset = 0;
+    cmp_init(&cmp_ctx, &buf, NULL, NULL, &ser_writer);
+    if (!action_serialize(action, &cmp_ctx)) {
+        return false;
+    }
+
+    if (cx_keccak_init_no_throw(&hash_ctx, 256) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, buf.ptr, buf.offset) != CX_OK) {
+        return false;
+    }
+
+    write_u64_be(nonce_buf, 0, action->nonce);
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, nonce_buf, sizeof(nonce_buf)) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, &end_byte, sizeof(end_byte)) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_final((cx_hash_t *) &hash_ctx, out) != CX_OK) {
+        return false;
+    }
+    PRINTF("connection_id = 0x%.*h\n", 32, out);
+    return true;
+}
+
+bool action_hash(const s_action *action,
+                 const s_action_metadata *metadata,
+                 uint8_t *domain_hash,
+                 uint8_t *message_hash) {
+    uint8_t connection_id[32];
+
+    if (action->type == ACTION_TYPE_APPROVE_BUILDER_FEE) {
+        if (!eip712_builder_fee_hash(&action->approve_builder_fee.signature_chain_id,
+                                     (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
+                                     action->approve_builder_fee.max_fee_rate,
+                                     action->approve_builder_fee.builder,
+                                     &action->nonce,
+                                     domain_hash,
+                                     message_hash)) {
+            return false;
+        }
+    } else {
+        if (!compute_connection_id(action, 0, connection_id)) {
+            return false;
+        }
+        if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
+                             connection_id,
+                             domain_hash,
+                             message_hash)) {
+            return false;
+        }
+    }
+    return true;
 }
