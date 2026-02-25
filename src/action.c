@@ -172,6 +172,9 @@ bool parse_action(const buffer_t *payload) {
         return false;
     }
     dump_action(&out.action);
+    if (!ctx_push_action(&out.action)) {
+        return false;
+    }
     return true;
 }
 

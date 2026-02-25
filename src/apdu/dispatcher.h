@@ -9,6 +9,7 @@ typedef enum {
     GET_ADDRESS = 0x01,
     PROVIDE_ACTION_METADATA = 0x02,
     SET_ACTION = 0x03,
+    SIGN_ACTION = 0x04,
 } command_e;
 
 /**

@@ -31,6 +31,7 @@
 #include "get_addr.h"
 #include "provide_action_metadata.h"
 #include "set_action.h"
+#include "sign_action.h"
 
 #define P1_FIRST     0x01
 #define P1_FOLLOWING 0x00
@@ -85,6 +86,17 @@ int apdu_dispatcher(const command_t *cmd) {
             }
             buf.ptr = cmd->data + sizeof(uint16_t);
             return handler_set_action(&buf);
+
+        case SIGN_ACTION:
+            if ((cmd->p1 != 0) || (cmd->p2 != 0)) {
+                return io_send_sw(SWO_INCORRECT_P1_P2);
+            }
+            if (!cmd->data || (cmd->lc < 1)) {
+                return io_send_sw(SWO_WRONG_DATA_LENGTH);
+            }
+            buf.size = cmd->lc;
+            buf.ptr = cmd->data;
+            return handler_sign_action(&buf);
 
         default:
             return io_send_sw(SWO_INVALID_INS);
