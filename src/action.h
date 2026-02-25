@@ -4,11 +4,13 @@
 #include <stdbool.h>
 #include "buffer.h"
 #include "action_type.h"
+#include "bulk_order.h"
 
 typedef struct {
     e_action_type type;
     uint64_t nonce;
     union {
+        s_bulk_order bulk_order;
     };
 } s_action;
 
