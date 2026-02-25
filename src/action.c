@@ -15,6 +15,7 @@ typedef struct {
         s_bulk_modify_ctx bulk_modify_ctx;
         s_bulk_cancel_ctx bulk_cancel_ctx;
         s_update_leverage_ctx update_leverage_ctx;
+        s_approve_builder_fee_ctx approve_builder_fee_ctx;
     };
 } s_action_ctx;
 
@@ -55,6 +56,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
         case ACTION_TYPE_MODIFY:
         case ACTION_TYPE_CANCEL:
         case ACTION_TYPE_UPDATE_LEVERAGE:
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
             break;
         default:
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
@@ -103,6 +105,10 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
             out->update_leverage_ctx.update_leverage = &out->action.update_leverage;
             ret = parse_update_leverage(&data->value, &out->update_leverage_ctx);
             break;
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            out->approve_builder_fee_ctx.approve_builder_fee = &out->action.approve_builder_fee;
+            ret = parse_approve_builder_fee(&data->value, &out->approve_builder_fee_ctx);
+            break;
         default:
             ret = false;
     }
@@ -141,6 +147,9 @@ static void dump_action(const s_action *action) {
             break;
         case ACTION_TYPE_UPDATE_LEVERAGE:
             dump_update_leverage(&action->update_leverage);
+            break;
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            dump_approve_builder_fee(&action->approve_builder_fee);
             break;
         default:
             PRINTF("Error: cannot dump unknown action type\n");

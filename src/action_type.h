@@ -5,4 +5,5 @@ typedef enum {
     ACTION_TYPE_MODIFY = 0x01,
     ACTION_TYPE_CANCEL = 0x02,
     ACTION_TYPE_UPDATE_LEVERAGE = 0x03,
+    ACTION_TYPE_APPROVE_BUILDER_FEE = 0x04,
 } e_action_type;

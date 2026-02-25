@@ -55,6 +55,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_metadata_ctx *ou
         case ACTION_TYPE_MODIFY:
         case ACTION_TYPE_CANCEL:
         case ACTION_TYPE_UPDATE_LEVERAGE:
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
             break;
         default:
             PRINTF("Error: unknown action type (%u)!\n", out->metadata.action_type);

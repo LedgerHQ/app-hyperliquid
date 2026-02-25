@@ -8,6 +8,7 @@
 #include "bulk_modify.h"
 #include "bulk_cancel.h"
 #include "update_leverage.h"
+#include "approve_builder_fee.h"
 
 typedef struct {
     e_action_type type;
@@ -17,6 +18,7 @@ typedef struct {
         s_bulk_modify bulk_modify;
         s_bulk_cancel bulk_cancel;
         s_update_leverage update_leverage;
+        s_approve_builder_fee approve_builder_fee;
     };
 } s_action;
 
