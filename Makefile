@@ -34,7 +34,7 @@ APPVERSION_P = 0
 APPVERSION = $(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)-dev
 
 # Application source files
-APP_SOURCE_PATH += src
+APP_SOURCE_PATH += src src_msgpack
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon

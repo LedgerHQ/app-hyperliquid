@@ -20,9 +20,11 @@ add_subdirectory(${BOLOS_SDK}/fuzzing ${CMAKE_CURRENT_BINARY_DIR}/ledger-secure-
 set(DEFINES FUZZ)
 
 set(APP_SRC ${CMAKE_SOURCE_DIR}/../src)
+set(MSGPACK_SRC ${CMAKE_SOURCE_DIR}/../src_msgpack)
 
 file(GLOB_RECURSE C_SOURCES
   ${APP_SRC}/*.c
+  ${MSGPACK_SRC}/*.c
   ${CMAKE_SOURCE_DIR}/mock/*.c
 )
 list(REMOVE_ITEM C_SOURCES
@@ -37,6 +39,7 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/mock
          ${APP_SRC}
          ${APP_SRC}/handler
+         ${MSGPACK_SRC}
 )
 
 target_link_libraries(code_lib PUBLIC secure_sdk)

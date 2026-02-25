@@ -2,6 +2,7 @@
 #include "tlv_library.h"
 #include "format.h"  // format_u64
 #include "write.h"
+#include "cmp.h"
 #include "action.h"
 
 #define STRUCT_TYPE 0x2c
@@ -121,4 +122,14 @@ bool parse_action(const buffer_t *payload) {
     }
     dump_action(&out.action);
     return true;
+}
+
+static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
+    bool ret;
+
+    switch (action->type) {
+        default:
+            ret = false;
+    }
+    return ret;
 }

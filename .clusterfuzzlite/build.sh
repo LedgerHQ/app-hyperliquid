@@ -2,6 +2,8 @@
 
 export BOLOS_SDK=/ledger-secure-sdk
 
+git submodule update --init
+
 # build fuzzers using the docker images.
 pushd fuzzing
 cmake -S . -B build -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Debug \
