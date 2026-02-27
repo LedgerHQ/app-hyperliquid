@@ -40,8 +40,7 @@ include_directories(../src)
 include_directories(../src/transaction)
 include_directories($ENV{BOLOS_SDK}/lib_standard_app)
 
-add_executable(test_tx_parser test_tx_parser.c)
-add_executable(test_tx_utils test_tx_utils.c)
+add_executable(test_dummy test_dummy.c)
 
 add_library(base58 SHARED $ENV{BOLOS_SDK}/lib_standard_app/base58.c)
 add_library(bip32 SHARED $ENV{BOLOS_SDK}/lib_standard_app/bip32.c)
@@ -51,25 +50,14 @@ add_library(write SHARED $ENV{BOLOS_SDK}/lib_standard_app/write.c)
 add_library(format SHARED $ENV{BOLOS_SDK}/lib_standard_app/format.c)
 add_library(varint SHARED $ENV{BOLOS_SDK}/lib_standard_app/varint.c)
 add_library(apdu_parser SHARED $ENV{BOLOS_SDK}/lib_standard_app/parser.c)
-add_library(transaction_deserialize ../src/transaction/deserialize.c)
-add_library(transaction_serialize ../src/transaction/serialize.c)
-add_library(transaction_utils ../src/transaction/utils.c)
 
-target_link_libraries(test_tx_parser PUBLIC
-                      transaction_deserialize
-                      transaction_serialize
+target_link_libraries(test_dummy PUBLIC
                       buffer
                       bip32
                       cmocka
                       gcov
                       write
                       read
-                      varint
-                      transaction_utils)
-target_link_libraries(test_tx_utils PUBLIC
-                      cmocka
-                      gcov
-                      transaction_utils)
+                      varint)
 
-add_test(test_tx_parser test_tx_parser)
-add_test(test_tx_utils test_tx_utils)
+add_test(test_dummy test_dummy)

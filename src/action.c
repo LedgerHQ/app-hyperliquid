@@ -1,0 +1,284 @@
+#include "os_print.h"
+#include "tlv_library.h"
+#include "format.h"  // format_u64
+#include "write.h"
+#include "cmp.h"
+#include "action.h"
+#include "hl_context.h"
+#include "eip712_builder_fee.h"
+#include "eip712_cid.h"
+
+#define STRUCT_TYPE 0x2c
+
+#define MAX_SERIALIZED_ACTION_SIZE 512
+
+typedef struct {
+    TLV_reception_t received_tags;
+    s_action action;
+    union {
+        s_bulk_order_ctx bulk_order_ctx;
+        s_bulk_modify_ctx bulk_modify_ctx;
+        s_bulk_cancel_ctx bulk_cancel_ctx;
+        s_update_leverage_ctx update_leverage_ctx;
+        s_approve_builder_fee_ctx approve_builder_fee_ctx;
+    };
+} s_action_ctx;
+
+static bool handle_struct_type(const tlv_data_t *data, s_action_ctx *out) {
+    uint8_t struct_type;
+
+    (void) out;
+    if (!get_uint8_t_from_tlv_data(data, &struct_type)) {
+        return false;
+    }
+    if (struct_type != STRUCT_TYPE) {
+        PRINTF("Error: unknown struct type (0x%02x)!\n", struct_type);
+        return false;
+    }
+    return true;
+}
+
+static bool handle_struct_version(const tlv_data_t *data, s_action_ctx *out) {
+    uint8_t struct_version;
+
+    (void) out;
+    if (!get_uint8_t_from_tlv_data(data, &struct_version)) {
+        return false;
+    }
+    if (struct_version != 1) {
+        PRINTF("Error: unsupported struct version (%u)!\n", struct_version);
+        return false;
+    }
+    return true;
+}
+
+static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
+    if (!get_uint8_t_from_tlv_data(data, &out->action.type)) {
+        return false;
+    }
+    switch (out->action.type) {
+        case ACTION_TYPE_ORDER:
+        case ACTION_TYPE_MODIFY:
+        case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            break;
+        default:
+            PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
+            return false;
+    }
+    return true;
+}
+
+static bool handle_nonce(const tlv_data_t *data, s_action_ctx *out) {
+    return get_uint64_t_from_tlv_data(data, &out->action.nonce);
+}
+
+static bool handle_action(const tlv_data_t *, s_action_ctx *);
+
+#define ACTION_TAGS(X)                                                     \
+    X(0x01, TAG_STRUCT_TYPE, handle_struct_type, ENFORCE_UNIQUE_TAG)       \
+    X(0x02, TAG_STRUCT_VERSION, handle_struct_version, ENFORCE_UNIQUE_TAG) \
+    X(0xd0, TAG_ACTION_TYPE, handle_action_type, ENFORCE_UNIQUE_TAG)       \
+    X(0xda, TAG_NONCE, handle_nonce, ENFORCE_UNIQUE_TAG)                   \
+    X(0xdb, TAG_ACTION, handle_action, ENFORCE_UNIQUE_TAG)
+
+DEFINE_TLV_PARSER(ACTION_TAGS, NULL, action_tlv_parser);
+
+static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
+    bool ret;
+
+    if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ACTION_TYPE)) {
+        PRINTF("Error: received an action structure before receiving its type!\n");
+        return false;
+    }
+
+    switch (out->action.type) {
+        case ACTION_TYPE_ORDER:
+            out->bulk_order_ctx.bulk_order = &out->action.bulk_order;
+            ret = parse_bulk_order(&data->value, &out->bulk_order_ctx);
+            break;
+        case ACTION_TYPE_MODIFY:
+            out->bulk_modify_ctx.bulk_modify = &out->action.bulk_modify;
+            ret = parse_bulk_modify(&data->value, &out->bulk_modify_ctx);
+            break;
+        case ACTION_TYPE_CANCEL:
+            out->bulk_cancel_ctx.bulk_cancel = &out->action.bulk_cancel;
+            ret = parse_bulk_cancel(&data->value, &out->bulk_cancel_ctx);
+            break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            out->update_leverage_ctx.update_leverage = &out->action.update_leverage;
+            ret = parse_update_leverage(&data->value, &out->update_leverage_ctx);
+            break;
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            out->approve_builder_fee_ctx.approve_builder_fee = &out->action.approve_builder_fee;
+            ret = parse_approve_builder_fee(&data->value, &out->approve_builder_fee_ctx);
+            break;
+        default:
+            ret = false;
+    }
+    return ret;
+}
+
+static bool verify_action(s_action_ctx *out) {
+    if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags,
+                                 TAG_STRUCT_TYPE,
+                                 TAG_STRUCT_VERSION,
+                                 TAG_ACTION_TYPE,
+                                 TAG_NONCE,
+                                 TAG_ACTION)) {
+        PRINTF("Error: incomplete action struct received!\n");
+        return false;
+    }
+    return true;
+}
+
+static void dump_action(const s_action *action) {
+    char tmp[20 + 1];
+
+    PRINTF(">>> ACTION >>>\n");
+    PRINTF("type = %u\n", action->type);
+    format_u64(tmp, sizeof(tmp), action->nonce);
+    PRINTF("nonce = %s\n", tmp);
+    switch (action->type) {
+        case ACTION_TYPE_ORDER:
+            dump_bulk_order(&action->bulk_order);
+            break;
+        case ACTION_TYPE_MODIFY:
+            dump_bulk_modify(&action->bulk_modify);
+            break;
+        case ACTION_TYPE_CANCEL:
+            dump_bulk_cancel(&action->bulk_cancel);
+            break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            dump_update_leverage(&action->update_leverage);
+            break;
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            dump_approve_builder_fee(&action->approve_builder_fee);
+            break;
+        default:
+            PRINTF("Error: cannot dump unknown action type\n");
+    }
+    PRINTF("<<< ACTION <<<\n");
+}
+
+bool parse_action(const buffer_t *payload) {
+    s_action_ctx out = {0};
+
+    if (!action_tlv_parser(payload, &out, &out.received_tags)) {
+        return false;
+    }
+    if (!verify_action(&out)) {
+        return false;
+    }
+    dump_action(&out.action);
+    if (!ctx_push_action(&out.action)) {
+        return false;
+    }
+    return true;
+}
+
+static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
+    bool ret;
+
+    switch (action->type) {
+        case ACTION_TYPE_ORDER:
+            ret = bulk_order_serialize(&action->bulk_order, cmp_ctx);
+            break;
+        case ACTION_TYPE_MODIFY:
+            ret = bulk_modify_serialize(&action->bulk_modify, cmp_ctx);
+            break;
+        case ACTION_TYPE_CANCEL:
+            ret = bulk_cancel_serialize(&action->bulk_cancel, cmp_ctx);
+            break;
+        case ACTION_TYPE_UPDATE_LEVERAGE:
+            ret = update_leverage_serialize(&action->update_leverage, cmp_ctx);
+            break;
+        default:
+            ret = false;
+    }
+    return ret;
+}
+
+static size_t ser_writer(cmp_ctx_t *ctx, const void *data, size_t count) {
+    buffer_t *buf = ctx->buf;
+
+    if (buf == NULL) {
+        return 0;
+    }
+    if ((buf->offset + count) > buf->size) {
+        return 0;
+    }
+    memcpy(&buf->ptr[buf->offset], data, count);
+    buf->offset += count;
+    return count;
+}
+
+static bool compute_connection_id(const s_action *action, uint8_t end_byte, uint8_t *out) {
+    cmp_ctx_t cmp_ctx;
+    uint8_t raw_buf[MAX_SERIALIZED_ACTION_SIZE];
+    buffer_t buf;
+    uint8_t nonce_buf[sizeof(action->nonce)];
+    cx_sha3_t hash_ctx;
+
+    buf.ptr = raw_buf;
+    buf.size = sizeof(raw_buf);
+    buf.offset = 0;
+    cmp_init(&cmp_ctx, &buf, NULL, NULL, &ser_writer);
+    if (!action_serialize(action, &cmp_ctx)) {
+        return false;
+    }
+
+    if (cx_keccak_init_no_throw(&hash_ctx, 256) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, buf.ptr, buf.offset) != CX_OK) {
+        return false;
+    }
+
+    write_u64_be(nonce_buf, 0, action->nonce);
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, nonce_buf, sizeof(nonce_buf)) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_update((cx_hash_t *) &hash_ctx, &end_byte, sizeof(end_byte)) != CX_OK) {
+        return false;
+    }
+
+    if (cx_hash_final((cx_hash_t *) &hash_ctx, out) != CX_OK) {
+        return false;
+    }
+    PRINTF("connection_id = 0x%.*h\n", 32, out);
+    return true;
+}
+
+bool action_hash(const s_action *action,
+                 const s_action_metadata *metadata,
+                 uint8_t *domain_hash,
+                 uint8_t *message_hash) {
+    uint8_t connection_id[32];
+
+    if (action->type == ACTION_TYPE_APPROVE_BUILDER_FEE) {
+        if (!eip712_builder_fee_hash(&action->approve_builder_fee.signature_chain_id,
+                                     (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
+                                     action->approve_builder_fee.max_fee_rate,
+                                     action->approve_builder_fee.builder,
+                                     &action->nonce,
+                                     domain_hash,
+                                     message_hash)) {
+            return false;
+        }
+    } else {
+        if (!compute_connection_id(action, 0, connection_id)) {
+            return false;
+        }
+        if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
+                             connection_id,
+                             domain_hash,
+                             message_hash)) {
+            return false;
+        }
+    }
+    return true;
+}
