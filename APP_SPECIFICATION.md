@@ -153,4 +153,58 @@ None
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb |                                |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order)      |          |
+
+### BULK_ORDER
+
+| Name            | Tag  | Type                       | Optional |
+| ----            | ---  | ----                       | -------- |
+| ORDER           | 0xdd | [ORDER](#order)            |          |
+| GROUPING        | 0xea | [Grouping](#grouping-enum) |          |
+| BUILDER_ADDRESS | 0xeb | uint8[20]                  | x        |
+| BUILDER_FEE     | 0xec | uint64                     | x        |
+
+#### Grouping enum
+
+| Name          | Value |
+| ----          | ----- |
+| NA            | 0x00  |
+| NORMAL_TPSL   | 0x01  |
+| POSITION_TPSL | 0x02  |
+
+### ORDER
+
+| Name            | Tag  | Type                             | Optional |
+| ----            | ---  | ----                             | -------- |
+| ORDER_TYPE      | 0xe0 | [OrderType](#ordertype-enum)     |          |
+| ASSET           | 0xe1 | uint32                           |          |
+| IS_BUY          | 0xe2 | bool                             |          |
+| LIMIT_PX        | 0xe3 | char[]                           |          |
+| SZ              | 0xe4 | char[]                           |          |
+| REDUCE_ONLY     | 0xe5 | bool                             |          |
+| TIF             | 0xe6 | [Tif](#tif-enum)                 | x        |
+| IS_MARKET       | 0xe7 | bool                             | x        |
+| TRIGGER_PX      | 0xe8 | char[]                           | x        |
+| TRIGGER_TYPE    | 0xe9 | [TriggerType](#triggertype-enum) | x        |
+
+#### OrderType enum
+
+| Name    | Value |
+| ----    | ----- |
+| LIMIT   | 0x00  |
+| TRIGGER | 0x01  |
+
+#### Tif enum
+
+| Name | Value |
+| ---- | ----- |
+| ALO  | 0x00  |
+| IOC  | 0x01  |
+| GTC  | 0x02  |
+
+#### TriggerType enum
+
+| Name | Value |
+| ---- | ----- |
+| TP   | 0x00  |
+| SL   | 0x01  |
