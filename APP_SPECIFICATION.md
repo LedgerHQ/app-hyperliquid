@@ -153,7 +153,7 @@ None
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb | [BULK_ORDER](#bulk_order)      |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) |          |
 
 ### BULK_ORDER
 
@@ -171,6 +171,13 @@ None
 | NA            | 0x00  |
 | NORMAL_TPSL   | 0x01  |
 | POSITION_TPSL | 0x02  |
+
+### BULK_MODIFY
+
+| Name            | Tag  | Type            | Optional |
+| ----            | ---  | ----            | -------- |
+| ORDER           | 0xdd | [ORDER](#order) |          |
+| OID             | 0xdc | uint64          |          |
 
 ### ORDER
 
