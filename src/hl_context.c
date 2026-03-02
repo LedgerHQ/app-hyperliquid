@@ -43,15 +43,27 @@ bool ctx_push_action(const s_action *action) {
     return true;
 }
 
-const s_action *ctx_get_next_action(void) {
+const s_action *ctx_get_current_action(void) {
     if (g_ctx.action_index == g_ctx.action_count) {
         return NULL;
     }
-    g_ctx.action_index += 1;
     return &g_ctx.actions[g_ctx.action_index - 1];
 }
 
-bool ctx_is_first_action(void) {
+void ctx_switch_to_next_action(void) {
+    g_ctx.action_index += 1;
+}
+
+const s_action *ctx_get_action(e_action_type action_type) {
+    for (uint8_t i = 0; i < g_ctx.action_count; ++i) {
+        if (action_type == g_ctx.actions[i].type) {
+            return &g_ctx.actions[i];
+        }
+    }
+    return NULL;
+}
+
+bool ctx_current_action_is_first(void) {
     return g_ctx.action_index == 0;
 }
 
