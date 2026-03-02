@@ -32,6 +32,12 @@ bool ctx_push_action(const s_action *action) {
     if (g_ctx.action_count == MAX_ACTION_COUNT) {
         return false;
     }
+    // check that we don't already have an action of the same type stored
+    for (int i = 0; i < g_ctx.action_count; ++i) {
+        if (action->type == g_ctx.actions[i].type) {
+            return false;
+        }
+    }
     memcpy(&g_ctx.actions[g_ctx.action_count], action, sizeof(*action));
     g_ctx.action_count += 1;
     return true;
