@@ -6,8 +6,19 @@
 #include "os_utils.h"  // bytes_to_lowercase_hex
 
 static bool handle_order(const tlv_data_t *data, s_bulk_order_ctx *out) {
-    out->order_ctx.order = &out->bulk_order->order;
-    return parse_order(&data->value, &out->order_ctx);
+    if (out->bulk_order->order_count == ARRAYLEN(out->bulk_order->orders)) {
+        PRINTF("Error: too many orders to handle!\n");
+        return false;
+    }
+    // wipe the sub-context since this tag can be handled multiple times
+    explicit_bzero(&out->order_ctx, sizeof(out->order_ctx));
+
+    out->order_ctx.order = &out->bulk_order->orders[out->bulk_order->order_count];
+    if (!parse_order(&data->value, &out->order_ctx)) {
+        return false;
+    }
+    out->bulk_order->order_count += 1;
+    return true;
 }
 
 static bool handle_grouping(const tlv_data_t *data, s_bulk_order_ctx *out) {
@@ -45,9 +56,9 @@ static bool handle_builder_fee(const tlv_data_t *data, s_bulk_order_ctx *out) {
 }
 
 #define BULK_ORDER_TAGS(X)                                                   \
-    X(0xdd, TAG_ORDER, handle_order, ENFORCE_UNIQUE_TAG)                     \
+    X(0xdd, TAG_ORDER, handle_order, ALLOW_MULTIPLE_TAG)                     \
     X(0xea, TAG_GROUPING, handle_grouping, ENFORCE_UNIQUE_TAG)               \
-    X(0xeb, TAG_BUILDER_ADDRESS, handle_builder_address, ENFORCE_UNIQUE_TAG) \
+    X(0xd3, TAG_BUILDER_ADDRESS, handle_builder_address, ENFORCE_UNIQUE_TAG) \
     X(0xec, TAG_BUILDER_FEE, handle_builder_fee, ENFORCE_UNIQUE_TAG)
 
 DEFINE_TLV_PARSER(BULK_ORDER_TAGS, NULL, bulk_order_tlv_parser);
@@ -70,7 +81,9 @@ void dump_bulk_order(const s_bulk_order *bulk_order) {
     char tmp[20 + 1];
 
     PRINTF(">>> BULK_ORDER >>>\n");
-    dump_order(&bulk_order->order);
+    for (uint8_t i = 0; i < bulk_order->order_count; ++i) {
+        dump_order(&bulk_order->orders[i]);
+    }
     PRINTF("grouping = %u\n", bulk_order->grouping);
     if (bulk_order->has_builder) {
         PRINTF("builder_address = 0x%.*h\n",
@@ -138,12 +151,14 @@ bool bulk_order_serialize(const s_bulk_order *bulk_order, cmp_ctx_t *cmp_ctx) {
     if (!cmp_write_str(cmp_ctx, "orders", 6)) {
         return false;
     }
-    if (!cmp_write_array(cmp_ctx, 1)) {
+    if (!cmp_write_array(cmp_ctx, bulk_order->order_count)) {
         return false;
     }
 
-    if (!order_serialize(&bulk_order->order, cmp_ctx)) {
-        return false;
+    for (uint8_t i = 0; i < bulk_order->order_count; ++i) {
+        if (!order_serialize(&bulk_order->orders[i], cmp_ctx)) {
+            return false;
+        }
     }
 
     if (!cmp_write_str(cmp_ctx, "grouping", 8)) {

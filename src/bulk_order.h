@@ -7,6 +7,8 @@
 #include "order.h"
 #include "constants.h"
 
+#define BULK_ORDER_MAX_ORDER_COUNT 5
+
 typedef enum {
     GROUPING_NA = 0x00,
     GROUPING_NORMAL_TPSL = 0x01,
@@ -19,7 +21,8 @@ typedef struct {
 } s_builder_info;
 
 typedef struct {
-    s_order order;
+    uint8_t order_count;
+    s_order orders[BULK_ORDER_MAX_ORDER_COUNT];
     e_grouping grouping;
     bool has_builder;
     s_builder_info builder;

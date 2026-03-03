@@ -10,7 +10,7 @@
 
 #define STRUCT_TYPE 0x2c
 
-#define MAX_SERIALIZED_ACTION_SIZE 512
+#define MAX_SERIALIZED_ACTION_SIZE 1024
 
 typedef struct {
     TLV_reception_t received_tags;
@@ -23,6 +23,8 @@ typedef struct {
         s_approve_builder_fee_ctx approve_builder_fee_ctx;
     };
 } s_action_ctx;
+
+static uint8_t g_raw_buf[MAX_SERIALIZED_ACTION_SIZE];
 
 static bool handle_struct_type(const tlv_data_t *data, s_action_ctx *out) {
     uint8_t struct_type;
@@ -207,6 +209,7 @@ static size_t ser_writer(cmp_ctx_t *ctx, const void *data, size_t count) {
         return 0;
     }
     if ((buf->offset + count) > buf->size) {
+        PRINTF("Error: serialization buffer too small!\n");
         return 0;
     }
     memcpy(&buf->ptr[buf->offset], data, count);
@@ -216,13 +219,12 @@ static size_t ser_writer(cmp_ctx_t *ctx, const void *data, size_t count) {
 
 static bool compute_connection_id(const s_action *action, uint8_t end_byte, uint8_t *out) {
     cmp_ctx_t cmp_ctx;
-    uint8_t raw_buf[MAX_SERIALIZED_ACTION_SIZE];
     buffer_t buf;
     uint8_t nonce_buf[sizeof(action->nonce)];
     cx_sha3_t hash_ctx;
 
-    buf.ptr = raw_buf;
-    buf.size = sizeof(raw_buf);
+    buf.ptr = g_raw_buf;
+    buf.size = sizeof(g_raw_buf);
     buf.offset = 0;
     cmp_init(&cmp_ctx, &buf, NULL, NULL, &ser_writer);
     if (!action_serialize(action, &cmp_ctx)) {

@@ -31,7 +31,7 @@ def _load_key(key: Key) -> SigningKey:
 
     if not os.path.exists(keychain_path):
         raise FileNotFoundError(
-            f"Keychain file not found: {keychain_path}\n"
+            f"Keychain file not found: {keychain_path}\n",
         )
 
     with open(keychain_path, encoding="utf-8") as pem_file:
