@@ -16,15 +16,17 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
         ActionType.ORDER,
         1770816625873,
         BulkOrder(
-            Order(
-                OrderType.LIMIT,
-                1,
-                True,
-                "1992",
-                "0.512",
-                False,
-                Tif.IOC,
-            ),
+            [
+                Order(
+                    OrderType.LIMIT,
+                    1,
+                    True,
+                    "1992",
+                    "0.512",
+                    False,
+                    Tif.IOC,
+                ),
+            ],
             Grouping.NA,
             builder_addr=bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
             builder_fee=100,

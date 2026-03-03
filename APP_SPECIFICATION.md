@@ -197,6 +197,8 @@ This command signs a previously given hyperliquid action (in the same order).
 | BUILDER_ADDRESS | 0xd3 | uint8[20]                  | x        |
 | BUILDER_FEE     | 0xec | uint64                     | x        |
 
+:information_source: Multiple ORDER tags may be present; up to 5 ORDER tags are supported per BULK_ORDER.
+
 #### Grouping enum
 
 | Name          | Value |

@@ -10,24 +10,25 @@ class Grouping(IntEnum):
     POSITION_TPSL = 0x02
 
 class BulkOrder(TlvSerializable):
-    order: Order
+    orders: list[Order]
     grouping: Grouping
     builder_addr: bytes | None
     builder_fee: int | None
 
     def __init__(self,
-                 order: Order,
+                 orders: list[Order],
                  grouping: Grouping,
                  builder_addr: bytes | None = None,
                  builder_fee: int | None = None) -> None:
-        self.order = order
+        self.orders = orders
         self.grouping = grouping
         self.builder_addr = builder_addr
         self.builder_fee = builder_fee
 
     def serialize(self) -> bytes:
         payload = bytearray()
-        payload += self.serialize_field(0xdd, self.order.serialize())
+        for order in self.orders:
+            payload += self.serialize_field(0xdd, order.serialize())
         payload += self.serialize_field(0xea, self.grouping)
         if self.builder_addr is not None:
             payload += self.serialize_field(0xd3, self.builder_addr)
