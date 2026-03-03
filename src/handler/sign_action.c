@@ -6,6 +6,7 @@
 #include "sign_action.h"
 #include "hl_context.h"
 #include "eip712_common.h"
+#include "display.h"
 
 typedef struct {
     uint32_t bip32_path[MAX_BIP32_PATH];
@@ -65,7 +66,10 @@ int handler_sign_action(const buffer_t *payload) {
     PRINTF("\")\n");
 
     if (ctx_current_action_is_first()) {
-        // TODO: handle UI
+        if (!handle_ui(ctx_get_action_metadata())) {
+            return io_send_sw(SWO_INCORRECT_DATA);
+        }
+        return 0;
     }
 
     return sign_action();
