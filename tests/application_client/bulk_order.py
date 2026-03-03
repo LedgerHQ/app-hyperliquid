@@ -30,7 +30,7 @@ class BulkOrder(TlvSerializable):
         payload += self.serialize_field(0xdd, self.order.serialize())
         payload += self.serialize_field(0xea, self.grouping)
         if self.builder_addr is not None:
-            payload += self.serialize_field(0xeb, self.builder_addr)
+            payload += self.serialize_field(0xd3, self.builder_addr)
         if self.builder_fee is not None:
             payload += self.serialize_field(0xec, self.builder_fee)
         return bytes(payload)

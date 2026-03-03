@@ -194,7 +194,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | ----            | ---  | ----                       | -------- |
 | ORDER           | 0xdd | [ORDER](#order)            |          |
 | GROUPING        | 0xea | [Grouping](#grouping-enum) |          |
-| BUILDER_ADDRESS | 0xeb | uint8[20]                  | x        |
+| BUILDER_ADDRESS | 0xd3 | uint8[20]                  | x        |
 | BUILDER_FEE     | 0xec | uint64                     | x        |
 
 #### Grouping enum

@@ -47,7 +47,7 @@ static bool handle_builder_fee(const tlv_data_t *data, s_bulk_order_ctx *out) {
 #define BULK_ORDER_TAGS(X)                                                   \
     X(0xdd, TAG_ORDER, handle_order, ENFORCE_UNIQUE_TAG)                     \
     X(0xea, TAG_GROUPING, handle_grouping, ENFORCE_UNIQUE_TAG)               \
-    X(0xeb, TAG_BUILDER_ADDRESS, handle_builder_address, ENFORCE_UNIQUE_TAG) \
+    X(0xd3, TAG_BUILDER_ADDRESS, handle_builder_address, ENFORCE_UNIQUE_TAG) \
     X(0xec, TAG_BUILDER_FEE, handle_builder_fee, ENFORCE_UNIQUE_TAG)
 
 DEFINE_TLV_PARSER(BULK_ORDER_TAGS, NULL, bulk_order_tlv_parser);
