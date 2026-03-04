@@ -19,6 +19,11 @@ typedef struct {
 } s_builder_info;
 
 typedef struct {
+    TLV_reception_t received_tags;
+    s_builder_info *builder_info;
+} s_builder_info_ctx;
+
+typedef struct {
     uint8_t order_count;
     s_order_request orders[BULK_MAX_SIZE];
     e_grouping grouping;
@@ -30,6 +35,7 @@ typedef struct {
     TLV_reception_t received_tags;
     s_bulk_order *bulk_order;
     s_order_request_ctx order_ctx;
+    s_builder_info_ctx builder_info_ctx;
 } s_bulk_order_ctx;
 
 bool parse_bulk_order(const buffer_t *payload, s_bulk_order_ctx *out);

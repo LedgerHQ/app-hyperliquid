@@ -1,7 +1,7 @@
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
-from application_client.bulk_order import BulkOrder, Grouping
+from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order_request import Limit, OrderRequest, OrderType, Tif
 from application_client.set_action import ActionType, SetAction
@@ -28,8 +28,10 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
                 ),
             ],
             Grouping.NA,
-            builder_addr=bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
-            builder_fee=100,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
         ),
     ))
 

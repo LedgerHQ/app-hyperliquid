@@ -193,10 +193,16 @@ This command signs a previously given hyperliquid action (in the same order).
 | ----            | ---  | ----                            | -------- |
 | ORDER           | 0xdd | [ORDER_REQUEST](#order_request) |          |
 | GROUPING        | 0xea | [Grouping](#grouping-enum)      |          |
-| BUILDER_ADDRESS | 0xd3 | uint8[20]                       | x        |
-| BUILDER_FEE     | 0xec | uint64                          | x        |
+| BUILDER         | 0xeb | [BUILDER_INFO](#builder_info)   | x        |
 
 :information_source: Multiple ORDER tags may be present; up to 5 ORDER tags are supported per BULK_ORDER.
+
+### BUILDER_INFO
+
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ADDRESS         | 0xd3 | uint8[20]                       |          |
+| FEE             | 0xec | uint64                          |          |
 
 #### Grouping enum
 
