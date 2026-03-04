@@ -1,6 +1,6 @@
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel
-from application_client.bulk_modify import BulkModify
+from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order import Order, OrderType, Tif
@@ -39,18 +39,32 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
         1,
         ActionType.MODIFY,
         1770816625873,
-        BulkModify(
-            Order(
-                OrderType.LIMIT,
-                1,
-                True,
-                "1992",
-                "0.512",
-                False,
-                Tif.IOC,
+        BulkModify([
+            ModifyRequest(
+                Order(
+                    OrderType.LIMIT,
+                    1,
+                    True,
+                    "1992",
+                    "0.512",
+                    False,
+                    tif=Tif.IOC,
+                ),
+                42,
             ),
-            42,
-        ),
+            ModifyRequest(
+                Order(
+                    OrderType.LIMIT,
+                    2,
+                    True,
+                    "254",
+                    "2.3",
+                    False,
+                    tif=Tif.ALO,
+                ),
+                21,
+            ),
+        ]),
     ))
 
 def test_set_action_bulk_cancel(backend: BackendInterface) -> None:

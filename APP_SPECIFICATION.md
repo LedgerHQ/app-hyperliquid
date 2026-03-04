@@ -208,6 +208,14 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### BULK_MODIFY
 
+| Name            | Tag  | Type                              | Optional |
+| ----            | ---  | ----                              | -------- |
+| MODIFY          | 0xd8 | [MODIFY_REQUEST](#modify_request) |          |
+
+:information_source: Multiple MODIFY tags may be present; up to 5 MODIFY tags are supported per BULK_MODIFY.
+
+### MODIFY_REQUEST
+
 | Name            | Tag  | Type            | Optional |
 | ----            | ---  | ----            | -------- |
 | ORDER           | 0xdd | [ORDER](#order) |          |
