@@ -119,7 +119,7 @@ static bool handle_trigger_type(const tlv_data_t *data, s_order_request_ctx *out
     return true;
 }
 
-static bool verify_order_request(s_order_request_ctx *out) {
+static bool verify_order_request(const s_order_request_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags,
                                  TAG_ORDER_TYPE,
                                  TAG_ASSET,

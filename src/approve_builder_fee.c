@@ -35,7 +35,7 @@ static bool handle_builder(const tlv_data_t *data, s_approve_builder_fee_ctx *ou
 
 DEFINE_TLV_PARSER(APPROVE_BUILDER_FEE_TAGS, NULL, approve_builder_fee_tlv_parser);
 
-static bool verify_approve_builder_fee(s_approve_builder_fee_ctx *out) {
+static bool verify_approve_builder_fee(const s_approve_builder_fee_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags,
                                  TAG_SIGNATURE_CHAIN_ID,
                                  TAG_MAX_FEE_RATE,

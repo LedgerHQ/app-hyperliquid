@@ -19,7 +19,7 @@ static bool handle_oid(const tlv_data_t *data, s_modify_request_ctx *out) {
 
 DEFINE_TLV_PARSER(MODIFY_REQUEST_TAGS, NULL, modify_request_tlv_parser);
 
-static bool verify_modify_request(s_modify_request_ctx *out) {
+static bool verify_modify_request(const s_modify_request_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ORDER, TAG_OID)) {
         PRINTF("Error: incomplete modify_request struct received!\n");
         return false;

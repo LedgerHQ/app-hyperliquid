@@ -63,7 +63,7 @@ static bool handle_builder_fee(const tlv_data_t *data, s_bulk_order_ctx *out) {
 
 DEFINE_TLV_PARSER(BULK_ORDER_TAGS, NULL, bulk_order_tlv_parser);
 
-static bool verify_bulk_order(s_bulk_order_ctx *out) {
+static bool verify_bulk_order(const s_bulk_order_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ORDER, TAG_GROUPING)) {
         PRINTF("Error: incomplete bulk_order struct received!\n");
         return false;

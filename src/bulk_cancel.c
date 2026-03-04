@@ -18,7 +18,7 @@ static bool handle_oid(const tlv_data_t *data, s_cancel_request_ctx *out) {
 
 DEFINE_TLV_PARSER(CANCEL_REQUEST_TAGS, NULL, cancel_request_tlv_parser);
 
-static bool verify_cancel_request(s_cancel_request_ctx *out) {
+static bool verify_cancel_request(const s_cancel_request_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ASSET, TAG_OID)) {
         PRINTF("Error: incomplete cancel_request struct received!\n");
         return false;
@@ -88,7 +88,7 @@ static bool handle_cancel_request(const tlv_data_t *data, s_bulk_cancel_ctx *out
 
 DEFINE_TLV_PARSER(BULK_CANCEL_TAGS, NULL, bulk_cancel_tlv_parser);
 
-static bool verify_bulk_cancel(s_bulk_cancel_ctx *out) {
+static bool verify_bulk_cancel(const s_bulk_cancel_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_CANCEL_REQUEST)) {
         PRINTF("Error: incomplete bulk_cancel struct received!\n");
         return false;

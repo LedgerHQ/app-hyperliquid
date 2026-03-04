@@ -21,7 +21,7 @@ static bool handle_leverage(const tlv_data_t *data, s_update_leverage_ctx *out) 
 
 DEFINE_TLV_PARSER(UPDATE_LEVERAGE_TAGS, NULL, update_leverage_tlv_parser);
 
-static bool verify_update_leverage(s_update_leverage_ctx *out) {
+static bool verify_update_leverage(const s_update_leverage_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ASSET, TAG_IS_CROSS, TAG_LEVERAGE)) {
         PRINTF("Error: incomplete update_leverage struct received!\n");
         return false;
