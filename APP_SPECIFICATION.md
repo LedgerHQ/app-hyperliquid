@@ -223,6 +223,14 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### BULK_CANCEL
 
+| Name            | Tag  | Type                              | Optional |
+| ----            | ---  | ----                              | -------- |
+| CANCEL          | 0xd9 | [CANCEL_REQUEST](#cancel_request) |          |
+
+:information_source: Multiple CANCEL tags may be present; up to 5 CANCEL tags are supported per BULK_CANCEL.
+
+### CANCEL_REQUEST
+
 | Name            | Tag  | Type      | Optional |
 | ----            | ---  | ----      | -------- |
 | ASSET           | 0xd1 | uint32    |          |

@@ -1,5 +1,5 @@
 from application_client.approve_builder_fee import ApproveBuilderFee
-from application_client.bulk_cancel import BulkCancel
+from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
@@ -73,10 +73,10 @@ def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
         1,
         ActionType.CANCEL,
         1770816625873,
-        BulkCancel(
-            1,
-            42,
-        ),
+        BulkCancel([
+            CancelRequest(1, 42),
+            CancelRequest(2, 21),
+        ]),
     ))
 
 def test_set_action_update_leverage(backend: BackendInterface) -> None:
