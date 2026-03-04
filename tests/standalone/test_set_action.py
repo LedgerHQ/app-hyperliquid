@@ -3,7 +3,7 @@ from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order_request import OrderRequest, OrderType, Tif
+from application_client.order_request import Limit, OrderRequest, OrderType, Tif
 from application_client.set_action import ActionType, SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
@@ -24,7 +24,7 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    tif=Tif.IOC,
+                    Limit(Tif.IOC),
                 ),
             ],
             Grouping.NA,
@@ -48,7 +48,7 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    tif=Tif.IOC,
+                    Limit(Tif.IOC),
                 ),
                 42,
             ),
@@ -60,7 +60,7 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
                     "254",
                     "2.3",
                     False,
-                    tif=Tif.ALO,
+                    Limit(Tif.ALO),
                 ),
                 21,
             ),

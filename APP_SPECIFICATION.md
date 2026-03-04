@@ -254,10 +254,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | LIMIT_PX        | 0xe3 | char[]                           |          |
 | SZ              | 0xe4 | char[]                           |          |
 | REDUCE_ONLY     | 0xe5 | bool                             |          |
-| TIF             | 0xe6 | [Tif](#tif-enum)                 | x        |
-| IS_MARKET       | 0xe7 | bool                             | x        |
-| TRIGGER_PX      | 0xe8 | char[]                           | x        |
-| TRIGGER_TYPE    | 0xe9 | [TriggerType](#triggertype-enum) | x        |
+| ORDER           | 0xd7 | [LIMIT_ORDER](#limit_order) \|<br>[TRIGGER_ORDER](#trigger_order) |          |
 
 #### OrderType enum
 
@@ -266,6 +263,12 @@ This command signs a previously given hyperliquid action (in the same order).
 | LIMIT   | 0x00  |
 | TRIGGER | 0x01  |
 
+### LIMIT_ORDER
+
+| Name            | Tag  | Type                             | Optional |
+| ----            | ---  | ----                             | -------- |
+| TIF             | 0xe6 | [Tif](#tif-enum)                 |          |
+
 #### Tif enum
 
 | Name | Value |
@@ -273,6 +276,14 @@ This command signs a previously given hyperliquid action (in the same order).
 | ALO  | 0x00  |
 | IOC  | 0x01  |
 | GTC  | 0x02  |
+
+### TRIGGER_ORDER
+
+| Name            | Tag  | Type                             | Optional |
+| ----            | ---  | ----                             | -------- |
+| IS_MARKET       | 0xe7 | bool                             |          |
+| TRIGGER_PX      | 0xe8 | char[]                           |          |
+| TPSL            | 0xe9 | [TriggerType](#triggertype-enum) |          |
 
 #### TriggerType enum
 

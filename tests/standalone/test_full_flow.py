@@ -2,7 +2,7 @@ from application_client.action_metadata import ActionMetadata, ActionType, Netwo
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order_request import OrderRequest, OrderType, Tif, TriggerType
+from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
 from application_client.set_action import SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
@@ -29,7 +29,7 @@ def test_sign_action(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    tif=Tif.IOC,
+                    Limit(Tif.IOC),
                 ),
                 OrderRequest(
                     OrderType.TRIGGER,
@@ -38,9 +38,11 @@ def test_sign_action(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    is_market=True,
-                    trigger_px="190",
-                    tpsl=TriggerType.TP,
+                    Trigger(
+                        True,
+                        "190",
+                        TriggerType.TP,
+                    ),
                 ),
             ],
             Grouping.NA,
