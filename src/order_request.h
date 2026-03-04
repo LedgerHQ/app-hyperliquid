@@ -43,13 +43,13 @@ typedef struct {
         s_limit limit;
         s_trigger trigger;
     };
-} s_order;
+} s_order_request;
 
 typedef struct {
     TLV_reception_t received_tags;
-    s_order *order;
-} s_order_ctx;
+    s_order_request *order_request;
+} s_order_request_ctx;
 
-bool parse_order(const buffer_t *payload, s_order_ctx *out);
-void dump_order(const s_order *order);
-bool order_serialize(const s_order *order, cmp_ctx_t *cmp_ctx);
+bool parse_order_request(const buffer_t *payload, s_order_request_ctx *out);
+void dump_order_request(const s_order_request *order_request);
+bool order_request_serialize(const s_order_request *order_request, cmp_ctx_t *cmp_ctx);

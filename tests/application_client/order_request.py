@@ -16,7 +16,7 @@ class TriggerType(IntEnum):
     TP = 0x00
     SL = 0x01
 
-class Order(TlvSerializable):
+class OrderRequest(TlvSerializable):
     order_type: OrderType
     asset: int
     is_buy: bool

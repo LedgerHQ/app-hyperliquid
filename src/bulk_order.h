@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "tlv_library.h"
 #include "cmp.h"
-#include "order.h"
+#include "order_request.h"
 #include "constants.h"
 
 typedef enum {
@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
     uint8_t order_count;
-    s_order orders[BULK_MAX_SIZE];
+    s_order_request orders[BULK_MAX_SIZE];
     e_grouping grouping;
     bool has_builder;
     s_builder_info builder;
@@ -29,7 +29,7 @@ typedef struct {
 typedef struct {
     TLV_reception_t received_tags;
     s_bulk_order *bulk_order;
-    s_order_ctx order_ctx;
+    s_order_request_ctx order_ctx;
 } s_bulk_order_ctx;
 
 bool parse_bulk_order(const buffer_t *payload, s_bulk_order_ctx *out);

@@ -1,13 +1,13 @@
-from .order import Order
+from .order_request import OrderRequest
 from .tlv import TlvSerializable
 
 
 class ModifyRequest(TlvSerializable):
-    order: Order
+    order: OrderRequest
     oid: int
 
     def __init__(self,
-                 order: Order,
+                 order: OrderRequest,
                  oid: int) -> None:
         self.order = order
         self.oid = oid

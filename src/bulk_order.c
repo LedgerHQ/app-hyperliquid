@@ -13,8 +13,8 @@ static bool handle_order(const tlv_data_t *data, s_bulk_order_ctx *out) {
     // wipe the sub-context since this tag can be handled multiple times
     explicit_bzero(&out->order_ctx, sizeof(out->order_ctx));
 
-    out->order_ctx.order = &out->bulk_order->orders[out->bulk_order->order_count];
-    if (!parse_order(&data->value, &out->order_ctx)) {
+    out->order_ctx.order_request = &out->bulk_order->orders[out->bulk_order->order_count];
+    if (!parse_order_request(&data->value, &out->order_ctx)) {
         return false;
     }
     out->bulk_order->order_count += 1;
@@ -82,7 +82,7 @@ void dump_bulk_order(const s_bulk_order *bulk_order) {
 
     PRINTF(">>> BULK_ORDER >>>\n");
     for (uint8_t i = 0; i < bulk_order->order_count; ++i) {
-        dump_order(&bulk_order->orders[i]);
+        dump_order_request(&bulk_order->orders[i]);
     }
     PRINTF("grouping = %u\n", bulk_order->grouping);
     if (bulk_order->has_builder) {
@@ -156,7 +156,7 @@ bool bulk_order_serialize(const s_bulk_order *bulk_order, cmp_ctx_t *cmp_ctx) {
     }
 
     for (uint8_t i = 0; i < bulk_order->order_count; ++i) {
-        if (!order_serialize(&bulk_order->orders[i], cmp_ctx)) {
+        if (!order_request_serialize(&bulk_order->orders[i], cmp_ctx)) {
             return false;
         }
     }

@@ -5,8 +5,8 @@
 #include "format.h"
 
 static bool handle_order(const tlv_data_t *data, s_modify_request_ctx *out) {
-    out->order_ctx.order = &out->modify_request->order;
-    return parse_order(&data->value, &out->order_ctx);
+    out->order_ctx.order_request = &out->modify_request->order;
+    return parse_order_request(&data->value, &out->order_ctx);
 }
 
 static bool handle_oid(const tlv_data_t *data, s_modify_request_ctx *out) {
@@ -41,7 +41,7 @@ static void dump_modify_request(const s_modify_request *modify_request) {
     char tmp[20 + 1];
 
     PRINTF(">>> MODIFY_REQUEST >>>\n");
-    dump_order(&modify_request->order);
+    dump_order_request(&modify_request->order);
     format_u64(tmp, sizeof(tmp), modify_request->oid);
     PRINTF("oid = %s\n", tmp);
     PRINTF("<<< MODIFY_REQUEST <<<\n");
@@ -62,7 +62,7 @@ static bool modify_request_serialize(const s_modify_request *modify_request, cmp
     if (!cmp_write_str(cmp_ctx, "order", 5)) {
         return false;
     }
-    if (!order_serialize(&modify_request->order, cmp_ctx)) {
+    if (!order_request_serialize(&modify_request->order, cmp_ctx)) {
         return false;
     }
     return true;

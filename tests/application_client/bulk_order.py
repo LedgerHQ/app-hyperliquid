@@ -1,6 +1,6 @@
 from enum import IntEnum
 
-from .order import Order
+from .order_request import OrderRequest
 from .tlv import TlvSerializable
 
 
@@ -10,13 +10,13 @@ class Grouping(IntEnum):
     POSITION_TPSL = 0x02
 
 class BulkOrder(TlvSerializable):
-    orders: list[Order]
+    orders: list[OrderRequest]
     grouping: Grouping
     builder_addr: bytes | None
     builder_fee: int | None
 
     def __init__(self,
-                 orders: list[Order],
+                 orders: list[OrderRequest],
                  grouping: Grouping,
                  builder_addr: bytes | None = None,
                  builder_fee: int | None = None) -> None:

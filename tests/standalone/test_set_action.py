@@ -3,7 +3,7 @@ from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order import Order, OrderType, Tif
+from application_client.order_request import OrderRequest, OrderType, Tif
 from application_client.set_action import ActionType, SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
@@ -17,7 +17,7 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
         1770816625873,
         BulkOrder(
             [
-                Order(
+                OrderRequest(
                     OrderType.LIMIT,
                     1,
                     True,
@@ -41,7 +41,7 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
         1770816625873,
         BulkModify([
             ModifyRequest(
-                Order(
+                OrderRequest(
                     OrderType.LIMIT,
                     1,
                     True,
@@ -53,7 +53,7 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
                 42,
             ),
             ModifyRequest(
-                Order(
+                OrderRequest(
                     OrderType.LIMIT,
                     2,
                     True,

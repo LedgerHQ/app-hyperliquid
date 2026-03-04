@@ -189,12 +189,12 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### BULK_ORDER
 
-| Name            | Tag  | Type                       | Optional |
-| ----            | ---  | ----                       | -------- |
-| ORDER           | 0xdd | [ORDER](#order)            |          |
-| GROUPING        | 0xea | [Grouping](#grouping-enum) |          |
-| BUILDER_ADDRESS | 0xd3 | uint8[20]                  | x        |
-| BUILDER_FEE     | 0xec | uint64                     | x        |
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ORDER           | 0xdd | [ORDER_REQUEST](#order_request) |          |
+| GROUPING        | 0xea | [Grouping](#grouping-enum)      |          |
+| BUILDER_ADDRESS | 0xd3 | uint8[20]                       | x        |
+| BUILDER_FEE     | 0xec | uint64                          | x        |
 
 :information_source: Multiple ORDER tags may be present; up to 5 ORDER tags are supported per BULK_ORDER.
 
@@ -216,10 +216,10 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### MODIFY_REQUEST
 
-| Name            | Tag  | Type            | Optional |
-| ----            | ---  | ----            | -------- |
-| ORDER           | 0xdd | [ORDER](#order) |          |
-| OID             | 0xdc | uint64          |          |
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ORDER           | 0xdd | [ORDER_REQUEST](#order_request) |          |
+| OID             | 0xdc | uint64                          |          |
 
 ### BULK_CANCEL
 
@@ -244,7 +244,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | IS_CROSS        | 0xde | bool      |          |
 | LEVERAGE        | 0xed | uint32    |          |
 
-### ORDER
+### ORDER_REQUEST
 
 | Name            | Tag  | Type                             | Optional |
 | ----            | ---  | ----                             | -------- |

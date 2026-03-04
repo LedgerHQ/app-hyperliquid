@@ -4,18 +4,18 @@
 #include <stdbool.h>
 #include "tlv_library.h"
 #include "cmp.h"
-#include "order.h"
+#include "order_request.h"
 #include "constants.h"
 
 typedef struct {
     uint64_t oid;
-    s_order order;
+    s_order_request order;
 } s_modify_request;
 
 typedef struct {
     TLV_reception_t received_tags;
     s_modify_request *modify_request;
-    s_order_ctx order_ctx;
+    s_order_request_ctx order_ctx;
 } s_modify_request_ctx;
 
 typedef struct {
