@@ -24,7 +24,7 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    Tif.IOC,
+                    tif=Tif.IOC,
                 ),
             ],
             Grouping.NA,

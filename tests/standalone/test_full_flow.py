@@ -29,7 +29,7 @@ def test_sign_action(backend: BackendInterface) -> None:
                     "1992",
                     "0.512",
                     False,
-                    Tif.IOC,
+                    tif=Tif.IOC,
                 ),
                 Order(
                     OrderType.TRIGGER,
