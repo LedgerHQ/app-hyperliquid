@@ -24,7 +24,6 @@ This command returns the derived address for the given BIP-32 path.
 | CLA | INS   | P1  | P2  | Lc       | Le       |
 | --- | ---   | --- | --- | ---      | ---      |
 | E0  |  01   | 00  | 00  | variable | variable |
-|     |       |     |     |          |          |
 
 ##### `Input data`
 
@@ -100,7 +99,7 @@ This command gives a hyperliquid action.
 | Description                      | Length   |
 | ---                              | ---      |
 | Struct length (big endian)       | 2        |
-| [SET_ACTION](#set_action) struct | variable |
+| [ACTION](#action) struct         | variable |
 
 ###### following chunk
 
@@ -108,7 +107,7 @@ This command gives a hyperliquid action.
 
 | Description                      | Length   |
 | ---                              | ---      |
-| [SET_ACTION](#set_action) struct | variable |
+| [ACTION](#action) struct         | variable |
 
 ##### `Output data`
 
@@ -178,7 +177,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | MAINNET | 0x00  |
 | TESTNET | 0x01  |
 
-### SET_ACTION
+### ACTION
 
 | Name           | Tag  | Type                           | Optional |
 | ----           | ---  | ----                           | -------- |
@@ -186,7 +185,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) |          |
 
 ### BULK_ORDER
 
