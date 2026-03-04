@@ -6,7 +6,7 @@
 #include "os_utils.h"  // bytes_to_lowercase_hex
 
 static bool handle_order(const tlv_data_t *data, s_bulk_order_ctx *out) {
-    if (out->bulk_order->order_count == ARRAYLEN(out->bulk_order->orders)) {
+    if (out->bulk_order->order_count >= ARRAYLEN(out->bulk_order->orders)) {
         PRINTF("Error: too many orders to handle!\n");
         return false;
     }
