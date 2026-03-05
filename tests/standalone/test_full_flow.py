@@ -24,7 +24,7 @@ def test_sign_action(backend: BackendInterface) -> None:
             [
                 OrderRequest(
                     OrderType.LIMIT,
-                    1,
+                    42,
                     True,
                     "1992",
                     "0.512",
@@ -33,7 +33,7 @@ def test_sign_action(backend: BackendInterface) -> None:
                 ),
                 OrderRequest(
                     OrderType.TRIGGER,
-                    1,
+                    42,
                     True,
                     "1992",
                     "0.512",
@@ -57,7 +57,7 @@ def test_sign_action(backend: BackendInterface) -> None:
         ActionType.UPDATE_LEVERAGE,
         1770816626930,
         UpdateLeverage(
-            1,
+            42,
             False,
             8,
         ),
