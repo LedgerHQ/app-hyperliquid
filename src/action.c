@@ -167,6 +167,9 @@ static void dump_action(const s_action *action) {
 bool parse_action(const buffer_t *payload) {
     s_action_ctx out = {0};
 
+    if (payload == NULL) {
+        return false;
+    }
     if (!action_tlv_parser(payload, &out, &out.received_tags)) {
         return false;
     }
@@ -261,6 +264,9 @@ bool action_hash(const s_action *action,
                  uint8_t *message_hash) {
     uint8_t connection_id[32];
 
+    if ((action == NULL) || (metadata == NULL) || (domain_hash == NULL) || (message_hash == NULL)) {
+        return false;
+    }
     if (action->type == ACTION_TYPE_APPROVE_BUILDER_FEE) {
         if (!eip712_builder_fee_hash(&action->approve_builder_fee.signature_chain_id,
                                      (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
