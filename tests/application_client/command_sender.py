@@ -1,4 +1,6 @@
 import struct
+from collections.abc import Generator
+from contextlib import contextmanager
 from enum import IntEnum
 
 from ragger.backend.interface import RAPDU, BackendInterface
@@ -54,9 +56,11 @@ class CommandSender:
                                      p2=0x00,
                                      data=struct.pack(">H", len(payload)) + payload)
 
-    def sign_action(self, bip32_path: str) -> RAPDU:
-        return self.backend.exchange(cla=CLA,
-                                     ins=InsType.SIGN_ACTION,
-                                     p1=0x00,
-                                     p2=0x00,
-                                     data=pack_derivation_path(bip32_path))
+    @contextmanager
+    def sign_action(self, bip32_path: str) -> Generator[None, None, None]:
+        with self.backend.exchange_async(cla=CLA,
+                                         ins=InsType.SIGN_ACTION,
+                                         p1=0x00,
+                                         p2=0x00,
+                                         data=pack_derivation_path(bip32_path)) as resp:
+            yield resp
