@@ -182,6 +182,9 @@ static void dump_action_metadata(const s_action_metadata *action_metadata) {
 bool parse_action_metadata(const buffer_t *payload) {
     s_action_metadata_ctx out = {0};
 
+    if (payload == NULL) {
+        return false;
+    }
     if (cx_sha256_init_no_throw(&out.hash_ctx) != CX_OK) {
         return false;
     }
