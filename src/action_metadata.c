@@ -132,7 +132,7 @@ static bool handle_common(const tlv_data_t *data, s_action_metadata_ctx *metadat
     return true;
 }
 
-static bool verify_action_metadata(s_action_metadata_ctx *out) {
+static bool verify_action_metadata(const s_action_metadata_ctx *out) {
     uint8_t hash[32];
     buffer_t hash_buf;
     uint8_t key_usage = CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA;

@@ -1,8 +1,8 @@
 from application_client.action_metadata import ActionMetadata, ActionType, Network
 from application_client.approve_builder_fee import ApproveBuilderFee
-from application_client.bulk_order import BulkOrder, Grouping
+from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order import Order, OrderType, Tif, TriggerType
+from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
 from application_client.set_action import SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
@@ -22,30 +22,34 @@ def test_sign_action(backend: BackendInterface) -> None:
         1770816625873,
         BulkOrder(
             [
-                Order(
+                OrderRequest(
                     OrderType.LIMIT,
                     1,
                     True,
                     "1992",
                     "0.512",
                     False,
-                    Tif.IOC,
+                    Limit(Tif.IOC),
                 ),
-                Order(
+                OrderRequest(
                     OrderType.TRIGGER,
                     1,
                     True,
                     "1992",
                     "0.512",
                     False,
-                    is_market=True,
-                    trigger_px="190",
-                    tpsl=TriggerType.TP,
+                    Trigger(
+                        True,
+                        "190",
+                        TriggerType.TP,
+                    ),
                 ),
             ],
             Grouping.NA,
-            builder_addr=bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
-            builder_fee=100,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
         ),
     ))
     client.set_action(SetAction(

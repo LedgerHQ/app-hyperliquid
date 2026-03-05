@@ -27,10 +27,20 @@ typedef struct {
 } s_limit;
 
 typedef struct {
+    TLV_reception_t received_tags;
+    s_limit *limit;
+} s_limit_ctx;
+
+typedef struct {
     bool is_market;
     char trigger_px[NUMERIC_STRING_LENGTH + 1];
-    e_trigger_type trigger_type;
+    e_trigger_type tpsl;
 } s_trigger;
+
+typedef struct {
+    TLV_reception_t received_tags;
+    s_trigger *trigger;
+} s_trigger_ctx;
 
 typedef struct {
     uint32_t asset;
@@ -43,13 +53,17 @@ typedef struct {
         s_limit limit;
         s_trigger trigger;
     };
-} s_order;
+} s_order_request;
 
 typedef struct {
     TLV_reception_t received_tags;
-    s_order *order;
-} s_order_ctx;
+    s_order_request *order_request;
+    union {
+        s_limit_ctx limit_ctx;
+        s_trigger_ctx trigger_ctx;
+    };
+} s_order_request_ctx;
 
-bool parse_order(const buffer_t *payload, s_order_ctx *out);
-void dump_order(const s_order *order);
-bool order_serialize(const s_order *order, cmp_ctx_t *cmp_ctx);
+bool parse_order_request(const buffer_t *payload, s_order_request_ctx *out);
+void dump_order_request(const s_order_request *order_request);
+bool order_request_serialize(const s_order_request *order_request, cmp_ctx_t *cmp_ctx);

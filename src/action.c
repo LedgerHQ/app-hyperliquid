@@ -122,7 +122,7 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
     return ret;
 }
 
-static bool verify_action(s_action_ctx *out) {
+static bool verify_action(const s_action_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags,
                                  TAG_STRUCT_TYPE,
                                  TAG_STRUCT_VERSION,

@@ -24,7 +24,6 @@ This command returns the derived address for the given BIP-32 path.
 | CLA | INS   | P1  | P2  | Lc       | Le       |
 | --- | ---   | --- | --- | ---      | ---      |
 | E0  |  01   | 00  | 00  | variable | variable |
-|     |       |     |     |          |          |
 
 ##### `Input data`
 
@@ -100,7 +99,7 @@ This command gives a hyperliquid action.
 | Description                      | Length   |
 | ---                              | ---      |
 | Struct length (big endian)       | 2        |
-| [SET_ACTION](#set_action) struct | variable |
+| [ACTION](#action) struct         | variable |
 
 ###### following chunk
 
@@ -108,7 +107,7 @@ This command gives a hyperliquid action.
 
 | Description                      | Length   |
 | ---                              | ---      |
-| [SET_ACTION](#set_action) struct | variable |
+| [ACTION](#action) struct         | variable |
 
 ##### `Output data`
 
@@ -178,7 +177,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | MAINNET | 0x00  |
 | TESTNET | 0x01  |
 
-### SET_ACTION
+### ACTION
 
 | Name           | Tag  | Type                           | Optional |
 | ----           | ---  | ----                           | -------- |
@@ -186,18 +185,24 @@ This command signs a previously given hyperliquid action (in the same order).
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) |          |
 
 ### BULK_ORDER
 
-| Name            | Tag  | Type                       | Optional |
-| ----            | ---  | ----                       | -------- |
-| ORDER           | 0xdd | [ORDER](#order)            |          |
-| GROUPING        | 0xea | [Grouping](#grouping-enum) |          |
-| BUILDER_ADDRESS | 0xd3 | uint8[20]                  | x        |
-| BUILDER_FEE     | 0xec | uint64                     | x        |
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ORDER           | 0xdd | [ORDER_REQUEST](#order_request) |          |
+| GROUPING        | 0xea | [Grouping](#grouping-enum)      |          |
+| BUILDER         | 0xeb | [BUILDER_INFO](#builder_info)   | x        |
 
 :information_source: Multiple ORDER tags may be present; up to 5 ORDER tags are supported per BULK_ORDER.
+
+### BUILDER_INFO
+
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ADDRESS         | 0xd3 | uint8[20]                       |          |
+| FEE             | 0xec | uint64                          |          |
 
 #### Grouping enum
 
@@ -209,12 +214,28 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### BULK_MODIFY
 
-| Name            | Tag  | Type            | Optional |
-| ----            | ---  | ----            | -------- |
-| ORDER           | 0xdd | [ORDER](#order) |          |
-| OID             | 0xdc | uint64          |          |
+| Name            | Tag  | Type                              | Optional |
+| ----            | ---  | ----                              | -------- |
+| MODIFY          | 0xd8 | [MODIFY_REQUEST](#modify_request) |          |
+
+:information_source: Multiple MODIFY tags may be present; up to 5 MODIFY tags are supported per BULK_MODIFY.
+
+### MODIFY_REQUEST
+
+| Name            | Tag  | Type                            | Optional |
+| ----            | ---  | ----                            | -------- |
+| ORDER           | 0xdd | [ORDER_REQUEST](#order_request) |          |
+| OID             | 0xdc | uint64                          |          |
 
 ### BULK_CANCEL
+
+| Name            | Tag  | Type                              | Optional |
+| ----            | ---  | ----                              | -------- |
+| CANCEL          | 0xd9 | [CANCEL_REQUEST](#cancel_request) |          |
+
+:information_source: Multiple CANCEL tags may be present; up to 5 CANCEL tags are supported per BULK_CANCEL.
+
+### CANCEL_REQUEST
 
 | Name            | Tag  | Type      | Optional |
 | ----            | ---  | ----      | -------- |
@@ -229,7 +250,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | IS_CROSS        | 0xde | bool      |          |
 | LEVERAGE        | 0xed | uint32    |          |
 
-### ORDER
+### ORDER_REQUEST
 
 | Name            | Tag  | Type                             | Optional |
 | ----            | ---  | ----                             | -------- |
@@ -239,10 +260,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | LIMIT_PX        | 0xe3 | char[]                           |          |
 | SZ              | 0xe4 | char[]                           |          |
 | REDUCE_ONLY     | 0xe5 | bool                             |          |
-| TIF             | 0xe6 | [Tif](#tif-enum)                 | x        |
-| IS_MARKET       | 0xe7 | bool                             | x        |
-| TRIGGER_PX      | 0xe8 | char[]                           | x        |
-| TRIGGER_TYPE    | 0xe9 | [TriggerType](#triggertype-enum) | x        |
+| ORDER           | 0xd7 | [LIMIT_ORDER](#limit_order) \|<br>[TRIGGER_ORDER](#trigger_order) |          |
 
 #### OrderType enum
 
@@ -251,6 +269,12 @@ This command signs a previously given hyperliquid action (in the same order).
 | LIMIT   | 0x00  |
 | TRIGGER | 0x01  |
 
+### LIMIT_ORDER
+
+| Name            | Tag  | Type                             | Optional |
+| ----            | ---  | ----                             | -------- |
+| TIF             | 0xe6 | [Tif](#tif-enum)                 |          |
+
 #### Tif enum
 
 | Name | Value |
@@ -258,6 +282,14 @@ This command signs a previously given hyperliquid action (in the same order).
 | ALO  | 0x00  |
 | IOC  | 0x01  |
 | GTC  | 0x02  |
+
+### TRIGGER_ORDER
+
+| Name            | Tag  | Type                             | Optional |
+| ----            | ---  | ----                             | -------- |
+| IS_MARKET       | 0xe7 | bool                             |          |
+| TRIGGER_PX      | 0xe8 | char[]                           |          |
+| TPSL            | 0xe9 | [TriggerType](#triggertype-enum) |          |
 
 #### TriggerType enum
 

@@ -1,9 +1,9 @@
 from application_client.approve_builder_fee import ApproveBuilderFee
-from application_client.bulk_cancel import BulkCancel
-from application_client.bulk_modify import BulkModify
-from application_client.bulk_order import BulkOrder, Grouping
+from application_client.bulk_cancel import BulkCancel, CancelRequest
+from application_client.bulk_modify import BulkModify, ModifyRequest
+from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order import Order, OrderType, Tif
+from application_client.order_request import Limit, OrderRequest, OrderType, Tif
 from application_client.set_action import ActionType, SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
@@ -17,19 +17,21 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
         1770816625873,
         BulkOrder(
             [
-                Order(
+                OrderRequest(
                     OrderType.LIMIT,
                     1,
                     True,
                     "1992",
                     "0.512",
                     False,
-                    Tif.IOC,
+                    Limit(Tif.IOC),
                 ),
             ],
             Grouping.NA,
-            builder_addr=bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
-            builder_fee=100,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
         ),
     ))
 
@@ -39,18 +41,32 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
         1,
         ActionType.MODIFY,
         1770816625873,
-        BulkModify(
-            Order(
-                OrderType.LIMIT,
-                1,
-                True,
-                "1992",
-                "0.512",
-                False,
-                Tif.IOC,
+        BulkModify([
+            ModifyRequest(
+                OrderRequest(
+                    OrderType.LIMIT,
+                    1,
+                    True,
+                    "1992",
+                    "0.512",
+                    False,
+                    Limit(Tif.IOC),
+                ),
+                42,
             ),
-            42,
-        ),
+            ModifyRequest(
+                OrderRequest(
+                    OrderType.LIMIT,
+                    2,
+                    True,
+                    "254",
+                    "2.3",
+                    False,
+                    Limit(Tif.ALO),
+                ),
+                21,
+            ),
+        ]),
     ))
 
 def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
@@ -59,10 +75,10 @@ def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
         1,
         ActionType.CANCEL,
         1770816625873,
-        BulkCancel(
-            1,
-            42,
-        ),
+        BulkCancel([
+            CancelRequest(1, 42),
+            CancelRequest(2, 21),
+        ]),
     ))
 
 def test_set_action_update_leverage(backend: BackendInterface) -> None:
