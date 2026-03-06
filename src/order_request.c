@@ -2,6 +2,7 @@
 #include "os_print.h"
 #include "tlv_library.h"
 #include "order_request.h"
+#include "hl_context.h"
 
 static bool handle_tif(const tlv_data_t *data, s_limit_ctx *out) {
     if (!get_uint8_t_from_tlv_data(data, &out->limit->tif)) {
@@ -264,6 +265,10 @@ static bool verify_order_request(const s_order_request_ctx *out) {
                                  TAG_REDUCE_ONLY,
                                  TAG_ORDER)) {
         PRINTF("Error: incomplete order_request struct received!\n");
+        return false;
+    }
+    if (ctx_get_action_metadata()->asset_id != out->order_request->asset) {
+        PRINTF("Error: asset does not match metadata!\n");
         return false;
     }
     return true;

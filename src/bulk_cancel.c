@@ -1,8 +1,9 @@
 #include <string.h>
 #include "os_print.h"
 #include "os_utils.h"
-#include "bulk_cancel.h"
 #include "format.h"
+#include "bulk_cancel.h"
+#include "hl_context.h"
 
 static bool handle_asset(const tlv_data_t *data, s_cancel_request_ctx *out) {
     return get_uint32_t_from_tlv_data(data, &out->cancel_request->asset);
@@ -21,6 +22,10 @@ DEFINE_TLV_PARSER(CANCEL_REQUEST_TAGS, NULL, cancel_request_tlv_parser);
 static bool verify_cancel_request(const s_cancel_request_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags, TAG_ASSET, TAG_OID)) {
         PRINTF("Error: incomplete cancel_request struct received!\n");
+        return false;
+    }
+    if (ctx_get_action_metadata()->asset_id != out->cancel_request->asset) {
+        PRINTF("Error: asset does not match metadata!\n");
         return false;
     }
     return true;
