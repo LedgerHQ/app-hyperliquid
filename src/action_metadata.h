@@ -20,6 +20,8 @@ typedef struct {
     e_network network;
     bool has_builder_addr;
     uint8_t builder_addr[ADDRESS_LENGTH];
+    bool has_margin;
+    char margin[NUMERIC_STRING_LENGTH + 1];
 } s_action_metadata;
 
 bool parse_action_metadata(const buffer_t *payload);

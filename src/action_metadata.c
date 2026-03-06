@@ -104,6 +104,14 @@ static bool handle_builder_addr(const tlv_data_t *data, s_action_metadata_ctx *o
     return true;
 }
 
+static bool handle_margin(const tlv_data_t *data, s_action_metadata_ctx *out) {
+    if (!get_string_from_tlv_data(data, out->metadata.margin, 1, sizeof(out->metadata.margin))) {
+        return false;
+    }
+    out->metadata.has_margin = true;
+    return true;
+}
+
 static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out) {
     return get_buffer_from_tlv_data(data, &out->signature, 70, 72);
 }
@@ -116,6 +124,7 @@ static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out)
     X(0x24, TAG_ASSET_TICKER, handle_asset_ticker, ENFORCE_UNIQUE_TAG)     \
     X(0xd2, TAG_NETWORK, handle_network, ENFORCE_UNIQUE_TAG)               \
     X(0xd3, TAG_BUILDER_ADDR, handle_builder_addr, ENFORCE_UNIQUE_TAG)     \
+    X(0xd4, TAG_MARGIN, handle_margin, ENFORCE_UNIQUE_TAG)                 \
     X(0x15, TAG_SIGNATURE, handle_signature, ENFORCE_UNIQUE_TAG)
 
 static bool handle_common(const tlv_data_t *, s_action_metadata_ctx *);
