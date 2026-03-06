@@ -39,6 +39,7 @@ target_include_directories(
          ${CMAKE_SOURCE_DIR}/mock
          ${APP_SRC}
          ${APP_SRC}/handler
+         ${APP_SRC}/ui
          ${MSGPACK_SRC}
 )
 
