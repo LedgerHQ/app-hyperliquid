@@ -59,9 +59,9 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
         return false;
     }
     switch (out->action.type) {
-        case ACTION_TYPE_ORDER:
-        case ACTION_TYPE_MODIFY:
-        case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_BULK_ORDER:
+        case ACTION_TYPE_BULK_MODIFY:
+        case ACTION_TYPE_BULK_CANCEL:
         case ACTION_TYPE_UPDATE_LEVERAGE:
         case ACTION_TYPE_APPROVE_BUILDER_FEE:
             break;
@@ -96,15 +96,15 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
     }
 
     switch (out->action.type) {
-        case ACTION_TYPE_ORDER:
+        case ACTION_TYPE_BULK_ORDER:
             out->bulk_order_ctx.bulk_order = &out->action.bulk_order;
             ret = parse_bulk_order(&data->value, &out->bulk_order_ctx);
             break;
-        case ACTION_TYPE_MODIFY:
+        case ACTION_TYPE_BULK_MODIFY:
             out->bulk_modify_ctx.bulk_modify = &out->action.bulk_modify;
             ret = parse_bulk_modify(&data->value, &out->bulk_modify_ctx);
             break;
-        case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_BULK_CANCEL:
             out->bulk_cancel_ctx.bulk_cancel = &out->action.bulk_cancel;
             ret = parse_bulk_cancel(&data->value, &out->bulk_cancel_ctx);
             break;
@@ -143,13 +143,13 @@ static void dump_action(const s_action *action) {
     format_u64(tmp, sizeof(tmp), action->nonce);
     PRINTF("nonce = %s\n", tmp);
     switch (action->type) {
-        case ACTION_TYPE_ORDER:
+        case ACTION_TYPE_BULK_ORDER:
             dump_bulk_order(&action->bulk_order);
             break;
-        case ACTION_TYPE_MODIFY:
+        case ACTION_TYPE_BULK_MODIFY:
             dump_bulk_modify(&action->bulk_modify);
             break;
-        case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_BULK_CANCEL:
             dump_bulk_cancel(&action->bulk_cancel);
             break;
         case ACTION_TYPE_UPDATE_LEVERAGE:
@@ -187,13 +187,13 @@ static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
     bool ret;
 
     switch (action->type) {
-        case ACTION_TYPE_ORDER:
+        case ACTION_TYPE_BULK_ORDER:
             ret = bulk_order_serialize(&action->bulk_order, cmp_ctx);
             break;
-        case ACTION_TYPE_MODIFY:
+        case ACTION_TYPE_BULK_MODIFY:
             ret = bulk_modify_serialize(&action->bulk_modify, cmp_ctx);
             break;
-        case ACTION_TYPE_CANCEL:
+        case ACTION_TYPE_BULK_CANCEL:
             ret = bulk_cancel_serialize(&action->bulk_cancel, cmp_ctx);
             break;
         case ACTION_TYPE_UPDATE_LEVERAGE:
