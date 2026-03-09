@@ -46,19 +46,19 @@ static bool handle_struct_version(const tlv_data_t *data, s_action_metadata_ctx 
     return true;
 }
 
-static bool handle_action_type(const tlv_data_t *data, s_action_metadata_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->metadata.action_type)) {
+static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx *out) {
+    if (!get_uint8_t_from_tlv_data(data, &out->metadata.op_type)) {
         return false;
     }
-    switch (out->metadata.action_type) {
-        case ACTION_TYPE_ORDER:
-        case ACTION_TYPE_MODIFY:
-        case ACTION_TYPE_CANCEL:
-        case ACTION_TYPE_UPDATE_LEVERAGE:
-        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+    switch (out->metadata.op_type) {
+        case OP_TYPE_ORDER:
+        case OP_TYPE_MODIFY:
+        case OP_TYPE_CANCEL:
+        case OP_TYPE_UPDATE_LEVERAGE:
+        case OP_TYPE_CLOSE:
             break;
         default:
-            PRINTF("Error: unknown action type (%u)!\n", out->metadata.action_type);
+            PRINTF("Error: unknown operation type (%u)!\n", out->metadata.op_type);
             return false;
     }
     return true;
@@ -119,7 +119,7 @@ static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out)
 #define METADATA_TAGS(X)                                                   \
     X(0x01, TAG_STRUCT_TYPE, handle_struct_type, ENFORCE_UNIQUE_TAG)       \
     X(0x02, TAG_STRUCT_VERSION, handle_struct_version, ENFORCE_UNIQUE_TAG) \
-    X(0xd0, TAG_ACTION_TYPE, handle_action_type, ENFORCE_UNIQUE_TAG)       \
+    X(0xd0, TAG_OPERATION_TYPE, handle_operation_type, ENFORCE_UNIQUE_TAG) \
     X(0xd1, TAG_ASSET_ID, handle_asset_id, ENFORCE_UNIQUE_TAG)             \
     X(0x24, TAG_ASSET_TICKER, handle_asset_ticker, ENFORCE_UNIQUE_TAG)     \
     X(0xd2, TAG_NETWORK, handle_network, ENFORCE_UNIQUE_TAG)               \
@@ -150,7 +150,7 @@ static bool verify_action_metadata(const s_action_metadata_ctx *out) {
     if (!TLV_CHECK_RECEIVED_TAGS(out->received_tags,
                                  TAG_STRUCT_TYPE,
                                  TAG_STRUCT_VERSION,
-                                 TAG_ACTION_TYPE,
+                                 TAG_OPERATION_TYPE,
                                  TAG_ASSET_ID,
                                  TAG_ASSET_TICKER,
                                  TAG_NETWORK,
@@ -176,7 +176,7 @@ static bool verify_action_metadata(const s_action_metadata_ctx *out) {
 static void dump_action_metadata(const s_action_metadata *action_metadata) {
     (void) action_metadata;  // to prevent warnings for release builds
     PRINTF(">>> ACTION_METADATA >>>\n");
-    PRINTF("action_type = %u\n", action_metadata->action_type);
+    PRINTF("operation_type = %u\n", action_metadata->op_type);
     PRINTF("asset_id = %u\n", action_metadata->asset_id);
     PRINTF("asset_ticker = \"%s\"\n", action_metadata->asset_ticker);
     PRINTF("network = %u\n", action_metadata->network);

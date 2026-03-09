@@ -149,27 +149,27 @@ This command signs a previously given hyperliquid action (in the same order).
 
 ### ACTION_METADATA
 
-| Name           | Tag  | Type                           | Optional |
-| ----           | ---  | ----                           | -------- |
-| STRUCT_TYPE    | 0x01 | uint8                          |          |
-| STRUCT_VERSION | 0x02 | uint8                          |          |
-| ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
-| ASSET_ID       | 0xd1 | uint32                         |          |
-| ASSET_TICKER   | 0x24 | char[]                         |          |
-| NETWORK        | 0xd2 | [Network](#network-enum)       |          |
-| BUILDER_ADDR   | 0xd3 | uint8[20]                      | x        |
-| MARGIN         | 0xd4 | char[]                         | x        |
-| SIGNATURE      | 0x15 | uint8[]                        |          |
+| Name           | Tag  | Type                                 | Optional |
+| ----           | ---  | ----                                 | -------- |
+| STRUCT_TYPE    | 0x01 | uint8                                |          |
+| STRUCT_VERSION | 0x02 | uint8                                |          |
+| OPERATION_TYPE | 0xd0 | [OperationType](#operationtype-enum) |          |
+| ASSET_ID       | 0xd1 | uint32                               |          |
+| ASSET_TICKER   | 0x24 | char[]                               |          |
+| NETWORK        | 0xd2 | [Network](#network-enum)             |          |
+| BUILDER_ADDR   | 0xd3 | uint8[20]                            | x        |
+| MARGIN         | 0xd4 | char[]                               | x        |
+| SIGNATURE      | 0x15 | uint8[]                              |          |
 
-#### ActionType enum
+#### OperationType enum
 
 | Name                 | Value |
 | ----                 | ----- |
 | ORDER                | 0x00  |
 | MODIFY               | 0x01  |
 | CANCEL               | 0x02  |
-| LEVERAGE             | 0x03  |
-| APPROVE_BUILDER_FEE  | 0x04  |
+| UPDATE_LEVERAGE      | 0x03  |
+| CLOSE                | 0x04  |
 
 #### Network enum
 
@@ -187,6 +187,16 @@ This command signs a previously given hyperliquid action (in the same order).
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
 | ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) |          |
+
+#### ActionType enum
+
+| Name                 | Value |
+| ----                 | ----- |
+| BULK_ORDER           | 0x00  |
+| BULK_MODIFY          | 0x01  |
+| BULK_CANCEL          | 0x02  |
+| UPDATE_LEVERAGE      | 0x03  |
+| APPROVE_BUILDER_FEE  | 0x04  |
 
 ### BULK_ORDER
 

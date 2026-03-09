@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "action_metadata.h"
 #include "action.h"
 #include "hl_context.h"
 
@@ -21,7 +22,7 @@ static int fuzz_action(const uint8_t *data, size_t size) {
 /* Main fuzzing handler called by libfuzzer */
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     s_action_metadata metadata = {
-        .action_type = ACTION_TYPE_ORDER,
+        .op_type = OP_TYPE_ORDER,
         .asset_id = 42,
         .asset_ticker = "FUZZ",
         .network = NETWORK_MAINNET,

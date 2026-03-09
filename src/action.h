@@ -3,13 +3,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "buffer.h"
-#include "action_type.h"
 #include "bulk_order.h"
 #include "bulk_modify.h"
 #include "bulk_cancel.h"
 #include "update_leverage.h"
 #include "approve_builder_fee.h"
 #include "action_metadata.h"
+
+typedef enum {
+    ACTION_TYPE_ORDER = 0x00,
+    ACTION_TYPE_MODIFY = 0x01,
+    ACTION_TYPE_CANCEL = 0x02,
+    ACTION_TYPE_UPDATE_LEVERAGE = 0x03,
+    ACTION_TYPE_APPROVE_BUILDER_FEE = 0x04,
+} e_action_type;
 
 typedef struct {
     e_action_type type;

@@ -1,9 +1,9 @@
-from application_client.action_metadata import ActionMetadata, ActionType, Network
+from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
-from application_client.set_action import SetAction
+from application_client.set_action import ActionType, SetAction
 from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
 
@@ -12,13 +12,13 @@ def test_sign_action(backend: BackendInterface) -> None:
     client = CommandSender(backend)
     client.provide_action_metadata(ActionMetadata(
         1,
-        ActionType.ORDER,
+        OperationType.ORDER,
         42,
         "BTC",
         Network.MAINNET))
     client.set_action(SetAction(
         1,
-        ActionType.ORDER,
+        ActionType.BULK_ORDER,
         1770816625873,
         BulkOrder(
             [

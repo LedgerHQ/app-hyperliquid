@@ -13,7 +13,7 @@ def test_set_action_bulk_order(backend: BackendInterface) -> None:
     client = CommandSender(backend)
     client.set_action(SetAction(
         1,
-        ActionType.ORDER,
+        ActionType.BULK_ORDER,
         1770816625873,
         BulkOrder(
             [
@@ -39,7 +39,7 @@ def test_set_action_bulk_modify(backend: BackendInterface) -> None:
     client = CommandSender(backend)
     client.set_action(SetAction(
         1,
-        ActionType.MODIFY,
+        ActionType.BULK_MODIFY,
         1770816625873,
         BulkModify([
             ModifyRequest(
@@ -73,7 +73,7 @@ def test_set_action_bulk_cancel(backend: BackendInterface) -> None:
     client = CommandSender(backend)
     client.set_action(SetAction(
         1,
-        ActionType.CANCEL,
+        ActionType.BULK_CANCEL,
         1770816625873,
         BulkCancel([
             CancelRequest(1, 42),
