@@ -1,6 +1,14 @@
-from .action_type import ActionType
+from enum import IntEnum
+
 from .tlv import TlvSerializable
 
+
+class ActionType(IntEnum):
+    BULK_ORDER = 0x00
+    BULK_MODIFY = 0x01
+    BULK_CANCEL = 0x02
+    UPDATE_LEVERAGE = 0x03
+    APPROVAL_BUILDER_FEE = 0x04
 
 class SetAction(TlvSerializable):
     version: int
