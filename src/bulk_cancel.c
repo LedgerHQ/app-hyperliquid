@@ -115,7 +115,14 @@ void dump_bulk_cancel(const s_bulk_cancel *bulk_cancel) {
 }
 
 bool bulk_cancel_serialize(const s_bulk_cancel *bulk_cancel, cmp_ctx_t *cmp_ctx) {
-    if (!cmp_write_map(cmp_ctx, 1)) {
+    if (!cmp_write_map(cmp_ctx, 2)) {
+        return false;
+    }
+
+    if (!cmp_write_str(cmp_ctx, "type", 4)) {
+        return false;
+    }
+    if (!cmp_write_str(cmp_ctx, "cancel", 6)) {
         return false;
     }
 

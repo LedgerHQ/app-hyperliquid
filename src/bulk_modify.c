@@ -116,7 +116,14 @@ void dump_bulk_modify(const s_bulk_modify *bulk_modify) {
 }
 
 bool bulk_modify_serialize(const s_bulk_modify *bulk_modify, cmp_ctx_t *cmp_ctx) {
-    if (!cmp_write_map(cmp_ctx, 1)) {
+    if (!cmp_write_map(cmp_ctx, 2)) {
+        return false;
+    }
+
+    if (!cmp_write_str(cmp_ctx, "type", 4)) {
+        return false;
+    }
+    if (!cmp_write_str(cmp_ctx, "batchModify", 11)) {
         return false;
     }
 

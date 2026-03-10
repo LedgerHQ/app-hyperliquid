@@ -49,7 +49,14 @@ void dump_update_leverage(const s_update_leverage *update_leverage) {
 }
 
 bool update_leverage_serialize(const s_update_leverage *update_leverage, cmp_ctx_t *cmp_ctx) {
-    if (!cmp_write_map(cmp_ctx, 3)) {
+    if (!cmp_write_map(cmp_ctx, 4)) {
+        return false;
+    }
+
+    if (!cmp_write_str(cmp_ctx, "type", 4)) {
+        return false;
+    }
+    if (!cmp_write_str(cmp_ctx, "updateLeverage", 14)) {
         return false;
     }
 
