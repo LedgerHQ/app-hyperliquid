@@ -1,5 +1,6 @@
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
+from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
 from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
@@ -142,4 +143,33 @@ def test_sign_limit_order(backend: BackendInterface) -> None:
     ))
     client.sign_action("m/44'/60'/0'/0/0")
     client.sign_action("m/44'/60'/0'/0/0")
+    client.sign_action("m/44'/60'/0'/0/0")
+
+def test_sign_edit(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.MODIFY,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_MODIFY,
+        1773050015814,
+        BulkModify([
+            ModifyRequest(
+                OrderRequest(
+                    OrderType.TRIGGER,
+                    0,
+                    False,
+                    "85169",
+                    "0.0005",
+                    True,
+                    Trigger(True, "85169", TriggerType.TP),
+                ),
+                343050796655,
+            ),
+        ]),
+    ))
     client.sign_action("m/44'/60'/0'/0/0")
