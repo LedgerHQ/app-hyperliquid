@@ -158,7 +158,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | ASSET_TICKER   | 0x24 | char[]                               |          |
 | NETWORK        | 0xd2 | [Network](#network-enum)             |          |
 | BUILDER_ADDR   | 0xd3 | uint8[20]                            | x        |
-| MARGIN         | 0xd4 | char[]                               | x        |
+| MARGIN         | 0xd4 | uint64                               | x        |
 | SIGNATURE      | 0x15 | uint8[]                              |          |
 
 #### OperationType enum

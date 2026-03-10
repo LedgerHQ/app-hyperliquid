@@ -19,3 +19,8 @@
  * Max size of a bulk operation
  */
 #define BULK_MAX_SIZE 5
+
+/**
+ * Decimals used for margins when expressed as 64-bit integers
+ */
+#define MARGIN_DECIMALS 6

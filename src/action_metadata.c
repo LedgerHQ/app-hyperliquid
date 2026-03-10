@@ -2,9 +2,10 @@
 #include "os_print.h"
 #include "cx.h"
 #include "tlv_library.h"
-#include "action_metadata.h"
 #include "os_pki.h"
 #include "ledger_pki.h"
+#include "format.h"
+#include "action_metadata.h"
 #include "hl_context.h"
 
 #define CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA 0x11
@@ -106,7 +107,7 @@ static bool handle_builder_addr(const tlv_data_t *data, s_action_metadata_ctx *o
 }
 
 static bool handle_margin(const tlv_data_t *data, s_action_metadata_ctx *out) {
-    if (!get_string_from_tlv_data(data, out->metadata.margin, 1, sizeof(out->metadata.margin))) {
+    if (!get_uint64_t_from_tlv_data(data, &out->metadata.margin)) {
         return false;
     }
     out->metadata.has_margin = true;
@@ -175,6 +176,9 @@ static bool verify_action_metadata(const s_action_metadata_ctx *out) {
 }
 
 static void dump_action_metadata(const s_action_metadata *action_metadata) {
+    // bigger value than necessary until the SDK function is fixed
+    char tmp[20 + 1 + MARGIN_DECIMALS + 1];
+
     (void) action_metadata;  // to prevent warnings for release builds
     PRINTF(">>> ACTION_METADATA >>>\n");
     PRINTF("operation_type = %u\n", action_metadata->op_type);
@@ -185,6 +189,10 @@ static void dump_action_metadata(const s_action_metadata *action_metadata) {
         PRINTF("builder_addr = 0x%.*h\n",
                sizeof(action_metadata->builder_addr),
                action_metadata->builder_addr);
+    }
+    if (action_metadata->has_margin) {
+        format_fpu64_trimmed(tmp, sizeof(tmp), action_metadata->margin, MARGIN_DECIMALS);
+        PRINTF("margin = %s\n", tmp);
     }
     PRINTF("<<< ACTION_METADATA <<<\n");
 }

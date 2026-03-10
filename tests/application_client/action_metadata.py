@@ -23,7 +23,7 @@ class ActionMetadata(TlvSerializable):
     asset_ticker: str
     network: Network
     builder_addr: bytes | None
-    margin: str | None
+    margin: int | None
     signature: bytes | None
 
     def __init__(self,
@@ -33,7 +33,7 @@ class ActionMetadata(TlvSerializable):
                  asset_ticker: str,
                  network: Network,
                  builder_addr: bytes | None = None,
-                 margin: str | None = None,
+                 margin: int | None = None,
                  signature: bytes | None = None) -> None:
         self.version = version
         self.op_type = operation_type
