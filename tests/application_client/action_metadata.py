@@ -14,6 +14,7 @@ class OperationType(IntEnum):
     CANCEL = 2
     UPDATE_LEVERAGE = 3
     CLOSE = 4
+    UPDATE_MARGIN = 5
 
 class ActionMetadata(TlvSerializable):
     version: int

@@ -9,6 +9,7 @@ class ActionType(IntEnum):
     BULK_CANCEL = 0x02
     UPDATE_LEVERAGE = 0x03
     APPROVAL_BUILDER_FEE = 0x04
+    UPDATE_ISOLATED_MARGIN = 0x05
 
 class SetAction(TlvSerializable):
     version: int
