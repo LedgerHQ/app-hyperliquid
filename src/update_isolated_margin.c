@@ -60,7 +60,14 @@ void dump_update_isolated_margin(const s_update_isolated_margin *update_isolated
 
 bool update_isolated_margin_serialize(const s_update_isolated_margin *update_isolated_margin,
                                       cmp_ctx_t *cmp_ctx) {
-    if (!cmp_write_map(cmp_ctx, 3)) {
+    if (!cmp_write_map(cmp_ctx, 4)) {
+        return false;
+    }
+
+    if (!cmp_write_str(cmp_ctx, "type", 4)) {
+        return false;
+    }
+    if (!cmp_write_str(cmp_ctx, "updateIsolatedMargin", 20)) {
         return false;
     }
 
