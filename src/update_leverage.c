@@ -67,7 +67,7 @@ bool update_leverage_serialize(const s_update_leverage *update_leverage, cmp_ctx
         return false;
     }
 
-    if (!cmp_write_str(cmp_ctx, "is_cross", 8)) {
+    if (!cmp_write_str(cmp_ctx, "isCross", 7)) {
         return false;
     }
     if (!cmp_write_bool(cmp_ctx, update_leverage->is_cross)) {
