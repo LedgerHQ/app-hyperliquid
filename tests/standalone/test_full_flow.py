@@ -192,3 +192,36 @@ def test_sign_cancel(backend: BackendInterface) -> None:
         ]),
     ))
     client.sign_action("m/44'/60'/0'/0/0")
+
+def test_sign_close(backend: BackendInterface) -> None:
+    client = CommandSender(backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CLOSE,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_ORDER,
+        1772814377109,
+        BulkOrder(
+            [
+                OrderRequest(
+                    OrderType.LIMIT,
+                    0,
+                    True,
+                    "69792",
+                    "0.00021",
+                    True,
+                    Limit(Tif.IOC),
+                ),
+            ],
+            Grouping.NA,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
+        ),
+    ))
+    client.sign_action("m/44'/60'/0'/0/0")
