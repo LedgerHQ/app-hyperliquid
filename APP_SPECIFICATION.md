@@ -266,7 +266,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | Name            | Tag  | Type                             | Optional |
 | ----            | ---  | ----                             | -------- |
 | ORDER_TYPE      | 0xe0 | [OrderType](#ordertype-enum)     |          |
-| ASSET           | 0xe1 | uint32                           |          |
+| ASSET           | 0xd1 | uint32                           |          |
 | IS_BUY          | 0xe2 | bool                             |          |
 | LIMIT_PX        | 0xe3 | char[]                           |          |
 | SZ              | 0xe4 | char[]                           |          |
