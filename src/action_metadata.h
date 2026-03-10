@@ -30,6 +30,8 @@ typedef struct {
     uint8_t builder_addr[ADDRESS_LENGTH];
     bool has_margin;
     uint64_t margin;
+    bool has_leverage;
+    uint32_t leverage;
 } s_action_metadata;
 
 bool parse_action_metadata(const buffer_t *payload);

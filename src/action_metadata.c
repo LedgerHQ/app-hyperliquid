@@ -114,6 +114,14 @@ static bool handle_margin(const tlv_data_t *data, s_action_metadata_ctx *out) {
     return true;
 }
 
+static bool handle_leverage(const tlv_data_t *data, s_action_metadata_ctx *out) {
+    if (!get_uint32_t_from_tlv_data(data, &out->metadata.leverage)) {
+        return false;
+    }
+    out->metadata.has_leverage = true;
+    return true;
+}
+
 static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out) {
     return get_buffer_from_tlv_data(data, &out->signature, 70, 72);
 }
@@ -127,6 +135,7 @@ static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out)
     X(0xd2, TAG_NETWORK, handle_network, ENFORCE_UNIQUE_TAG)               \
     X(0xd3, TAG_BUILDER_ADDR, handle_builder_addr, ENFORCE_UNIQUE_TAG)     \
     X(0xd4, TAG_MARGIN, handle_margin, ENFORCE_UNIQUE_TAG)                 \
+    X(0xd5, TAG_LEVERAGE, handle_leverage, ENFORCE_UNIQUE_TAG)             \
     X(0x15, TAG_SIGNATURE, handle_signature, ENFORCE_UNIQUE_TAG)
 
 static bool handle_common(const tlv_data_t *, s_action_metadata_ctx *);
@@ -193,6 +202,9 @@ static void dump_action_metadata(const s_action_metadata *action_metadata) {
     if (action_metadata->has_margin) {
         format_fpu64_trimmed(tmp, sizeof(tmp), action_metadata->margin, MARGIN_DECIMALS);
         PRINTF("margin = %s\n", tmp);
+    }
+    if (action_metadata->has_leverage) {
+        PRINTF("leverage = %u\n", action_metadata->leverage);
     }
     PRINTF("<<< ACTION_METADATA <<<\n");
 }

@@ -24,6 +24,7 @@ class ActionMetadata(TlvSerializable):
     network: Network
     builder_addr: bytes | None
     margin: int | None
+    leverage: int | None
     signature: bytes | None
 
     def __init__(self,
@@ -34,6 +35,7 @@ class ActionMetadata(TlvSerializable):
                  network: Network,
                  builder_addr: bytes | None = None,
                  margin: int | None = None,
+                 leverage: int | None = None,
                  signature: bytes | None = None) -> None:
         self.version = version
         self.op_type = operation_type
@@ -42,6 +44,7 @@ class ActionMetadata(TlvSerializable):
         self.network = network
         self.builder_addr = builder_addr
         self.margin = margin
+        self.leverage = leverage
         self.signature = signature
 
     def serialize(self) -> bytes:
@@ -56,6 +59,8 @@ class ActionMetadata(TlvSerializable):
             payload += self.serialize_field(0xd3, self.builder_addr)
         if self.margin is not None:
             payload += self.serialize_field(0xd4, self.margin)
+        if self.leverage is not None:
+            payload += self.serialize_field(0xd5, self.leverage)
         sig = self.signature
         if sig is None:
             sig = sign_data(payload, Key.ACTION_METADATA)
