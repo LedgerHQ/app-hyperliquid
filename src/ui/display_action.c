@@ -72,6 +72,20 @@ typedef struct {
             // MAX_UINT32(4294967295)
             char order[10 + 1];
         } cancel;
+
+        struct {
+            // "Short"/"Long" + " - " + ASSET_TICKER_LENGTH
+            char operation[5 + 3 + ASSET_TICKER_LENGTH + 1];
+
+            // NUMERIC_STRING_LENGTH + " " + ASSET_TICKER_LENGTH
+            char margin[NUMERIC_STRING_LENGTH + 1 + ASSET_TICKER_LENGTH + 1];
+
+            // MAX_UINT32(4294967295) + "x"
+            char leverage[10 + 1 + 1];
+
+            // NUMERIC_STRING_LENGTH + " " + ASSET_TICKER_LENGTH
+            char size[NUMERIC_STRING_LENGTH + 1 + ASSET_TICKER_LENGTH + 1];
+        } close;
     };
 } s_ui_strings;
 
@@ -354,6 +368,72 @@ static bool ui_cancel(const s_action_metadata *metadata) {
     return true;
 }
 
+static bool ui_close(const s_action_metadata *metadata) {
+    const s_action *action;
+    const s_order_request *limit;
+
+    if ((action = ctx_get_action(ACTION_TYPE_BULK_ORDER)) == NULL) {
+        return false;
+    }
+    if ((limit = get_order_request(action->bulk_order.orders,
+                                   action->bulk_order.order_count,
+                                   &get_limit_request)) == NULL) {
+        return false;
+    }
+
+    g_pairs[g_pair_list.nbPairs].item = "Position to close";
+    snprintf(g_ui_strings.close.operation,
+             sizeof(g_ui_strings.close.operation),
+             "%s - %s",
+             limit->is_buy ? "Long" : "Short",
+             metadata->asset_ticker);
+    g_pairs[g_pair_list.nbPairs].value = g_ui_strings.close.operation;
+    g_pair_list.nbPairs += 1;
+
+    if (metadata->has_margin) {
+        g_pairs[g_pair_list.nbPairs].item = "Margin";
+        snprintf(g_ui_strings.order.margin,
+                 sizeof(g_ui_strings.order.margin),
+                 "%s %s",
+                 metadata->margin,
+                 metadata->asset_ticker);
+        g_pairs[g_pair_list.nbPairs].value = g_ui_strings.order.margin;
+        g_pair_list.nbPairs += 1;
+    }
+
+    g_pairs[g_pair_list.nbPairs].item = "Size";
+    snprintf(g_ui_strings.order.size,
+             sizeof(g_ui_strings.order.size),
+             "%s %s",
+             limit->sz,
+             metadata->asset_ticker);
+    g_pairs[g_pair_list.nbPairs].value = g_ui_strings.order.size;
+    g_pair_list.nbPairs += 1;
+
+    snprintf(g_ui_strings.review,
+             sizeof(g_ui_strings.review),
+#ifdef SCREEN_SIZE_WALLET
+             "Review message to close %s %s position",
+             metadata->asset_ticker,
+             limit->is_buy ? "long" : "short"
+#else
+             "Review message to close %s position",
+             limit->is_buy ? "long" : "short"
+#endif
+    );
+    snprintf(g_ui_strings.sign,
+             sizeof(g_ui_strings.sign),
+#ifdef SCREEN_SIZE_WALLET
+             "Sign message to cancel %s order",
+             metadata->asset_ticker
+#else
+             "Sign message to cancel order"
+#endif
+    );
+
+    return true;
+}
+
 bool handle_ui(const s_action_metadata *metadata) {
     bool ret;
 
@@ -378,6 +458,9 @@ bool handle_ui(const s_action_metadata *metadata) {
             break;
         case OP_TYPE_CANCEL:
             ret = ui_cancel(metadata);
+            break;
+        case OP_TYPE_CLOSE:
+            ret = ui_close(metadata);
             break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
