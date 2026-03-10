@@ -56,6 +56,7 @@ static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx 
         case OP_TYPE_CANCEL:
         case OP_TYPE_UPDATE_LEVERAGE:
         case OP_TYPE_CLOSE:
+        case OP_TYPE_UPDATE_MARGIN:
             break;
         default:
             PRINTF("Error: unknown operation type (%u)!\n", out->metadata.op_type);

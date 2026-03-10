@@ -21,6 +21,7 @@ typedef struct {
         s_bulk_cancel_ctx bulk_cancel_ctx;
         s_update_leverage_ctx update_leverage_ctx;
         s_approve_builder_fee_ctx approve_builder_fee_ctx;
+        s_update_isolated_margin_ctx update_isolated_margin_ctx;
     };
 } s_action_ctx;
 
@@ -64,6 +65,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
         case ACTION_TYPE_BULK_CANCEL:
         case ACTION_TYPE_UPDATE_LEVERAGE:
         case ACTION_TYPE_APPROVE_BUILDER_FEE:
+        case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
             break;
         default:
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
@@ -116,6 +118,11 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
             out->approve_builder_fee_ctx.approve_builder_fee = &out->action.approve_builder_fee;
             ret = parse_approve_builder_fee(&data->value, &out->approve_builder_fee_ctx);
             break;
+        case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
+            out->update_isolated_margin_ctx.update_isolated_margin =
+                &out->action.update_isolated_margin;
+            ret = parse_update_isolated_margin(&data->value, &out->update_isolated_margin_ctx);
+            break;
         default:
             ret = false;
     }
@@ -158,6 +165,9 @@ static void dump_action(const s_action *action) {
         case ACTION_TYPE_APPROVE_BUILDER_FEE:
             dump_approve_builder_fee(&action->approve_builder_fee);
             break;
+        case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
+            dump_update_isolated_margin(&action->update_isolated_margin);
+            break;
         default:
             PRINTF("Error: cannot dump unknown action type\n");
     }
@@ -198,6 +208,9 @@ static bool action_serialize(const s_action *action, cmp_ctx_t *cmp_ctx) {
             break;
         case ACTION_TYPE_UPDATE_LEVERAGE:
             ret = update_leverage_serialize(&action->update_leverage, cmp_ctx);
+            break;
+        case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
+            ret = update_isolated_margin_serialize(&action->update_isolated_margin, cmp_ctx);
             break;
         default:
             ret = false;

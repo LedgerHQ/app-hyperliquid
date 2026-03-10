@@ -13,6 +13,7 @@ typedef enum {
     OP_TYPE_CANCEL = 0x02,
     OP_TYPE_UPDATE_LEVERAGE = 0x03,
     OP_TYPE_CLOSE = 0x04,
+    OP_TYPE_UPDATE_MARGIN = 0x05,
 } e_operation_type;
 
 typedef enum {
