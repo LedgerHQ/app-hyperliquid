@@ -64,6 +64,14 @@ typedef struct {
 
         struct {
         } modify;
+
+        struct {
+            // ASSET_TICKER_LENGTH
+            char asset[ASSET_TICKER_LENGTH + 1];
+
+            // MAX_UINT32(4294967295)
+            char order[10 + 1];
+        } cancel;
     };
 } s_ui_strings;
 
@@ -300,6 +308,52 @@ static bool ui_modify(const s_action_metadata *metadata) {
     return true;
 }
 
+static bool ui_cancel(const s_action_metadata *metadata) {
+    const s_action *action;
+    const s_bulk_cancel *bulk_cancel;
+
+    if ((action = ctx_get_action(ACTION_TYPE_BULK_CANCEL)) == NULL) {
+        return false;
+    }
+    bulk_cancel = &action->bulk_cancel;
+
+    g_pairs[g_pair_list.nbPairs].item = "Asset";
+    snprintf(g_ui_strings.cancel.asset,
+             sizeof(g_ui_strings.cancel.asset),
+             "%s",
+             metadata->asset_ticker);
+    g_pairs[g_pair_list.nbPairs].value = g_ui_strings.cancel.asset;
+    g_pair_list.nbPairs += 1;
+
+    g_pairs[g_pair_list.nbPairs].item = "Order ID";
+    format_u64(g_ui_strings.cancel.order,
+               sizeof(g_ui_strings.cancel.order),
+               bulk_cancel->cancels[0].oid);
+    g_pairs[g_pair_list.nbPairs].value = g_ui_strings.cancel.order;
+    g_pair_list.nbPairs += 1;
+
+    snprintf(g_ui_strings.review,
+             sizeof(g_ui_strings.review),
+#ifdef SCREEN_SIZE_WALLET
+             "Review message to cancel %s order",
+             metadata->asset_ticker
+#else
+             "Review message to cancel order"
+#endif
+    );
+    snprintf(g_ui_strings.sign,
+             sizeof(g_ui_strings.sign),
+#ifdef SCREEN_SIZE_WALLET
+             "Sign message to cancel %s order",
+             metadata->asset_ticker
+#else
+             "Sign message to cancel order"
+#endif
+    );
+
+    return true;
+}
+
 bool handle_ui(const s_action_metadata *metadata) {
     bool ret;
 
@@ -321,6 +375,9 @@ bool handle_ui(const s_action_metadata *metadata) {
             break;
         case OP_TYPE_MODIFY:
             ret = ui_modify(metadata);
+            break;
+        case OP_TYPE_CANCEL:
+            ret = ui_cancel(metadata);
             break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
