@@ -72,7 +72,7 @@ class OrderRequest(TlvSerializable):
     def serialize(self) -> bytes:
         payload = bytearray()
         payload += self.serialize_field(0xe0, self.order_type)
-        payload += self.serialize_field(0xe1, self.asset)
+        payload += self.serialize_field(0xd1, self.asset)
         payload += self.serialize_field(0xe2, self.is_buy)
         payload += self.serialize_field(0xe3, self.limit_px)
         payload += self.serialize_field(0xe4, self.sz)

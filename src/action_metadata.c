@@ -2,9 +2,10 @@
 #include "os_print.h"
 #include "cx.h"
 #include "tlv_library.h"
-#include "action_metadata.h"
 #include "os_pki.h"
 #include "ledger_pki.h"
+#include "format.h"
+#include "action_metadata.h"
 #include "hl_context.h"
 
 #define CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA 0x11
@@ -56,6 +57,7 @@ static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx 
         case OP_TYPE_CANCEL:
         case OP_TYPE_UPDATE_LEVERAGE:
         case OP_TYPE_CLOSE:
+        case OP_TYPE_UPDATE_MARGIN:
             break;
         default:
             PRINTF("Error: unknown operation type (%u)!\n", out->metadata.op_type);
@@ -105,10 +107,18 @@ static bool handle_builder_addr(const tlv_data_t *data, s_action_metadata_ctx *o
 }
 
 static bool handle_margin(const tlv_data_t *data, s_action_metadata_ctx *out) {
-    if (!get_string_from_tlv_data(data, out->metadata.margin, 1, sizeof(out->metadata.margin))) {
+    if (!get_uint64_t_from_tlv_data(data, &out->metadata.margin)) {
         return false;
     }
     out->metadata.has_margin = true;
+    return true;
+}
+
+static bool handle_leverage(const tlv_data_t *data, s_action_metadata_ctx *out) {
+    if (!get_uint32_t_from_tlv_data(data, &out->metadata.leverage)) {
+        return false;
+    }
+    out->metadata.has_leverage = true;
     return true;
 }
 
@@ -125,6 +135,7 @@ static bool handle_signature(const tlv_data_t *data, s_action_metadata_ctx *out)
     X(0xd2, TAG_NETWORK, handle_network, ENFORCE_UNIQUE_TAG)               \
     X(0xd3, TAG_BUILDER_ADDR, handle_builder_addr, ENFORCE_UNIQUE_TAG)     \
     X(0xd4, TAG_MARGIN, handle_margin, ENFORCE_UNIQUE_TAG)                 \
+    X(0xd5, TAG_LEVERAGE, handle_leverage, ENFORCE_UNIQUE_TAG)             \
     X(0x15, TAG_SIGNATURE, handle_signature, ENFORCE_UNIQUE_TAG)
 
 static bool handle_common(const tlv_data_t *, s_action_metadata_ctx *);
@@ -174,6 +185,9 @@ static bool verify_action_metadata(const s_action_metadata_ctx *out) {
 }
 
 static void dump_action_metadata(const s_action_metadata *action_metadata) {
+    // bigger value than necessary until the SDK function is fixed
+    char tmp[20 + 1 + MARGIN_DECIMALS + 1];
+
     (void) action_metadata;  // to prevent warnings for release builds
     PRINTF(">>> ACTION_METADATA >>>\n");
     PRINTF("operation_type = %u\n", action_metadata->op_type);
@@ -184,6 +198,13 @@ static void dump_action_metadata(const s_action_metadata *action_metadata) {
         PRINTF("builder_addr = 0x%.*h\n",
                sizeof(action_metadata->builder_addr),
                action_metadata->builder_addr);
+    }
+    if (action_metadata->has_margin) {
+        format_fpu64_trimmed(tmp, sizeof(tmp), action_metadata->margin, MARGIN_DECIMALS);
+        PRINTF("margin = %s\n", tmp);
+    }
+    if (action_metadata->has_leverage) {
+        PRINTF("leverage = %u\n", action_metadata->leverage);
     }
     PRINTF("<<< ACTION_METADATA <<<\n");
 }

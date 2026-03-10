@@ -158,7 +158,8 @@ This command signs a previously given hyperliquid action (in the same order).
 | ASSET_TICKER   | 0x24 | char[]                               |          |
 | NETWORK        | 0xd2 | [Network](#network-enum)             |          |
 | BUILDER_ADDR   | 0xd3 | uint8[20]                            | x        |
-| MARGIN         | 0xd4 | char[]                               | x        |
+| MARGIN         | 0xd4 | uint64                               | x        |
+| LEVERAGE       | 0xd5 | uint32                               | x        |
 | SIGNATURE      | 0x15 | uint8[]                              |          |
 
 #### OperationType enum
@@ -170,6 +171,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | CANCEL               | 0x02  |
 | UPDATE_LEVERAGE      | 0x03  |
 | CLOSE                | 0x04  |
+| UPDATE_MARGIN        | 0x05  |
 
 #### Network enum
 
@@ -186,17 +188,18 @@ This command signs a previously given hyperliquid action (in the same order).
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) \|<br>[UPDATE_ISOLATED_MARGIN](#update_isolated_margin) |          |
 
 #### ActionType enum
 
-| Name                 | Value |
-| ----                 | ----- |
-| BULK_ORDER           | 0x00  |
-| BULK_MODIFY          | 0x01  |
-| BULK_CANCEL          | 0x02  |
-| UPDATE_LEVERAGE      | 0x03  |
-| APPROVE_BUILDER_FEE  | 0x04  |
+| Name                   | Value |
+| ----                   | ----- |
+| BULK_ORDER             | 0x00  |
+| BULK_MODIFY            | 0x01  |
+| BULK_CANCEL            | 0x02  |
+| UPDATE_LEVERAGE        | 0x03  |
+| APPROVE_BUILDER_FEE    | 0x04  |
+| UPDATE_ISOLATED_MARGIN | 0x05  |
 
 ### BULK_ORDER
 
@@ -266,7 +269,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | Name            | Tag  | Type                             | Optional |
 | ----            | ---  | ----                             | -------- |
 | ORDER_TYPE      | 0xe0 | [OrderType](#ordertype-enum)     |          |
-| ASSET           | 0xe1 | uint32                           |          |
+| ASSET           | 0xd1 | uint32                           |          |
 | IS_BUY          | 0xe2 | bool                             |          |
 | LIMIT_PX        | 0xe3 | char[]                           |          |
 | SZ              | 0xe4 | char[]                           |          |
@@ -316,3 +319,11 @@ This command signs a previously given hyperliquid action (in the same order).
 | SIGNATURE_CHAIN_ID | 0x23 | uint64    |          |
 | MAX_FEE_RATE       | 0xb0 | char[]    |          |
 | BUILDER            | 0xd3 | uint8[20] |          |
+
+### UPDATE_ISOLATED_MARGIN
+
+| Name               | Tag  | Type      | Optional |
+| ----               | ---  | ----      | -------- |
+| ASSET              | 0xd1 | uint32    |          |
+| IS_BUY             | 0xe2 | bool      |          |
+| NTLI               | 0xd6 | int64     |          |

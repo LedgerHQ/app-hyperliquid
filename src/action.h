@@ -8,14 +8,16 @@
 #include "bulk_cancel.h"
 #include "update_leverage.h"
 #include "approve_builder_fee.h"
+#include "update_isolated_margin.h"
 #include "action_metadata.h"
 
 typedef enum {
-    ACTION_TYPE_ORDER = 0x00,
-    ACTION_TYPE_MODIFY = 0x01,
-    ACTION_TYPE_CANCEL = 0x02,
+    ACTION_TYPE_BULK_ORDER = 0x00,
+    ACTION_TYPE_BULK_MODIFY = 0x01,
+    ACTION_TYPE_BULK_CANCEL = 0x02,
     ACTION_TYPE_UPDATE_LEVERAGE = 0x03,
     ACTION_TYPE_APPROVE_BUILDER_FEE = 0x04,
+    ACTION_TYPE_UPDATE_ISOLATED_MARGIN = 0x05,
 } e_action_type;
 
 typedef struct {
@@ -27,6 +29,7 @@ typedef struct {
         s_bulk_cancel bulk_cancel;
         s_update_leverage update_leverage;
         s_approve_builder_fee approve_builder_fee;
+        s_update_isolated_margin update_isolated_margin;
     };
 } s_action;
 

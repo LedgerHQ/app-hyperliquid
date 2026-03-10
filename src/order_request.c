@@ -224,7 +224,7 @@ static bool handle_order(const tlv_data_t *, s_order_request_ctx *);
 
 #define ORDER_REQUEST_TAGS(X)                                        \
     X(0xe0, TAG_ORDER_TYPE, handle_order_type, ENFORCE_UNIQUE_TAG)   \
-    X(0xe1, TAG_ASSET, handle_asset, ENFORCE_UNIQUE_TAG)             \
+    X(0xd1, TAG_ASSET, handle_asset, ENFORCE_UNIQUE_TAG)             \
     X(0xe2, TAG_IS_BUY, handle_is_buy, ENFORCE_UNIQUE_TAG)           \
     X(0xe3, TAG_LIMIT_PX, handle_limit_px, ENFORCE_UNIQUE_TAG)       \
     X(0xe4, TAG_SZ, handle_sz, ENFORCE_UNIQUE_TAG)                   \

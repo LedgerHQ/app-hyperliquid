@@ -13,6 +13,7 @@ typedef enum {
     OP_TYPE_CANCEL = 0x02,
     OP_TYPE_UPDATE_LEVERAGE = 0x03,
     OP_TYPE_CLOSE = 0x04,
+    OP_TYPE_UPDATE_MARGIN = 0x05,
 } e_operation_type;
 
 typedef enum {
@@ -28,7 +29,9 @@ typedef struct {
     bool has_builder_addr;
     uint8_t builder_addr[ADDRESS_LENGTH];
     bool has_margin;
-    char margin[NUMERIC_STRING_LENGTH + 1];
+    uint64_t margin;
+    bool has_leverage;
+    uint32_t leverage;
 } s_action_metadata;
 
 bool parse_action_metadata(const buffer_t *payload);
