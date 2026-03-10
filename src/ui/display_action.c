@@ -61,6 +61,9 @@ typedef struct {
             // NUMERIC_STRING_LENGTH + " " + ASSET_TICKER_LENGTH
             char size[NUMERIC_STRING_LENGTH + 1 + ASSET_TICKER_LENGTH + 1];
         } order;
+
+        struct {
+        } modify;
     };
 } s_ui_strings;
 
@@ -291,6 +294,12 @@ static bool ui_order(const s_action_metadata *metadata) {
     return ret;
 }
 
+static bool ui_modify(const s_action_metadata *metadata) {
+    (void) metadata;
+    // TODO
+    return true;
+}
+
 bool handle_ui(const s_action_metadata *metadata) {
     bool ret;
 
@@ -309,6 +318,9 @@ bool handle_ui(const s_action_metadata *metadata) {
     switch (metadata->op_type) {
         case OP_TYPE_ORDER:
             ret = ui_order(metadata);
+            break;
+        case OP_TYPE_MODIFY:
+            ret = ui_modify(metadata);
             break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
