@@ -186,7 +186,7 @@ static bool verify_action_metadata(const s_action_metadata_ctx *out) {
 
 static void dump_action_metadata(const s_action_metadata *action_metadata) {
     // bigger value than necessary until the SDK function is fixed
-    char tmp[20 + 1 + MARGIN_DECIMALS + 1];
+    char tmp[NUMERIC_STRING_LENGTH + MARGIN_DECIMALS + 1] = {0};
 
     (void) action_metadata;  // to prevent warnings for release builds
     PRINTF(">>> ACTION_METADATA >>>\n");
