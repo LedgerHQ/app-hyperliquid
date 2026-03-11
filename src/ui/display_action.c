@@ -96,6 +96,7 @@ static bool ui_order_common(const s_action_metadata *metadata,
                             const s_update_leverage *update_leverage,
                             const s_order_request *tp_order,
                             const s_order_request *sl_order) {
+    /*
     if (metadata->has_margin) {
         g_pairs[g_pair_list.nbPairs].item = "Margin";
         snprintf(g_ui_strings.order.margin,
@@ -106,6 +107,7 @@ static bool ui_order_common(const s_action_metadata *metadata,
         g_pairs[g_pair_list.nbPairs].value = g_ui_strings.order.margin;
         g_pair_list.nbPairs += 1;
     }
+    */
 
     if (update_leverage != NULL) {
         g_pairs[g_pair_list.nbPairs].item = "Leverage";
@@ -390,6 +392,7 @@ static bool ui_close(const s_action_metadata *metadata) {
     g_pairs[g_pair_list.nbPairs].value = g_ui_strings.close.operation;
     g_pair_list.nbPairs += 1;
 
+    /*
     if (metadata->has_margin) {
         g_pairs[g_pair_list.nbPairs].item = "Margin";
         snprintf(g_ui_strings.order.margin,
@@ -400,6 +403,7 @@ static bool ui_close(const s_action_metadata *metadata) {
         g_pairs[g_pair_list.nbPairs].value = g_ui_strings.order.margin;
         g_pair_list.nbPairs += 1;
     }
+    */
 
     g_pairs[g_pair_list.nbPairs].item = "Size";
     snprintf(g_ui_strings.order.size,
