@@ -11,9 +11,9 @@
 #define ADDRESS_LENGTH 20
 
 /**
- * Max size of a numeric value represented as a string
+ * Max size of a numeric value represented as a string (64-bit floating number)
  */
-#define NUMERIC_STRING_LENGTH 20
+#define NUMERIC_STRING_LENGTH 21
 
 /**
  * Max size of a bulk operation
