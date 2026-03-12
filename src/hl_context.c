@@ -44,10 +44,10 @@ bool ctx_push_action(const s_action *action) {
 }
 
 const s_action *ctx_get_current_action(void) {
-    if (g_ctx.action_index == g_ctx.action_count) {
+    if (g_ctx.action_index >= g_ctx.action_count) {
         return NULL;
     }
-    return &g_ctx.actions[g_ctx.action_index - 1];
+    return &g_ctx.actions[g_ctx.action_index];
 }
 
 void ctx_switch_to_next_action(void) {
