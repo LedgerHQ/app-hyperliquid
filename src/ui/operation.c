@@ -57,6 +57,9 @@ bool handle_ui(const s_action_metadata *metadata) {
     g_ui_ctx.pair_list.nbPairs += 1;
 
     switch (metadata->op_type) {
+        case OP_TYPE_ORDER:
+            ret = ui_order(&g_ui_ctx, metadata);
+            break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
             ret = false;
