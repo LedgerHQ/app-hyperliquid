@@ -2,6 +2,7 @@
 
 #include "nbgl_content.h"
 #include "op_order.h"
+#include "op_modify.h"
 
 #define REVIEW_SIGN_STRING_LENGTH 128
 #define MAX_UI_PAIRS              16
@@ -16,5 +17,6 @@ typedef struct {
 
     union {
         s_order_strings order;
+        s_modify_strings modify;
     };
 } s_ui_ctx;
