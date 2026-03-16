@@ -1,5 +1,6 @@
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
+from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
@@ -229,5 +230,23 @@ def test_sign_set_tp_sl(scenario_navigator: NavigateWithScenario) -> None:
                 100,
             ),
         ),
+    ))
+    common_sign(client, scenario_navigator)
+
+def test_sign_cancel(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+        ]),
     ))
     common_sign(client, scenario_navigator)
