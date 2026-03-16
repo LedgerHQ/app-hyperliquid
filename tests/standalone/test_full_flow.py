@@ -7,6 +7,7 @@ from application_client.command_sender import CommandSender
 from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
 from application_client.response_unpacker import unpack_sign_action_response
 from application_client.set_action import ActionType, SetAction
+from application_client.update_isolated_margin import UpdateIsolatedMargin
 from application_client.update_leverage import UpdateLeverage
 from ragger.navigator.navigation_scenario import NavigateWithScenario
 
@@ -280,6 +281,46 @@ def test_sign_close(scenario_navigator: NavigateWithScenario) -> None:
                 bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
                 100,
             ),
+        ),
+    ))
+    common_sign(client, scenario_navigator)
+
+def test_sign_add_margin(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.UPDATE_MARGIN,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.UPDATE_ISOLATED_MARGIN,
+        1773141130938,
+        UpdateIsolatedMargin(
+            0,
+            True,
+            4200000,
+        ),
+    ))
+    common_sign(client, scenario_navigator)
+
+def test_sign_remove_margin(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.UPDATE_MARGIN,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.UPDATE_ISOLATED_MARGIN,
+        1773141130952,
+        UpdateIsolatedMargin(
+            0,
+            True,
+            -2690000,
         ),
     ))
     common_sign(client, scenario_navigator)
