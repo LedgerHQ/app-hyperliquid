@@ -250,3 +250,36 @@ def test_sign_cancel(scenario_navigator: NavigateWithScenario) -> None:
         ]),
     ))
     common_sign(client, scenario_navigator)
+
+def test_sign_close(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CLOSE,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_ORDER,
+        1772814377109,
+        BulkOrder(
+            [
+                OrderRequest(
+                    OrderType.LIMIT,
+                    0,
+                    True,
+                    "69792",
+                    "0.00021",
+                    True,
+                    Limit(Tif.IOC),
+                ),
+            ],
+            Grouping.NA,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
+        ),
+    ))
+    common_sign(client, scenario_navigator)
