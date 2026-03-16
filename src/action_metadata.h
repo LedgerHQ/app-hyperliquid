@@ -5,8 +5,6 @@
 #include "buffer.h"
 #include "constants.h"
 
-#define ASSET_TICKER_LENGTH 48
-
 typedef enum {
     OP_TYPE_ORDER = 0x00,
     OP_TYPE_MODIFY = 0x01,

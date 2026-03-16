@@ -11,6 +11,11 @@
 #define ADDRESS_LENGTH 20
 
 /**
+ * Max size of an asset ticker
+ */
+#define ASSET_TICKER_LENGTH 48
+
+/**
  * Max size of a numeric value represented as a string (64-bit floating number)
  */
 #define NUMERIC_STRING_LENGTH 21
