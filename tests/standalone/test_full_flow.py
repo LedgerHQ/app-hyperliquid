@@ -181,3 +181,53 @@ def test_sign_edit(scenario_navigator: NavigateWithScenario) -> None:
         ]),
     ))
     common_sign(client, scenario_navigator)
+
+def test_sign_set_tp_sl(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.MODIFY,
+        1,
+        "ETH",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_ORDER,
+        1773335540229,
+        BulkOrder(
+            [
+                OrderRequest(
+                    OrderType.TRIGGER,
+                    1,
+                    False,
+                    "2276.3",
+                    "0.0072",
+                    True,
+                    Trigger(
+                        True,
+                        "2276.3",
+                        TriggerType.TP,
+                    ),
+                ),
+                OrderRequest(
+                    OrderType.TRIGGER,
+                    1,
+                    True,
+                    "1965.9",
+                    "0.0072",
+                    True,
+                    Trigger(
+                        True,
+                        "1965.9",
+                        TriggerType.SL,
+                    ),
+                ),
+            ],
+            Grouping.POSITION_TPSL,
+            BuilderInfo(
+                bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+                100,
+            ),
+        ),
+    ))
+    common_sign(client, scenario_navigator)
