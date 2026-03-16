@@ -152,7 +152,7 @@ static bool trigger_order_serialize(const s_trigger *trigger, cmp_ctx_t *cmp_ctx
         return false;
     }
 
-    if (!cmp_write_str(cmp_ctx, "triggerType", 11)) {
+    if (!cmp_write_str(cmp_ctx, "tpsl", 4)) {
         return false;
     }
     switch (trigger->tpsl) {
