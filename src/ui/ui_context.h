@@ -4,6 +4,7 @@
 #include "op_order.h"
 #include "op_modify.h"
 #include "op_cancel.h"
+#include "op_close.h"
 
 #define REVIEW_SIGN_STRING_LENGTH 128
 #define MAX_UI_PAIRS              16
@@ -20,5 +21,6 @@ typedef struct {
         s_order_strings order;
         s_modify_strings modify;
         s_cancel_strings cancel;
+        s_close_strings close;
     };
 } s_ui_ctx;

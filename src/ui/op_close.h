@@ -1,0 +1,12 @@
+#pragma once
+
+#include "constants.h"
+
+typedef struct {
+    // "Short"/"Long" + " - " + ASSET_TICKER_LENGTH
+    char operation[SHORT_LONG_STRING_LENGTH + 3 + ASSET_TICKER_LENGTH + 1];
+
+    char margin[MARGIN_STRING_LENGTH + 1];
+    char leverage[LEVERAGE_STRING_LENGTH + 1];
+    char size[SIZE_STRING_LENGTH + 1];
+} s_close_strings;
