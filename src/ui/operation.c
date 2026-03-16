@@ -69,6 +69,9 @@ bool handle_ui(const s_action_metadata *metadata) {
         case OP_TYPE_CLOSE:
             ret = ui_close(&g_ui_ctx, metadata);
             break;
+        case OP_TYPE_UPDATE_MARGIN:
+            ret = ui_update_margin(&g_ui_ctx, metadata);
+            break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
             ret = false;
