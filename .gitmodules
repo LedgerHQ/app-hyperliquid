@@ -1,3 +1,6 @@
 [submodule "cmp"]
 	path = cmp
 	url = https://github.com/camgunz/cmp.git
+[submodule ".github/instructions"]
+	path = .github/instructions
+	url = https://github.com/LedgerHQ/ledger-app-ai-instructions.git
