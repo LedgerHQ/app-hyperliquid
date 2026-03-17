@@ -1,3 +1,4 @@
+import pytest
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel, CancelRequest
@@ -9,14 +10,20 @@ from application_client.response_unpacker import unpack_sign_action_response
 from application_client.set_action import ActionType, SetAction
 from application_client.update_isolated_margin import UpdateIsolatedMargin
 from application_client.update_leverage import UpdateLeverage
+from ragger.error import ExceptionRAPDU, StatusWords
 from ragger.navigator.navigation_scenario import NavigateWithScenario
+
+_BUILDER = BuilderInfo(
+    bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
+    100,
+)
 
 
 def common_sign(client: CommandSender,
                 scenario_navigator: NavigateWithScenario,
                 path: str = "m/44'/60'/0'/0/0") -> None:
     with client.sign_action(path):
-        scenario_navigator.review_approve(custom_screen_text="Sign message to", do_comparison=True)
+        scenario_navigator.review_approve(custom_screen_text="Sign message to")
     remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
     while remaining > 0:
         with client.sign_action(path):
@@ -322,5 +329,56 @@ def test_sign_remove_margin(scenario_navigator: NavigateWithScenario) -> None:
             True,
             -2690000,
         ),
+    ))
+    common_sign(client, scenario_navigator)
+
+
+# ── User rejection ────────────────────────────────────────────────────────────
+
+def test_sign_reject(scenario_navigator: NavigateWithScenario) -> None:
+    """Rejecting a sign request at the review screen must return SW 0x6985."""
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+        ]),
+    ))
+    with pytest.raises(ExceptionRAPDU) as exc_info, client.sign_action("m/44'/60'/0'/0/0"):
+        scenario_navigator.review_reject(do_comparison=False)
+    assert exc_info.value.status == StatusWords.SWO_CONDITIONS_NOT_SATISFIED
+
+
+# ── TESTNET network ───────────────────────────────────────────────────────────
+
+def test_sign_testnet(scenario_navigator: NavigateWithScenario) -> None:
+    """Full signing flow on TESTNET must succeed.
+
+    The EIP-712 domain uses "b" (testnet) instead of "a" (mainnet) so the hash
+    and resulting signature differ from the equivalent MAINNET test.
+    do_comparison=False because the UI screens are visually identical to mainnet.
+    """
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL,
+        0,
+        "BTC",
+        Network.TESTNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+        ]),
     ))
     common_sign(client, scenario_navigator)
