@@ -80,11 +80,6 @@ add_library(action         SHARED ../src/action.c)
 set(COMMON_LIBS buffer bip32 read write varint format tlv_library cmocka gcov)
 set(APP_LIBS    hl_context cmp_lib)
 
-# ── test_dummy ───────────────────────────────────────────────────────────────
-add_executable(test_dummy test_dummy.c)
-target_link_libraries(test_dummy PUBLIC ${COMMON_LIBS})
-add_test(test_dummy test_dummy)
-
 # ── test_hl_context ──────────────────────────────────────────────────────────
 add_executable(test_hl_context test_hl_context.c)
 target_link_libraries(test_hl_context PUBLIC hl_context cmocka gcov)
