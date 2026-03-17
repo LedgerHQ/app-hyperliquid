@@ -1,3 +1,4 @@
+#include <string.h>
 #include "os_print.h"
 #include "tlv_library.h"
 #include "format.h"  // format_u64
