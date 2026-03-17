@@ -180,6 +180,10 @@ bool parse_action(const buffer_t *payload) {
     if (payload == NULL) {
         return false;
     }
+    if (ctx_get_action_metadata() == NULL) {
+        PRINTF("Error: received an action without a prior metadata!\n");
+        return false;
+    }
     if (!action_tlv_parser(payload, &out, &out.received_tags)) {
         return false;
     }

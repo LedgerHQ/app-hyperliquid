@@ -16,7 +16,10 @@ static int fuzz_action(const uint8_t *data, size_t size) {
     if (!parse_action(&buf)) {
         return 1;
     }
-    return action_hash(ctx_get_next_action(), ctx_get_action_metadata(), domain_hash, message_hash);
+    return action_hash(ctx_get_current_action(),
+                       ctx_get_action_metadata(),
+                       domain_hash,
+                       message_hash);
 }
 
 /* Main fuzzing handler called by libfuzzer */

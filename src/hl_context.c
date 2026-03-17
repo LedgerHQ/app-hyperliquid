@@ -29,23 +29,41 @@ const s_action_metadata *ctx_get_action_metadata(void) {
 }
 
 bool ctx_push_action(const s_action *action) {
-    if (g_ctx.action_count == MAX_ACTION_COUNT) {
+    if (g_ctx.action_count >= MAX_ACTION_COUNT) {
         return false;
+    }
+    // check that we don't already have an action of the same type stored
+    for (int i = 0; i < g_ctx.action_count; ++i) {
+        if (action->type == g_ctx.actions[i].type) {
+            return false;
+        }
     }
     memcpy(&g_ctx.actions[g_ctx.action_count], action, sizeof(*action));
     g_ctx.action_count += 1;
     return true;
 }
 
-const s_action *ctx_get_next_action(void) {
-    if (g_ctx.action_index == g_ctx.action_count) {
+const s_action *ctx_get_current_action(void) {
+    if (g_ctx.action_index >= g_ctx.action_count) {
         return NULL;
     }
-    g_ctx.action_index += 1;
-    return &g_ctx.actions[g_ctx.action_index - 1];
+    return &g_ctx.actions[g_ctx.action_index];
 }
 
-bool ctx_is_first_action(void) {
+void ctx_switch_to_next_action(void) {
+    g_ctx.action_index += 1;
+}
+
+const s_action *ctx_get_action(e_action_type action_type) {
+    for (uint8_t i = 0; i < g_ctx.action_count; ++i) {
+        if (action_type == g_ctx.actions[i].type) {
+            return &g_ctx.actions[i];
+        }
+    }
+    return NULL;
+}
+
+bool ctx_current_action_is_first(void) {
     return g_ctx.action_index == 0;
 }
 
