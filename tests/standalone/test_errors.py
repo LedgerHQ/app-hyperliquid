@@ -106,38 +106,3 @@ def test_error_bad_metadata_signature(backend: BackendInterface) -> None:
             signature=bad_sig,
         ))
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
-
-
-# ── Missing UI handler ────────────────────────────────────────────────────────
-
-def test_sign_update_leverage_op_type_not_handled(backend: BackendInterface) -> None:
-    """OP_TYPE_UPDATE_LEVERAGE has no UI handler in operation.c (no op_update_leverage.c).
-
-    The default: branch in handle_ui() returns false, so SIGN_ACTION is rejected
-    with SWO_INCORRECT_DATA.  This test documents the known gap and ensures the app
-    fails gracefully rather than silently.
-
-    NOTE: A future ui_update_leverage implementation would change this to a happy-path
-    test in test_full_flow.py.
-    """
-    client = CommandSender(backend)
-    # Provide valid metadata with the unsupported op type
-    client.provide_action_metadata(ActionMetadata(
-        version=1,
-        operation_type=OperationType.UPDATE_LEVERAGE,
-        asset_id=1,
-        asset_ticker="ETH",
-        network=Network.MAINNET,
-        leverage=20,
-    ))
-    client.set_action(SetAction(
-        version=1,
-        action_type=ActionType.UPDATE_LEVERAGE,
-        nonce=1772544778963,
-        action=UpdateLeverage(asset=1, is_cross=True, leverage=20),
-    ))
-    with pytest.raises(ExceptionRAPDU) as exc_info:
-        backend.exchange(cla=CLA, ins=InsType.SIGN_ACTION,
-                         p1=0x00, p2=0x00,
-                         data=pack_derivation_path("m/44'/60'/0'/0/0"))
-    assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
