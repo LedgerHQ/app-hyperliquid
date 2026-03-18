@@ -52,3 +52,24 @@ bool get_trigger_tp(const s_order_request *req) {
 bool get_trigger_sl(const s_order_request *req) {
     return (req->order_type == ORDER_TYPE_TRIGGER) && (req->trigger.tpsl == TRIGGER_TYPE_SL);
 }
+
+static const char *short_long_string(const s_order_request *req,
+                                     const char *short_str,
+                                     const char *long_str) {
+    if (req != NULL) {
+        if (req->reduce_only) {
+            return (req->is_buy) ? short_str : long_str;
+        } else {
+            return (req->is_buy) ? long_str : short_str;
+        }
+    }
+    return NULL;
+}
+
+const char *get_short_long_string(const s_order_request *req) {
+    return short_long_string(req, "short", "long");
+}
+
+const char *get_short_long_string_capitalized(const s_order_request *req) {
+    return short_long_string(req, "Short", "Long");
+}

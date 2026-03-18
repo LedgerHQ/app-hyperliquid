@@ -66,7 +66,7 @@ static bool ui_market_order(s_ui_ctx *ui_ctx,
     snprintf(ui_ctx->order.operation,
              sizeof(ui_ctx->order.operation),
              "Market %s - %s",
-             limit->is_buy ? "Long" : "Short",
+             get_short_long_string_capitalized(limit),
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->order.operation;
     ui_ctx->pair_list.nbPairs += 1;
@@ -80,10 +80,10 @@ static bool ui_market_order(s_ui_ctx *ui_ctx,
 #ifdef SCREEN_SIZE_WALLET
              "open %s %s",
              metadata->asset_ticker,
-             limit->is_buy ? "long" : "short"
+             get_short_long_string(limit)
 #else
              "open %s",
-             limit->is_buy ? "long" : "short"
+             get_short_long_string(limit)
 #endif
     );
     return true;
@@ -99,7 +99,7 @@ static bool ui_limit_order(s_ui_ctx *ui_ctx,
     snprintf(ui_ctx->order.operation,
              sizeof(ui_ctx->order.operation),
              "Limit %s - %s",
-             limit->is_buy ? "Long" : "Short",
+             get_short_long_string_capitalized(limit),
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->order.operation;
     ui_ctx->pair_list.nbPairs += 1;

@@ -80,7 +80,7 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     snprintf(ui_ctx->modify.operation,
              sizeof(ui_ctx->modify.operation),
              "Market %s - %s",
-             any_req->is_buy ? "Long" : "Short",
+             get_short_long_string_capitalized(any_req),
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.operation;
     ui_ctx->pair_list.nbPairs += 1;

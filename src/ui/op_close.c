@@ -22,7 +22,7 @@ bool ui_close(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     snprintf(ui_ctx->close.operation,
              sizeof(ui_ctx->close.operation),
              "%s - %s",
-             limit->is_buy ? "Short" : "Long",
+             get_short_long_string_capitalized(limit),
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->close.operation;
     ui_ctx->pair_list.nbPairs += 1;
@@ -47,10 +47,10 @@ bool ui_close(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
 #ifdef SCREEN_SIZE_WALLET
              "close %s %s position",
              metadata->asset_ticker,
-             limit->is_buy ? "short" : "long"
+             get_short_long_string(limit)
 #else
              "close %s position",
-             limit->is_buy ? "short" : "long"
+             get_short_long_string(limit)
 #endif
     );
     return true;
