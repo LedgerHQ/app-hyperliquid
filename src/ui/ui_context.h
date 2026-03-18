@@ -7,6 +7,7 @@
 #include "op_close.h"
 #include "op_update_margin.h"
 
+#define INTENT_STRING_LENGTH      100
 #define REVIEW_SIGN_STRING_LENGTH 128
 #define MAX_UI_PAIRS              16
 
@@ -14,7 +15,7 @@ typedef struct {
     nbgl_contentTagValue_t pairs[MAX_UI_PAIRS];
     nbgl_contentTagValueList_t pair_list;
 
-    char intent[REVIEW_SIGN_STRING_LENGTH + 1];
+    char intent[INTENT_STRING_LENGTH + 1];
     char review_msg[REVIEW_SIGN_STRING_LENGTH + 1];
     char sign_msg[REVIEW_SIGN_STRING_LENGTH + 1];
 
