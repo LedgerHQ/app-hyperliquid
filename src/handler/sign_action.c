@@ -29,7 +29,6 @@ int sign_action(void) {
         PRINTF("Error: missing action metadata!\n");
         return io_send_sw(SWO_INCORRECT_DATA);
     }
-    ctx_switch_to_next_action();
     if (!action_hash(action, metadata, eip712_ctx.domain_hash, eip712_ctx.message_hash)) {
         return io_send_sw(SWO_INCORRECT_DATA);
     }
@@ -39,6 +38,7 @@ int sign_action(void) {
         PRINTF("Error: could not sign EIP-712 message!\n");
         return io_send_sw(SWO_INCORRECT_DATA);
     }
+    ctx_switch_to_next_action();
 
     buf[0] = ctx_remaining_actions();
     memcpy(&buf[1], &eip712_ctx.signature, sizeof(eip712_ctx.signature));
