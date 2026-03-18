@@ -224,6 +224,13 @@ bool parse_action_metadata(const buffer_t *payload) {
     if (!verify_action_metadata(&out)) {
         return false;
     }
+    if (!ctx_current_action_is_first()) {
+        // a signature flow was started but not finished, could be a bug or something malicious
+        // return false to indicate failure but still reset so that a new one can be started after
+        // (otherwise the app could be stuck in this state)
+        ctx_reset();
+        return false;
+    }
     dump_action_metadata(&out.metadata);
     ctx_reset();
     ctx_save_action_metadata(&out.metadata);
