@@ -172,6 +172,9 @@ This command signs a previously given hyperliquid action (in the same order).
 | UPDATE_LEVERAGE      | 0x03  |
 | CLOSE                | 0x04  |
 | UPDATE_MARGIN        | 0x05  |
+| CANCEL_SL            | 0x06  |
+| CANCEL_TP            | 0x07  |
+| CANCEL_TP_SL         | 0x08  |
 
 #### Network enum
 

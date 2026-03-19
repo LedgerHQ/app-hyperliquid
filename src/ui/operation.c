@@ -73,6 +73,11 @@ bool handle_ui(const s_action_metadata *metadata) {
         case OP_TYPE_UPDATE_MARGIN:
             ret = ui_update_margin(&g_ui_ctx, metadata);
             break;
+        case OP_TYPE_CANCEL_SL:
+        case OP_TYPE_CANCEL_TP:
+        case OP_TYPE_CANCEL_TP_SL:
+            ret = ui_cancel_tp_sl(&g_ui_ctx, metadata);
+            break;
         default:
             PRINTF("Error: no UI flow for given operation type (%u)!\n", metadata->op_type);
             ret = false;
