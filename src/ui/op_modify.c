@@ -160,7 +160,7 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
              sizeof(ui_ctx->intent),
 #ifdef SCREEN_SIZE_WALLET
              "%s %s %s",
-             (action->type == ACTION_TYPE_BULK_ORDER) ? "set" : "edit",
+             (action->type == ACTION_TYPE_BULK_ORDER) ? "Set" : "Edit",
              metadata->asset_ticker,
              target_tmp
 #else

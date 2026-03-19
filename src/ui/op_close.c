@@ -45,7 +45,7 @@ bool ui_close(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     snprintf(ui_ctx->intent,
              sizeof(ui_ctx->intent),
 #ifdef SCREEN_SIZE_WALLET
-             "close %s %s position",
+             "Close %s %s position",
              metadata->asset_ticker,
              get_short_long_string(limit)
 #else

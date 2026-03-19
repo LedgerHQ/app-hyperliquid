@@ -78,7 +78,7 @@ static bool ui_market_order(s_ui_ctx *ui_ctx,
     snprintf(ui_ctx->intent,
              sizeof(ui_ctx->intent),
 #ifdef SCREEN_SIZE_WALLET
-             "open %s %s",
+             "Open %s %s",
              metadata->asset_ticker,
              get_short_long_string(limit)
 #else
@@ -120,7 +120,7 @@ static bool ui_limit_order(s_ui_ctx *ui_ctx,
     snprintf(ui_ctx->intent,
              sizeof(ui_ctx->intent),
 #ifdef SCREEN_SIZE_WALLET
-             "open %s limit order",
+             "Open %s limit order",
              metadata->asset_ticker
 #else
              "open limit order"
