@@ -51,6 +51,7 @@ bool handle_ui(const s_action_metadata *metadata) {
     }
     explicit_bzero(&g_ui_ctx, sizeof(g_ui_ctx));
     g_ui_ctx.pair_list.pairs = (nbgl_contentTagValue_t *) &g_ui_ctx.pairs;
+    g_ui_ctx.pair_list.wrapping = true;
 
     g_ui_ctx.pairs[g_ui_ctx.pair_list.nbPairs].item = "Protocol";
     g_ui_ctx.pairs[g_ui_ctx.pair_list.nbPairs].value = APPNAME;
