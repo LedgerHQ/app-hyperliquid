@@ -57,6 +57,9 @@ static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx 
         case OP_TYPE_CANCEL:
         case OP_TYPE_CLOSE:
         case OP_TYPE_UPDATE_MARGIN:
+        case OP_TYPE_CANCEL_SL:
+        case OP_TYPE_CANCEL_TP:
+        case OP_TYPE_CANCEL_TP_SL:
             break;
         case OP_TYPE_UPDATE_LEVERAGE:
         default:

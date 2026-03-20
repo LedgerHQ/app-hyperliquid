@@ -26,6 +26,7 @@ bool ui_update_margin(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     snprintf(ui_ctx->update_margin.operation,
              sizeof(ui_ctx->update_margin.operation),
              "%s - %s",
+             // Can't call get_short_long_string since this isn't a s_order_request
              update_isolated_margin->is_buy ? "Long" : "Short",
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->update_margin.operation;

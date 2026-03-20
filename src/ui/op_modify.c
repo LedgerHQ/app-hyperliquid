@@ -80,7 +80,7 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     snprintf(ui_ctx->modify.operation,
              sizeof(ui_ctx->modify.operation),
              "Market %s - %s",
-             any_req->is_buy ? "Long" : "Short",
+             get_short_long_string_capitalized(any_req),
              metadata->asset_ticker);
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.operation;
     ui_ctx->pair_list.nbPairs += 1;
@@ -160,7 +160,7 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
              sizeof(ui_ctx->intent),
 #ifdef SCREEN_SIZE_WALLET
              "%s %s %s",
-             (action->type == ACTION_TYPE_BULK_ORDER) ? "set" : "edit",
+             (action->type == ACTION_TYPE_BULK_ORDER) ? "Set" : "Edit",
              metadata->asset_ticker,
              target_tmp
 #else

@@ -259,6 +259,61 @@ def test_sign_cancel(scenario_navigator: NavigateWithScenario) -> None:
     ))
     common_sign(client, scenario_navigator)
 
+def test_sign_cancel_tp(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL_TP,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+        ]),
+    ))
+    common_sign(client, scenario_navigator)
+
+def test_sign_cancel_sl(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL_SL,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+        ]),
+    ))
+    common_sign(client, scenario_navigator)
+
+def test_sign_cancel_tpsl(scenario_navigator: NavigateWithScenario) -> None:
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(
+        1,
+        OperationType.CANCEL_TP_SL,
+        0,
+        "BTC",
+        Network.MAINNET))
+    client.set_action(SetAction(
+        1,
+        ActionType.BULK_CANCEL,
+        1772813983827,
+        BulkCancel([
+            CancelRequest(0, 340574409238),
+            CancelRequest(0, 340574409262),
+        ]),
+    ))
+    common_sign(client, scenario_navigator)
+
 def test_sign_close(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
     client.provide_action_metadata(ActionMetadata(

@@ -22,3 +22,6 @@ const s_order_request *get_order_request(const s_order_request *list,
 bool get_limit_request(const s_order_request *req);
 bool get_trigger_tp(const s_order_request *req);
 bool get_trigger_sl(const s_order_request *req);
+
+const char *get_short_long_string(const s_order_request *req);
+const char *get_short_long_string_capitalized(const s_order_request *req);
