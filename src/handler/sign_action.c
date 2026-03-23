@@ -16,6 +16,7 @@ typedef struct {
 static s_signing_ctx g_signing_ctx;
 
 int sign_action(void) {
+    int ret;
     s_eip712_ctx eip712_ctx;
     uint8_t buf[1 + sizeof(eip712_ctx.signature)];
     const s_action *action;
@@ -42,7 +43,14 @@ int sign_action(void) {
 
     buf[0] = ctx_remaining_actions();
     memcpy(&buf[1], &eip712_ctx.signature, sizeof(eip712_ctx.signature));
-    return io_send_response_pointer(buf, sizeof(buf), SWO_SUCCESS);
+    if ((ret = io_send_response_pointer(buf, sizeof(buf), SWO_SUCCESS)) >= 0) {
+        // successful response
+        if (buf[0] == 0) {
+            // was the last signature
+            ctx_reset();
+        }
+    }
+    return ret;
 }
 
 int handler_sign_action(const buffer_t *payload) {
