@@ -73,6 +73,16 @@ int handler_sign_action(const buffer_t *payload) {
     }
     PRINTF("\")\n");
 
+    // The UI review screen is shown only for the first SIGN_ACTION in a
+    // session. Subsequent SIGN_ACTION commands (e.g. for TP/SL orders or an
+    // accompanying APPROVE_BUILDER_FEE) are signed silently, by design:
+    // all actions in the batch are described to the user in a single review
+    // screen before any signature is produced, so repeating the review for
+    // every intermediate action would be redundant and confusing.
+    // The action list is frozen at that point (ctx_push_action rejects new
+    // entries once action_index > 0), and each action type is validated
+    // against the declared op_type at SET_ACTION time, so the set of actions
+    // signed is guaranteed to match what was shown on screen.
     if (ctx_current_action_is_first()) {
         if (ctx_remaining_actions() == 0) {
             // nothing to sign
