@@ -175,13 +175,58 @@ static void dump_action(const s_action *action) {
     PRINTF("<<< ACTION <<<\n");
 }
 
+/**
+ * Validate that the action type being pushed is consistent with the operation
+ * type declared in the metadata. This prevents a malicious host from injecting
+ * an unrelated action (e.g. a BULK_ORDER) into a cancel session: the UI is
+ * built from the action fetched by type, but signing iterates by index, so a
+ * rogue action at a lower index would be signed without ever being displayed.
+ *
+ * For OP_TYPE_MODIFY the list must contain exactly one action (either
+ * BULK_MODIFY or BULK_ORDER, not both), so we also reject a second compatible
+ * action if one is already present.
+ */
+static bool is_action_compatible(e_action_type action_type, e_operation_type op_type) {
+    switch (op_type) {
+        case OP_TYPE_ORDER:
+            // UPDATE_LEVERAGE and APPROVE_BUILDER_FEE may accompany a bulk
+            // order. The builder fee approval is signed silently by design —
+            // see the comment in bulk_order.c handle_builder().
+            return action_type == ACTION_TYPE_BULK_ORDER ||
+                   action_type == ACTION_TYPE_UPDATE_LEVERAGE ||
+                   action_type == ACTION_TYPE_APPROVE_BUILDER_FEE;
+        case OP_TYPE_MODIFY:
+            // A modify is represented by exactly one action: either BULK_MODIFY
+            // or BULK_ORDER.  Reject if a compatible action is already present
+            // to prevent a second action from being signed silently.
+            if (action_type != ACTION_TYPE_BULK_MODIFY && action_type != ACTION_TYPE_BULK_ORDER) {
+                return false;
+            }
+            return ctx_get_action(ACTION_TYPE_BULK_MODIFY) == NULL &&
+                   ctx_get_action(ACTION_TYPE_BULK_ORDER) == NULL;
+        case OP_TYPE_CANCEL:
+        case OP_TYPE_CANCEL_SL:
+        case OP_TYPE_CANCEL_TP:
+        case OP_TYPE_CANCEL_TP_SL:
+            return action_type == ACTION_TYPE_BULK_CANCEL;
+        case OP_TYPE_CLOSE:
+            return action_type == ACTION_TYPE_BULK_ORDER;
+        case OP_TYPE_UPDATE_MARGIN:
+            return action_type == ACTION_TYPE_UPDATE_ISOLATED_MARGIN;
+        default:
+            break;
+    }
+    return false;
+}
+
 bool parse_action(const buffer_t *payload) {
     s_action_ctx out = {0};
+    const s_action_metadata *metadata;
 
     if (payload == NULL) {
         return false;
     }
-    if (ctx_get_action_metadata() == NULL) {
+    if ((metadata = ctx_get_action_metadata()) == NULL) {
         PRINTF("Error: received an action without a prior metadata!\n");
         return false;
     }
@@ -189,6 +234,12 @@ bool parse_action(const buffer_t *payload) {
         return false;
     }
     if (!verify_action(&out)) {
+        return false;
+    }
+    if (!is_action_compatible(out.action.type, metadata->op_type)) {
+        PRINTF("Error: action type %u is incompatible with op_type %u!\n",
+               out.action.type,
+               metadata->op_type);
         return false;
     }
     dump_action(&out.action);
