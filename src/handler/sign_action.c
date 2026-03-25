@@ -74,6 +74,10 @@ int handler_sign_action(const buffer_t *payload) {
     PRINTF("\")\n");
 
     if (ctx_current_action_is_first()) {
+        if (ctx_remaining_actions() == 0) {
+            // nothing to sign
+            return io_send_sw(SWO_INCORRECT_DATA);
+        }
         if (!handle_ui(ctx_get_action_metadata())) {
             return io_send_sw(SWO_INCORRECT_DATA);
         }
