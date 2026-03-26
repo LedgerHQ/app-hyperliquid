@@ -245,11 +245,13 @@ static void test_parse_all_action_types(void **state) {
      * Here we just test that they reach the inner parser (no type error).
      * Using bulk_cancel as the simplest to construct for each metadata type. */
 
-    /* update_leverage */
+    /* update_leverage — must be accompanied by OP_TYPE_ORDER metadata since
+     * OP_TYPE_UPDATE_LEVERAGE is rejected at metadata parse time and
+     * UPDATE_LEVERAGE actions are only valid companions to ORDER sessions. */
     ctx_reset();
     {
         s_action_metadata m = {0};
-        m.op_type  = OP_TYPE_UPDATE_LEVERAGE;
+        m.op_type  = OP_TYPE_ORDER;
         m.asset_id = TEST_ASSET_ID;
         m.network  = NETWORK_MAINNET;
         strncpy(m.asset_ticker, "BTC", sizeof(m.asset_ticker) - 1);
