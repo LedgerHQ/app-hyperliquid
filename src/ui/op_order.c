@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "os_print.h"
 #include "ui_context.h"
 #include "action.h"
 #include "ui_common.h"
@@ -13,6 +14,10 @@ static bool ui_order_common(s_ui_ctx *ui_ctx,
     show_metadata_margin(ui_ctx, metadata, ui_ctx->order.margin, sizeof(ui_ctx->order.margin));
 
     if (update_leverage != NULL) {
+        if (update_leverage->is_cross) {
+            PRINTF("Error: cross orders are unsupported\n");
+            return false;
+        }
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "Leverage";
         snprintf(ui_ctx->order.leverage,
                  sizeof(ui_ctx->order.leverage),
