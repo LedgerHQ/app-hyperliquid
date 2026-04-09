@@ -57,6 +57,12 @@ bool handle_ui(const s_action_metadata *metadata) {
     g_ui_ctx.pairs[g_ui_ctx.pair_list.nbPairs].value = APPNAME;
     g_ui_ctx.pair_list.nbPairs += 1;
 
+    if (metadata->network == NETWORK_TESTNET) {
+        g_ui_ctx.pairs[g_ui_ctx.pair_list.nbPairs].item = "Network";
+        g_ui_ctx.pairs[g_ui_ctx.pair_list.nbPairs].value = "Testnet";
+        g_ui_ctx.pair_list.nbPairs += 1;
+    }
+
     switch (metadata->op_type) {
         case OP_TYPE_ORDER:
             ret = ui_order(&g_ui_ctx, metadata);
