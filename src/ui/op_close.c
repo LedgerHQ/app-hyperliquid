@@ -12,9 +12,18 @@ bool ui_close(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     if ((action = ctx_get_action(ACTION_TYPE_BULK_ORDER)) == NULL) {
         return false;
     }
+
+    if (action->bulk_order.order_count != 1) {
+        return false;
+    }
+
     if ((limit = get_order_request(action->bulk_order.orders,
                                    action->bulk_order.order_count,
                                    &get_limit_request)) == NULL) {
+        return false;
+    }
+
+    if (!limit->reduce_only) {
         return false;
     }
 
