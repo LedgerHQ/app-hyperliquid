@@ -19,6 +19,9 @@ typedef bool (*f_order_request_matcher)(const s_order_request *);
 const s_order_request *get_order_request(const s_order_request *list,
                                          size_t size,
                                          f_order_request_matcher match_func);
+size_t count_order_requests(const s_order_request *list,
+                            size_t size,
+                            f_order_request_matcher match_func);
 bool get_limit_request(const s_order_request *req);
 bool get_trigger_tp(const s_order_request *req);
 bool get_trigger_sl(const s_order_request *req);

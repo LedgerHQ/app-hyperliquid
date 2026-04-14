@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "os_print.h"
 #include "ui_context.h"
 #include "action.h"
 #include "ui_common.h"
@@ -13,6 +14,10 @@ static bool ui_order_common(s_ui_ctx *ui_ctx,
     show_metadata_margin(ui_ctx, metadata, ui_ctx->order.margin, sizeof(ui_ctx->order.margin));
 
     if (update_leverage != NULL) {
+        if (update_leverage->is_cross) {
+            PRINTF("Error: cross orders are unsupported\n");
+            return false;
+        }
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "Leverage";
         snprintf(ui_ctx->order.leverage,
                  sizeof(ui_ctx->order.leverage),
@@ -152,6 +157,23 @@ bool ui_order(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     sl_order = get_order_request(bulk_order->bulk_order.orders,
                                  bulk_order->bulk_order.order_count,
                                  &get_trigger_sl);
+
+    // Enforce structural integrity: exactly 1 limit order, at most 1 TP, at most 1 SL,
+    // and no hidden extra orders that would be signed without being shown.
+    if ((count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_limit_request) != 1) ||
+        (count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_trigger_tp) > 1) ||
+        (count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_trigger_sl) > 1) ||
+        (bulk_order->bulk_order.order_count !=
+         (uint8_t) (1 + (tp_order != NULL) + (sl_order != NULL)))) {
+        PRINTF("Error: unexpected order structure in bulk_order\n");
+        return false;
+    }
 
     switch (limit_order->limit.tif) {
         case TIF_IOC:

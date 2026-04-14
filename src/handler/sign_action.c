@@ -54,22 +54,25 @@ int sign_action(void) {
 }
 
 int handler_sign_action(const buffer_t *payload) {
-    if (payload->size < sizeof(g_signing_ctx.bip32_path_length)) {
+    s_signing_ctx tmp = {0};
+
+    if (payload->size < sizeof(tmp.bip32_path_length)) {
         return io_send_sw(SWO_WRONG_DATA_LENGTH);
     }
-    g_signing_ctx.bip32_path_length = payload->ptr[0];
-    if (!bip32_path_read(&payload->ptr[sizeof(g_signing_ctx.bip32_path_length)],
-                         payload->size - sizeof(g_signing_ctx.bip32_path_length),
-                         g_signing_ctx.bip32_path,
-                         g_signing_ctx.bip32_path_length)) {
+    tmp.bip32_path_length = payload->ptr[0];
+    if (!bip32_path_read(&payload->ptr[sizeof(tmp.bip32_path_length)],
+                         payload->size - sizeof(tmp.bip32_path_length),
+                         tmp.bip32_path,
+                         tmp.bip32_path_length)) {
         return io_send_sw(SWO_INCORRECT_DATA);
     }
+
     PRINTF("handler_sign_action(\"");
-    for (int i = 0; i < (int) g_signing_ctx.bip32_path_length; ++i) {
+    for (int i = 0; i < (int) tmp.bip32_path_length; ++i) {
         if (i > 0) {
             PRINTF("/");
         }
-        PRINTF("0x%08x", g_signing_ctx.bip32_path[i]);
+        PRINTF("0x%08x", tmp.bip32_path[i]);
     }
     PRINTF("\")\n");
 
@@ -84,6 +87,8 @@ int handler_sign_action(const buffer_t *payload) {
     // against the declared op_type at SET_ACTION time, so the set of actions
     // signed is guaranteed to match what was shown on screen.
     if (ctx_current_action_is_first()) {
+        memcpy(&g_signing_ctx, &tmp, sizeof(g_signing_ctx));
+
         if (ctx_remaining_actions() == 0) {
             // nothing to sign
             return io_send_sw(SWO_INCORRECT_DATA);
@@ -94,5 +99,9 @@ int handler_sign_action(const buffer_t *payload) {
         return 0;
     }
 
+    if (memcmp(&tmp, &g_signing_ctx, sizeof(g_signing_ctx)) != 0) {
+        PRINTF("Error: derivation path does not match!\n");
+        return io_send_sw(SWO_INCORRECT_DATA);
+    }
     return sign_action();
 }
