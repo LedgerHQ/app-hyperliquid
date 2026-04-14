@@ -158,6 +158,23 @@ bool ui_order(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                                  bulk_order->bulk_order.order_count,
                                  &get_trigger_sl);
 
+    // Enforce structural integrity: exactly 1 limit order, at most 1 TP, at most 1 SL,
+    // and no hidden extra orders that would be signed without being shown.
+    if ((count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_limit_request) != 1) ||
+        (count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_trigger_tp) > 1) ||
+        (count_order_requests(bulk_order->bulk_order.orders,
+                              bulk_order->bulk_order.order_count,
+                              &get_trigger_sl) > 1) ||
+        (bulk_order->bulk_order.order_count !=
+         (uint8_t) (1 + (tp_order != NULL) + (sl_order != NULL)))) {
+        PRINTF("Error: unexpected order structure in bulk_order\n");
+        return false;
+    }
+
     switch (limit_order->limit.tif) {
         case TIF_IOC:
             ret = ui_market_order(

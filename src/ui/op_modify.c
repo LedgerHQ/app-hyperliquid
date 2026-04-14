@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include "os_print.h"
 #include "action.h"
 #include "hl_context.h"
 #include "ui_context.h"
@@ -17,6 +18,18 @@ static const s_modify_request *get_modify_request(const s_modify_request *list,
         }
     }
     return NULL;
+}
+
+static size_t count_modify_requests(const s_modify_request *list,
+                                    size_t size,
+                                    f_modify_request_matcher match_func) {
+    size_t count = 0;
+    for (size_t i = 0; i < size; ++i) {
+        if (match_func(&list[i])) {
+            count++;
+        }
+    }
+    return count;
 }
 
 static bool get_modify_tp(const s_modify_request *req) {
@@ -56,6 +69,19 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                                                  &get_modify_sl)) != NULL) {
                 sl_req = &mod_sl_req->order;
             }
+            // Enforce structural integrity: at most 1 TP modify and 1 SL modify,
+            // with no hidden extra modifies that would be signed without being shown.
+            if ((count_modify_requests(action->bulk_modify.modifies,
+                                       action->bulk_modify.modify_count,
+                                       &get_modify_tp) > 1) ||
+                (count_modify_requests(action->bulk_modify.modifies,
+                                       action->bulk_modify.modify_count,
+                                       &get_modify_sl) > 1) ||
+                (action->bulk_modify.modify_count !=
+                 (uint8_t) ((tp_req != NULL) + (sl_req != NULL)))) {
+                PRINTF("Error: unexpected order structure in bulk_modify\n");
+                return false;
+            }
             break;
 
         case ACTION_TYPE_BULK_ORDER:
@@ -65,6 +91,22 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
             sl_req = get_order_request(action->bulk_order.orders,
                                        action->bulk_order.order_count,
                                        &get_trigger_sl);
+            // Enforce structural integrity: no limit orders (those belong to ORDER sessions),
+            // at most 1 TP and 1 SL, with no hidden extra orders signed without being shown.
+            if ((count_order_requests(action->bulk_order.orders,
+                                      action->bulk_order.order_count,
+                                      &get_limit_request) != 0) ||
+                (count_order_requests(action->bulk_order.orders,
+                                      action->bulk_order.order_count,
+                                      &get_trigger_tp) > 1) ||
+                (count_order_requests(action->bulk_order.orders,
+                                      action->bulk_order.order_count,
+                                      &get_trigger_sl) > 1) ||
+                (action->bulk_order.order_count !=
+                 (uint8_t) ((tp_req != NULL) + (sl_req != NULL)))) {
+                PRINTF("Error: unexpected order structure in bulk_order for modify\n");
+                return false;
+            }
             break;
 
         default:

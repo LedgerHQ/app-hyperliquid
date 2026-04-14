@@ -41,6 +41,19 @@ const s_order_request *get_order_request(const s_order_request *list,
     return NULL;
 }
 
+size_t count_order_requests(const s_order_request *list,
+                            size_t size,
+                            f_order_request_matcher match_func) {
+    size_t count = 0;
+
+    for (size_t i = 0; i < size; ++i) {
+        if (match_func(&list[i])) {
+            count++;
+        }
+    }
+    return count;
+}
+
 bool get_limit_request(const s_order_request *req) {
     return req->order_type == ORDER_TYPE_LIMIT;
 }
