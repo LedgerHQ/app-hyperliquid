@@ -1,11 +1,19 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include "os_print.h"
 #include "ui_context.h"
 #include "ui_common.h"
 #include "hl_context.h"
 
 bool ui_cancel(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
-    if (ctx_get_action(ACTION_TYPE_BULK_CANCEL) == NULL) {
+    const s_action *action;
+
+    if ((action = ctx_get_action(ACTION_TYPE_BULK_CANCEL)) == NULL) {
+        return false;
+    }
+    if (action->bulk_cancel.cancel_count != 1) {
+        PRINTF("Error: unexpected cancel count in bulk_cancel (%u)\n",
+               action->bulk_cancel.cancel_count);
         return false;
     }
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "Operation";
