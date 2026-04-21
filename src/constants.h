@@ -6,43 +6,39 @@
 #define CLA 0xE0
 
 /**
- * Length of APPNAME variable in the Makefile.
+ * Size of an address in bytes
  */
-#define APPNAME_LEN (sizeof(APPNAME) - 1)
+#define ADDRESS_LENGTH 20
 
 /**
- * Maximum length of MAJOR_VERSION || MINOR_VERSION || PATCH_VERSION.
+ * Max size of an asset ticker
  */
-#define APPVERSION_LEN 3
+#define ASSET_TICKER_LENGTH 48
 
 /**
- * Maximum length of application name.
+ * Max size of a numeric value represented as a string (64-bit floating number)
  */
-#define MAX_APPNAME_LEN 64
+#define NUMERIC_STRING_LENGTH 21
 
 /**
- * Maximum transaction length (bytes).
+ * Max size of a bulk operation
  */
-#define MAX_TRANSACTION_LEN 510
+#define BULK_MAX_SIZE 5
 
 /**
- * Maximum signature length (bytes).
+ * Decimals used for margins when expressed as 64-bit integers
  */
-#define MAX_DER_SIG_LEN 72
+#define MARGIN_DECIMALS 6
 
-/**
- * Exponent used to convert mBOL to BOL unit (N BOL = N * 10^3 mBOL).
- */
-#define EXPONENT_SMALLEST_UNIT 3
+#define COUNTERVALUE_TICKER "USDC"
 
-/**
- * Boilerplate SLIP-44 coin type (TEST coin - 0x8001).
- * Production apps must use their assigned SLIP-44 coin type.
- * @see https://github.com/satoshilabs/slips/blob/master/slip-0044.md
- */
-#define BOILERPLATE_SLIP44_COIN_TYPE 0x8001
+#define SHORT_LONG_STRING_LENGTH 5
 
-/**
- * Boilerplate SLIP-44 coin type with hardened bit (0x80008001).
- */
-#define BOILERPLATE_SLIP44_COIN_TYPE_HARDENED (0x80000000 | BOILERPLATE_SLIP44_COIN_TYPE)
+#define LIMIT_MARKET_STRING_LENGTH 6
+
+#define UINT32_STRING_LENGTH 10
+
+#define PRICE_STRING_LENGTH    (NUMERIC_STRING_LENGTH + 1 + ASSET_TICKER_LENGTH)
+#define SIZE_STRING_LENGTH     PRICE_STRING_LENGTH
+#define MARGIN_STRING_LENGTH   PRICE_STRING_LENGTH
+#define LEVERAGE_STRING_LENGTH (UINT32_STRING_LENGTH + 1)
