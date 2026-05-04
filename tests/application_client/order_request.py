@@ -52,6 +52,7 @@ class OrderRequest(TlvSerializable):
     sz: str
     reduce_only: bool
     order: Limit | Trigger
+    cloid: bytes | None
 
     def __init__(self,
                  order_type: OrderType,
@@ -60,7 +61,8 @@ class OrderRequest(TlvSerializable):
                  limit_px: str,
                  sz: str,
                  reduce_only: bool,
-                 order: Limit | Trigger) -> None:
+                 order: Limit | Trigger,
+                 cloid: bytes | None = None) -> None:
         self.order_type = order_type
         self.asset = asset
         self.is_buy = is_buy
@@ -68,6 +70,7 @@ class OrderRequest(TlvSerializable):
         self.sz = sz
         self.reduce_only = reduce_only
         self.order = order
+        self.cloid = cloid
 
     def serialize(self) -> bytes:
         payload = bytearray()
@@ -78,4 +81,6 @@ class OrderRequest(TlvSerializable):
         payload += self.serialize_field(0xe4, self.sz)
         payload += self.serialize_field(0xe5, self.reduce_only)
         payload += self.serialize_field(0xd7, self.order.serialize())
+        if self.cloid is not None:
+            payload += self.serialize_field(0xee, self.cloid)
         return bytes(payload)

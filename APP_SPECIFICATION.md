@@ -278,6 +278,7 @@ This command signs a previously given hyperliquid action (in the same order).
 | SZ              | 0xe4 | char[]                           |          |
 | REDUCE_ONLY     | 0xe5 | bool                             |          |
 | ORDER           | 0xd7 | [LIMIT_ORDER](#limit_order) \|<br>[TRIGGER_ORDER](#trigger_order) |          |
+| CLOID           | 0xee | uint8[16]                        | x        |
 
 #### OrderType enum
 
