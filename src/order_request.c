@@ -1,5 +1,6 @@
 #include <string.h>
 #include "os_print.h"
+#include "os_utils.h"
 #include "tlv_library.h"
 #include "order_request.h"
 #include "hl_context.h"
@@ -223,6 +224,21 @@ static bool handle_reduce_only(const tlv_data_t *data, s_order_request_ctx *out)
 
 static bool handle_order(const tlv_data_t *, s_order_request_ctx *);
 
+static bool handle_cloid(const tlv_data_t *data, s_order_request_ctx *out) {
+    if (data->value.size != (CLOID_BIT_LENGTH / 8)) {
+        return false;
+    }
+    memcpy(out->order_request->cloid, "0x", 2);
+    if (bytes_to_lowercase_hex(&out->order_request->cloid[2],
+                               sizeof(out->order_request->cloid) - 2,
+                               data->value.ptr,
+                               data->value.size) != 0) {
+        return false;
+    }
+    out->order_request->has_cloid = true;
+    return true;
+}
+
 #define ORDER_REQUEST_TAGS(X)                                        \
     X(0xe0, TAG_ORDER_TYPE, handle_order_type, ENFORCE_UNIQUE_TAG)   \
     X(0xd1, TAG_ASSET, handle_asset, ENFORCE_UNIQUE_TAG)             \
@@ -230,7 +246,8 @@ static bool handle_order(const tlv_data_t *, s_order_request_ctx *);
     X(0xe3, TAG_LIMIT_PX, handle_limit_px, ENFORCE_UNIQUE_TAG)       \
     X(0xe4, TAG_SZ, handle_sz, ENFORCE_UNIQUE_TAG)                   \
     X(0xe5, TAG_REDUCE_ONLY, handle_reduce_only, ENFORCE_UNIQUE_TAG) \
-    X(0xd7, TAG_ORDER, handle_order, ENFORCE_UNIQUE_TAG)
+    X(0xd7, TAG_ORDER, handle_order, ENFORCE_UNIQUE_TAG)             \
+    X(0xee, TAG_CLOID, handle_cloid, ENFORCE_UNIQUE_TAG)
 
 DEFINE_TLV_PARSER(ORDER_REQUEST_TAGS, NULL, order_request_tlv_parser);
 
@@ -289,6 +306,9 @@ void dump_order_request(const s_order_request *order_request) {
             dump_trigger_order(&order_request->trigger);
             break;
     }
+    if (order_request->has_cloid) {
+        PRINTF("cloid = %s\n", order_request->cloid);
+    }
     PRINTF("<<< ORDER <<<\n");
 }
 
@@ -303,7 +323,7 @@ bool parse_order_request(const buffer_t *payload, s_order_request_ctx *out) {
 }
 
 bool order_request_serialize(const s_order_request *order_request, cmp_ctx_t *cmp_ctx) {
-    if (!cmp_write_map(cmp_ctx, 6)) {
+    if (!cmp_write_map(cmp_ctx, order_request->has_cloid ? 7 : 6)) {
         return false;
     }
 
@@ -362,6 +382,15 @@ bool order_request_serialize(const s_order_request *order_request, cmp_ctx_t *cm
             break;
         default:
             return false;
+    }
+
+    if (order_request->has_cloid) {
+        if (!cmp_write_str(cmp_ctx, "c", 1)) {
+            return false;
+        }
+        if (!cmp_write_str(cmp_ctx, order_request->cloid, strlen(order_request->cloid))) {
+            return false;
+        }
     }
     return true;
 }

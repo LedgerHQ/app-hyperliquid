@@ -53,6 +53,8 @@ typedef struct {
         s_limit limit;
         s_trigger trigger;
     };
+    bool has_cloid;
+    char cloid[CLOID_HEX_STRING_LENGTH];
 } s_order_request;
 
 typedef struct {
