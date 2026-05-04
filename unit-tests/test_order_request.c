@@ -22,6 +22,7 @@
 #define TAG_SZ          0xe4
 #define TAG_REDUCE_ONLY 0xe5
 #define TAG_ORDER       0xd7
+#define TAG_CLOID       0xee
 /* Nested limit order tags */
 #define TAG_TIF         0xe6
 /* Nested trigger order tags */
@@ -559,6 +560,119 @@ static void test_serialize_trigger_tp(void **state) {
     ASSERT_SERIALIZED_STR(sb, "tp");
 }
 
+/* ─── CLOID tests ────────────────────────────────────────────────────────── */
+
+/* Reference 16-byte CLOID and its expected hex string representation. */
+static const uint8_t TEST_CLOID_BYTES[16] = {
+    0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+    0xfe, 0xdc, 0xba, 0x98, 0x76, 0x54, 0x32, 0x10
+};
+#define TEST_CLOID_HEX "0x0123456789abcdeffedcba9876543210"
+
+static void test_parse_cloid_valid(void **state) {
+    (void) state;
+    uint8_t buf[256];
+    size_t  len = build_limit_order_request(buf, TEST_ASSET_ID, true,
+                                             "50000", "1", false, TIF_GTC);
+    tlv_append_bytes(buf, &len, TAG_CLOID, TEST_CLOID_BYTES, sizeof(TEST_CLOID_BYTES));
+
+    s_order_request     result = {0};
+    s_order_request_ctx ctx    = {.order_request = &result};
+
+    buffer_t payload = make_buffer(buf, len);
+    assert_true(parse_order_request(&payload, &ctx));
+
+    assert_true(result.has_cloid);
+    assert_string_equal(result.cloid, TEST_CLOID_HEX);
+}
+
+static void test_parse_cloid_too_short_fails(void **state) {
+    (void) state;
+    uint8_t buf[256];
+    size_t  len = build_limit_order_request(buf, TEST_ASSET_ID, true,
+                                             "50000", "1", false, TIF_GTC);
+    tlv_append_bytes(buf, &len, TAG_CLOID, TEST_CLOID_BYTES, 15);
+
+    s_order_request     result = {0};
+    s_order_request_ctx ctx    = {.order_request = &result};
+
+    buffer_t payload = make_buffer(buf, len);
+    assert_false(parse_order_request(&payload, &ctx));
+}
+
+static void test_parse_cloid_too_long_fails(void **state) {
+    (void) state;
+    uint8_t buf[256];
+    size_t  len = build_limit_order_request(buf, TEST_ASSET_ID, true,
+                                             "50000", "1", false, TIF_GTC);
+    uint8_t oversized[17] = {0};
+    memcpy(oversized, TEST_CLOID_BYTES, sizeof(TEST_CLOID_BYTES));
+    tlv_append_bytes(buf, &len, TAG_CLOID, oversized, sizeof(oversized));
+
+    s_order_request     result = {0};
+    s_order_request_ctx ctx    = {.order_request = &result};
+
+    buffer_t payload = make_buffer(buf, len);
+    assert_false(parse_order_request(&payload, &ctx));
+}
+
+static void test_serialize_limit_order_with_cloid(void **state) {
+    (void) state;
+    s_order_request req = {
+        .asset       = TEST_ASSET_ID,
+        .is_buy      = true,
+        .reduce_only = false,
+        .order_type  = ORDER_TYPE_LIMIT,
+        .has_cloid   = true,
+    };
+    strncpy(req.limit_px, "50000", sizeof(req.limit_px) - 1);
+    strncpy(req.sz, "0.1", sizeof(req.sz) - 1);
+    req.limit.tif = TIF_GTC;
+    strcpy(req.cloid, TEST_CLOID_HEX);
+
+    ser_buf_t sb  = {0};
+    cmp_ctx_t cmp = make_writer(&sb);
+    assert_true(order_request_serialize(&req, &cmp));
+
+    /* fixmap(7) = 0x87: 6 base fields + "c" cloid field */
+    assert_int_equal(sb.data[0], 0x87);
+
+    /* "c" key present (fixstr len 1) */
+    ASSERT_SERIALIZED_STR(sb, "c");
+
+    /* Cloid value: str8 marker (0xd9), length 34 (0x22), then the hex string */
+    uint8_t expected_val[36];
+    expected_val[0] = 0xd9;
+    expected_val[1] = 0x22;
+    memcpy(&expected_val[2], TEST_CLOID_HEX, 34);
+    assert_non_null(find_bytes(sb.data, sb.len, expected_val, sizeof(expected_val)));
+}
+
+static void test_serialize_limit_order_no_cloid(void **state) {
+    (void) state;
+    s_order_request req = {
+        .asset       = TEST_ASSET_ID,
+        .is_buy      = true,
+        .reduce_only = false,
+        .order_type  = ORDER_TYPE_LIMIT,
+        .has_cloid   = false,
+    };
+    strncpy(req.limit_px, "50000", sizeof(req.limit_px) - 1);
+    strncpy(req.sz, "0.1", sizeof(req.sz) - 1);
+    req.limit.tif = TIF_GTC;
+
+    ser_buf_t sb  = {0};
+    cmp_ctx_t cmp = make_writer(&sb);
+    assert_true(order_request_serialize(&req, &cmp));
+
+    /* fixmap(6) = 0x86 — no cloid field added */
+    assert_int_equal(sb.data[0], 0x86);
+
+    /* "c" key must not appear */
+    static const uint8_t c_key[] = {0xa1, 'c'};
+    assert_null(find_bytes(sb.data, sb.len, c_key, sizeof(c_key)));
+}
+
 /* ─── main ───────────────────────────────────────────────────────────────── */
 
 int main(void) {
@@ -585,6 +699,11 @@ int main(void) {
         cmocka_unit_test(test_serialize_limit_ioc),
         cmocka_unit_test(test_serialize_trigger_order),
         cmocka_unit_test(test_serialize_trigger_tp),
+        cmocka_unit_test_setup_teardown(test_parse_cloid_valid, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_parse_cloid_too_short_fails, setup, teardown),
+        cmocka_unit_test_setup_teardown(test_parse_cloid_too_long_fails, setup, teardown),
+        cmocka_unit_test(test_serialize_limit_order_with_cloid),
+        cmocka_unit_test(test_serialize_limit_order_no_cloid),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
