@@ -1,0 +1,36 @@
+# Domain overrides applied after invariant sync.
+#
+# Constrain enum/state fields to valid values so Absolution converges
+# instead of burning prefix bytes on impossible bit patterns. Field
+# selectors are GLOBAL_NAME.FIELD_NAME; use a trailing dot
+# (`SYMBOL. = ...`) for flat globals.
+#
+# NOTE on nested struct fields: the current SDK tune-invariant script
+# (`tune-invariant-domains.py`) splits the selector on the LAST `.`, so
+# `g_ctx.metadata.op_type = ...` is parsed as global="g_ctx.metadata"
+# and silently dropped. Until that is fixed upstream, only top-level
+# fields of a struct global are reachable from this file. Nested fields
+# (g_ctx.metadata.{op_type,network,...}) remain fuzzable as `.top`. The
+# dictionary and seed corpus still steer the fuzzer toward valid byte
+# patterns, so the practical convergence cost is small.
+
+# ── Session state machine (g_ctx, static in src/hl_context.c) ────────────
+# action_count and action_index are uint8 bounded by MAX_ACTION_COUNT=10.
+g_ctx.has_metadata = values \x00 \x01
+g_ctx.action_count = values \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
+g_ctx.action_index = values \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
+
+# ── Signing-side path scratch (g_signing_ctx, src/handler/sign_action.c) ─
+# Absolution defaulted these fields to constant zero because it never
+# observed runtime writes. Forcing them fuzzable unlocks the non-first
+# SIGN_ACTION branch (memcmp(tmp, g_signing_ctx)) which is the only way to
+# reach action_hash, eip712_*, action_serialize, and src_msgpack/cmp.c in
+# a single APDU iteration. The padding field stays zeroed (default), which
+# matches tmp's zero-init and keeps the memcmp predicate satisfiable from
+# seed inputs.
+g_signing_ctx.bip32_path = top
+g_signing_ctx.bip32_path_length = top
+
+# ── SDK mock toggles (always include) ────────────────────────────────────
+fuzz_mock_nbgl_reject. = values \x00 \x01
+fuzz_mock_crypto_fail. = values \x00 \x01
