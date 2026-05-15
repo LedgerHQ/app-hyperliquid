@@ -1,0 +1,190 @@
+# Hyperliquid fuzz manifest.
+#
+# State-level model: Absolution restores global state from the prefix and
+# the harness dispatches one APDU per iteration through apdu_dispatcher().
+# See $BOLOS_SDK/fuzzing/docs/APP_CONTRACT.md for the schema.
+
+[target]
+fuzzer = "fuzz_globals"
+harness_version = "1"
+
+[coverage]
+key_files = [
+    "src/apdu/dispatcher.c",
+    "src/handler/get_addr.c",
+    "src/handler/provide_action_metadata.c",
+    "src/handler/set_action.c",
+    "src/handler/sign_action.c",
+    "src/action.c",
+    "src/action_metadata.c",
+    "src/bulk_order.c",
+    "src/bulk_modify.c",
+    "src/bulk_cancel.c",
+    "src/update_leverage.c",
+    "src/update_isolated_margin.c",
+    "src/approve_builder_fee.c",
+    "src/order_request.c",
+    "src/eip712_builder_fee.c",
+    "src/eip712_cid.c",
+    "src/eip712_common.c",
+    "src/hl_context.c",
+]
+exclude_regexes = [
+    '.*ledger-secure-sdk.*',
+    # Harness sources, including the DER-aware tlv_custom_mutate() in
+    # fuzzing/harness/fuzz_tlv_config.c. That function runs constantly
+    # during the active fuzzing phase (LLVMFuzzerCustomMutator → 86% lines
+    # measured on a 10s cov-build fuzz run) but is never invoked during the
+    # campaign's replay phase, which is what generates the .profdata used
+    # for the coverage report. Including it would falsely show 0% and hide
+    # the real app-coverage signal.
+    '.*fuzzing/harness/.*',
+    '.*fuzzer\.c',
+    '.*fuzzing/mock/.*',
+    '.*src/app_main\.c',
+    '.*src/ui/.*',
+]
+
+[dictionary]
+tokens = [
+    { name = "cla_app",                 value = "\\xE0" },
+    { name = "ins_get_address",         value = "\\xE0\\x01\\x00\\x00" },
+    { name = "ins_provide_metadata",    value = "\\xE0\\x02\\x01\\x00" },
+    { name = "ins_set_action",          value = "\\xE0\\x03\\x01\\x00" },
+    { name = "ins_sign_action",         value = "\\xE0\\x04\\x00\\x00" },
+
+    # The hyperliquid TLV parser (lib_tlv/tlv_library.c) is DER-encoded:
+    # tags and lengths >= 0x80 use the long form "0x80|n + n bytes". All
+    # hyperliquid tag bytes >= 0xb0 must therefore appear in the stream as
+    # the 2-byte sequence "0x81 <tag>". Single-byte tokens for tags < 0x80
+    # work unchanged.
+
+    # TLV tags for action_metadata (parsed by src/action_metadata.c)
+    { name = "tag_struct_type",         value = "\\x01" },
+    { name = "tag_struct_version",      value = "\\x02" },
+    { name = "tag_asset_ticker",        value = "\\x24" },
+    { name = "tag_signature",           value = "\\x15" },
+    { name = "tag_operation_type",      value = "\\x81\\xd0" },
+    { name = "tag_asset_id",            value = "\\x81\\xd1" },
+    { name = "tag_network",             value = "\\x81\\xd2" },
+    { name = "tag_builder_addr",        value = "\\x81\\xd3" },
+    { name = "tag_margin",              value = "\\x81\\xd4" },
+    { name = "tag_leverage",            value = "\\x81\\xd5" },
+
+    # TLV tags for action (parsed by src/action.c)
+    { name = "tag_action_type",         value = "\\x81\\xd0" },
+    { name = "tag_nonce",               value = "\\x81\\xda" },
+    { name = "tag_action_payload",      value = "\\x81\\xdb" },
+
+    # Nested action sub-TLV tags (carried inside TAG_ACTION 0xdb).
+    # libFuzzer splices these tokens into TAG_ACTION values during byte-level
+    # mutation; with proper DER framing the parser recognises them on a hit.
+
+    # bulk_order.c (BULK_ORDER_TAGS, BUILDER_INFO_TAGS)
+    { name = "tag_bo_order",            value = "\\x81\\xdd" },
+    { name = "tag_bo_grouping",         value = "\\x81\\xea" },
+    { name = "tag_bo_builder",          value = "\\x81\\xeb" },
+    { name = "tag_bi_address",          value = "\\x81\\xd3" },
+    { name = "tag_bi_fee",              value = "\\x81\\xec" },
+
+    # order_request.c (ORDER_REQUEST_TAGS, LIMIT_ORDER_TAGS, TRIGGER_ORDER_TAGS)
+    { name = "tag_or_order_type",       value = "\\x81\\xe0" },
+    { name = "tag_or_asset",            value = "\\x81\\xd1" },
+    { name = "tag_or_is_buy",           value = "\\x81\\xe2" },
+    { name = "tag_or_limit_px",         value = "\\x81\\xe3" },
+    { name = "tag_or_sz",               value = "\\x81\\xe4" },
+    { name = "tag_or_reduce_only",      value = "\\x81\\xe5" },
+    { name = "tag_or_order",            value = "\\x81\\xd7" },
+    { name = "tag_lim_tif",             value = "\\x81\\xe6" },
+    { name = "tag_trg_is_market",       value = "\\x81\\xe7" },
+    { name = "tag_trg_trigger_px",      value = "\\x81\\xe8" },
+    { name = "tag_trg_trigger_type",    value = "\\x81\\xe9" },
+
+    # bulk_modify.c (BULK_MODIFY_TAGS, MODIFY_REQUEST_TAGS)
+    { name = "tag_bm_modify_request",   value = "\\x81\\xd8" },
+    { name = "tag_mr_order",            value = "\\x81\\xdd" },
+    { name = "tag_mr_oid",              value = "\\x81\\xdc" },
+
+    # bulk_cancel.c (BULK_CANCEL_TAGS, CANCEL_REQUEST_TAGS)
+    { name = "tag_bc_cancel_request",   value = "\\x81\\xd9" },
+    { name = "tag_cr_asset",            value = "\\x81\\xd1" },
+    { name = "tag_cr_oid",              value = "\\x81\\xdc" },
+
+    # update_leverage.c (UPDATE_LEVERAGE_TAGS)
+    { name = "tag_ul_asset",            value = "\\x81\\xd1" },
+    { name = "tag_ul_is_cross",         value = "\\x81\\xde" },
+    { name = "tag_ul_leverage",         value = "\\x81\\xed" },
+
+    # update_isolated_margin.c (UPDATE_ISOLATED_MARGIN_TAGS)
+    { name = "tag_uim_asset",           value = "\\x81\\xd1" },
+    { name = "tag_uim_is_buy",          value = "\\x81\\xe2" },
+    { name = "tag_uim_ntli",            value = "\\x81\\xd6" },
+
+    # approve_builder_fee.c (APPROVE_BUILDER_FEE_TAGS)
+    { name = "tag_abf_chain_id",        value = "\\x23" },
+    { name = "tag_abf_max_fee_rate",    value = "\\x81\\xb0" },
+    { name = "tag_abf_builder_addr",    value = "\\x81\\xd3" },
+
+    # Struct-type / version constants expected by the app parsers (short-form).
+    { name = "metadata_struct_type",    value = "\\x01\\x01\\x2b" },
+    { name = "action_struct_type",      value = "\\x01\\x01\\x2c" },
+    { name = "struct_version_1",        value = "\\x02\\x01\\x01" },
+
+    # Network enum bytes (NETWORK_MAINNET=0, NETWORK_TESTNET=1)
+    { name = "network_mainnet",         value = "\\x81\\xd2\\x01\\x00" },
+    { name = "network_testnet",         value = "\\x81\\xd2\\x01\\x01" },
+
+    # Action types (e_action_type)
+    { name = "action_bulk_order",       value = "\\x81\\xd0\\x01\\x00" },
+    { name = "action_bulk_modify",      value = "\\x81\\xd0\\x01\\x01" },
+    { name = "action_bulk_cancel",      value = "\\x81\\xd0\\x01\\x02" },
+    { name = "action_update_leverage",  value = "\\x81\\xd0\\x01\\x03" },
+    { name = "action_approve_fee",      value = "\\x81\\xd0\\x01\\x04" },
+    { name = "action_update_margin",    value = "\\x81\\xd0\\x01\\x05" },
+
+    # Operation types (e_operation_type) — these are validated in
+    # handle_operation_type() and gate the action_compatibility matrix.
+    { name = "op_order",                value = "\\x81\\xd0\\x01\\x00" },
+    { name = "op_modify",               value = "\\x81\\xd0\\x01\\x01" },
+    { name = "op_cancel",               value = "\\x81\\xd0\\x01\\x02" },
+    { name = "op_close",                value = "\\x81\\xd0\\x01\\x04" },
+    { name = "op_update_margin",        value = "\\x81\\xd0\\x01\\x05" },
+    { name = "op_cancel_sl",            value = "\\x81\\xd0\\x01\\x06" },
+    { name = "op_cancel_tp",            value = "\\x81\\xd0\\x01\\x07" },
+    { name = "op_cancel_tp_sl",         value = "\\x81\\xd0\\x01\\x08" },
+
+    # Sub-action discriminator enum values (well-formed long-form TLV entries
+    # the byte-level mutator can splice into TAG_ACTION values).
+    { name = "order_type_limit",        value = "\\x81\\xe0\\x01\\x00" },
+    { name = "order_type_trigger",      value = "\\x81\\xe0\\x01\\x01" },
+    { name = "tif_alo",                 value = "\\x81\\xe6\\x01\\x00" },
+    { name = "tif_ioc",                 value = "\\x81\\xe6\\x01\\x01" },
+    { name = "tif_gtc",                 value = "\\x81\\xe6\\x01\\x02" },
+    { name = "trigger_type_tp",         value = "\\x81\\xe9\\x01\\x00" },
+    { name = "trigger_type_sl",         value = "\\x81\\xe9\\x01\\x01" },
+    { name = "grouping_na",             value = "\\x81\\xea\\x01\\x00" },
+    { name = "grouping_normal_tpsl",    value = "\\x81\\xea\\x01\\x01" },
+    { name = "grouping_position_tpsl",  value = "\\x81\\xea\\x01\\x02" },
+    { name = "is_buy_false",            value = "\\x81\\xe2\\x01\\x00" },
+    { name = "is_buy_true",             value = "\\x81\\xe2\\x01\\x01" },
+    { name = "is_cross_false",          value = "\\x81\\xde\\x01\\x00" },
+    { name = "is_cross_true",           value = "\\x81\\xde\\x01\\x01" },
+    { name = "reduce_only_false",       value = "\\x81\\xe5\\x01\\x00" },
+    { name = "reduce_only_true",        value = "\\x81\\xe5\\x01\\x01" },
+    { name = "is_market_false",         value = "\\x81\\xe7\\x01\\x00" },
+    { name = "is_market_true",          value = "\\x81\\xe7\\x01\\x01" },
+]
+
+[seeds]
+cla = 0xE0
+ins = [0x01, 0x02, 0x03, 0x04]
+
+[seeds.generic]
+enabled = true
+
+[seeds.custom]
+enabled = true
+script = "seeds/custom_seeds.py"
+
+[mocks]
+override_sources = []
