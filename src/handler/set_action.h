@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdbool.h>
 #include "buffer.h"
 
-int handler_set_action(const buffer_t *payload);
+int handler_set_action(bool first, const buffer_t *payload);

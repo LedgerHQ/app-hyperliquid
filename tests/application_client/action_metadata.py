@@ -66,6 +66,6 @@ class ActionMetadata(TlvSerializable):
             payload += self.serialize_field(0xd5, self.leverage)
         sig = self.signature
         if sig is None:
-            sig = sign_data(payload, Key.ACTION_METADATA)
+            sig = sign_data(bytes(payload), Key.ACTION_METADATA)
         payload += self.serialize_field(0x15, sig)
         return bytes(payload)

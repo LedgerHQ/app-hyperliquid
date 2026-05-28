@@ -134,3 +134,10 @@ target_link_libraries(test_action PUBLIC
     update_leverage update_isolated_margin approve_builder_fee
     stubs_cx stubs_eip712 stubs_os_utils ${APP_LIBS} ${COMMON_LIBS} write)
 add_test(test_action test_action)
+
+# ── test_chunked_payload ──────────────────────────────────────────────────────
+add_library(chunked_payload SHARED ../src/chunked_payload.c)
+add_executable(test_chunked_payload test_chunked_payload.c)
+target_link_libraries(test_chunked_payload PUBLIC
+    chunked_payload buffer read cmocka gcov)
+add_test(test_chunked_payload test_chunked_payload)
