@@ -69,4 +69,4 @@ class PKIClient:
         header.append(key_usage)
         header.append(0x00)
         header.append(len(payload))
-        return self._client.exchange_raw(header + payload)
+        return self._client.exchange_raw(bytes(header + payload))

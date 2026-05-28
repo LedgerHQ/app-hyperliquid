@@ -19,6 +19,9 @@ class InsType(IntEnum):
     SET_ACTION = 0x03
     SIGN_ACTION = 0x04
 
+P1_FIRST:     int = 0x01
+P1_FOLLOWING: int = 0x00
+
 def split_message(message: bytes) -> list[bytes]:
     return [message[x:x + MAX_APDU_LEN] for x in range(0, len(message), MAX_APDU_LEN)]
 
@@ -41,20 +44,28 @@ class CommandSender:
                     CertificatePubKeyUsage.CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA,
                     bytes.fromhex(cert_apdu),
             )
-        payload = obj.serialize()
-        return self.backend.exchange(cla=CLA,
-                                     ins=InsType.PROVIDE_ACTION_METADATA,
-                                     p1=0x01,
-                                     p2=0x00,
-                                     data=struct.pack(">H", len(payload)) + payload)
+        return self._send_chunked(InsType.PROVIDE_ACTION_METADATA, obj.serialize())
 
     def set_action(self, obj: TlvSerializable) -> RAPDU:
-        payload = obj.serialize()
-        return self.backend.exchange(cla=CLA,
-                                     ins=InsType.SET_ACTION,
-                                     p1=0x01,
-                                     p2=0x00,
-                                     data=struct.pack(">H", len(payload)) + payload)
+        return self._send_chunked(InsType.SET_ACTION, obj.serialize())
+
+    def _send_chunked(self, ins: InsType, payload: bytes) -> RAPDU:
+        """Send a payload that may span multiple APDUs.
+
+        Prepends the 2-byte big-endian total-length to the payload, then splits
+        the result into MAX_APDU_LEN-byte chunks.  The first chunk is sent with
+        P1_FIRST (0x01), all subsequent chunks with P1_FOLLOWING (0x00).
+        """
+        data = struct.pack(">H", len(payload)) + payload
+        for i, chunk in enumerate(split_message(data)):
+            resp = self.backend.exchange(
+                cla=CLA,
+                ins=ins,
+                p1=P1_FIRST if i == 0 else P1_FOLLOWING,
+                p2=0x00,
+                data=chunk,
+            )
+        return resp
 
     @contextmanager
     def sign_action(self, bip32_path: str) -> Generator[None, None, None]:
