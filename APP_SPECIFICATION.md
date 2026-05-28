@@ -67,8 +67,6 @@ for proper clear-signing). The metadata includes a signature, which is cryptogra
 
 ###### following chunk
 
-:warning: Multi-chunk payloads are currently not supported by the app, but for future-proofing it was specified this way.
-
 | Description                                | Length   |
 | ---                                        | ---      |
 | [ACTION_METADATA](#action_metadata) struct | variable |
@@ -102,8 +100,6 @@ This command gives a hyperliquid action.
 | [ACTION](#action) struct         | variable |
 
 ###### following chunk
-
-:warning: Multi-chunk payloads are currently not supported by the app, but for future-proofing it was specified this way.
 
 | Description                      | Length   |
 | ---                              | ---      |
