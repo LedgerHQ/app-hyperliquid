@@ -43,7 +43,10 @@ int apdu_dispatcher(const command_t *cmd) {
         return io_send_sw(SWO_INVALID_CLA);
     }
 
-    buffer_t buf = {0};
+    buffer_t buf = {
+        .size = cmd->lc,
+        .ptr = cmd->data,
+    };
 
     switch (cmd->ins) {
         case GET_ADDRESS:
@@ -53,39 +56,25 @@ int apdu_dispatcher(const command_t *cmd) {
             if (!cmd->data || (cmd->lc < 1)) {
                 return io_send_sw(SWO_WRONG_DATA_LENGTH);
             }
-            buf.size = cmd->lc;
-            buf.ptr = cmd->data;
             return handler_get_addr(&buf);
 
         case PROVIDE_ACTION_METADATA:
-            if ((cmd->p1 != P1_FIRST) || (cmd->p2 != 0)) {
+            if (((cmd->p1 != P1_FIRST) && (cmd->p1 != P1_FOLLOWING)) || (cmd->p2 != 0)) {
                 return io_send_sw(SWO_INCORRECT_P1_P2);
             }
-            if (!cmd->data || (cmd->lc < 2)) {
+            if (!cmd->data) {
                 return io_send_sw(SWO_WRONG_DATA_LENGTH);
             }
-            buf.size = read_u16_be(cmd->data, 0);
-            if (buf.size != (cmd->lc - sizeof(uint16_t))) {
-                // for now only handle command fitting on one APDU
-                return io_send_sw(SWO_WRONG_DATA_LENGTH);
-            }
-            buf.ptr = cmd->data + sizeof(uint16_t);
-            return handler_provide_action_metadata(&buf);
+            return handler_provide_action_metadata(cmd->p1 == P1_FIRST, &buf);
 
         case SET_ACTION:
-            if ((cmd->p1 != P1_FIRST) || (cmd->p2 != 0)) {
+            if (((cmd->p1 != P1_FIRST) && (cmd->p1 != P1_FOLLOWING)) || (cmd->p2 != 0)) {
                 return io_send_sw(SWO_INCORRECT_P1_P2);
             }
-            if (!cmd->data || (cmd->lc < 2)) {
+            if (!cmd->data) {
                 return io_send_sw(SWO_WRONG_DATA_LENGTH);
             }
-            buf.size = read_u16_be(cmd->data, 0);
-            if (buf.size != (cmd->lc - sizeof(uint16_t))) {
-                // for now only handle command fitting on one APDU
-                return io_send_sw(SWO_WRONG_DATA_LENGTH);
-            }
-            buf.ptr = cmd->data + sizeof(uint16_t);
-            return handler_set_action(&buf);
+            return handler_set_action(cmd->p1 == P1_FIRST, &buf);
 
         case SIGN_ACTION:
             if ((cmd->p1 != 0) || (cmd->p2 != 0)) {
@@ -94,8 +83,6 @@ int apdu_dispatcher(const command_t *cmd) {
             if (!cmd->data || (cmd->lc < 1)) {
                 return io_send_sw(SWO_WRONG_DATA_LENGTH);
             }
-            buf.size = cmd->lc;
-            buf.ptr = cmd->data;
             return handler_sign_action(&buf);
 
         default:

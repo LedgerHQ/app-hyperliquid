@@ -52,13 +52,13 @@ def test_error_wrong_p1_p2(backend: BackendInterface) -> None:
                          p1=0x01, p2=0x00, data=path_data)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
-    # PROVIDE_ACTION_METADATA: expects P1=0x01, P2=0x00
+    # PROVIDE_ACTION_METADATA: expects P1=0x01 or P1=0x00, P2=0x00
     with pytest.raises(ExceptionRAPDU) as exc_info:
         backend.exchange(cla=CLA, ins=InsType.PROVIDE_ACTION_METADATA,
-                         p1=0x00, p2=0x00, data=two_zero)
+                         p1=0x02, p2=0x00, data=two_zero)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
-    # SET_ACTION: expects P1=0x01, P2=0x00 — test bad P2
+    # SET_ACTION: expects P1=0x01 or P1=0x00, P2=0x00 — test bad P2
     with pytest.raises(ExceptionRAPDU) as exc_info:
         backend.exchange(cla=CLA, ins=InsType.SET_ACTION,
                          p1=0x01, p2=0x01, data=two_zero)
