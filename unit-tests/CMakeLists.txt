@@ -25,7 +25,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 add_definitions(-DPRINTF=)
 # OS_UNIT_TEST makes PIC(x) a simple cast instead of a hardware call
 add_compile_definitions(OS_UNIT_TEST)
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall -pedantic -g -O0 --coverage")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fshort-enums -Wall -pedantic -g -O0 --coverage")
 
 set(GCC_COVERAGE_LINK_FLAGS "--coverage -lgcov")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS}")
