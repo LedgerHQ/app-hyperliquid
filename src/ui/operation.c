@@ -11,6 +11,7 @@
 #include "ui_context.h"
 #include "sign_action.h"
 #include "operations.h"
+#include "comm_enabler.h"
 
 #ifdef SCREEN_SIZE_WALLET
 #define APP_REVIEW_ICON LARGE_REVIEW_ICON
@@ -21,6 +22,7 @@
 static s_ui_ctx g_ui_ctx;
 
 static void review_choice(bool confirm) {
+    enable_comm();
     if (confirm) {
         if (sign_action() != -1) {
             nbgl_useCaseReviewStatus(STATUS_TYPE_MESSAGE_SIGNED, ui_menu_main);
@@ -90,6 +92,7 @@ bool handle_ui(const s_action_metadata *metadata) {
     }
     if (ret) {
         prepare_review_sign_msgs(&g_ui_ctx);
+        disable_comm();
         nbgl_useCaseReview(TYPE_MESSAGE,
                            &g_ui_ctx.pair_list,
                            &APP_REVIEW_ICON,

@@ -26,6 +26,7 @@
 #include "io.h"
 #include "menu.h"
 #include "dispatcher.h"
+#include "comm_enabler.h"
 
 const internal_storage_t N_storage_real;
 
@@ -49,6 +50,7 @@ void app_main() {
         nvm_write((void *) &N_storage, &storage, sizeof(storage));
     }
 
+    enable_comm();
     for (;;) {
         // Receive command bytes in G_io_apdu_buffer
         if ((input_len = io_recv_command()) < 0) {
@@ -56,26 +58,30 @@ void app_main() {
             return;
         }
 
-        // Parse APDU command from G_io_apdu_buffer
-        if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
-            PRINTF("=> /!\\ BAD LENGTH: %.*H\n", input_len, G_io_apdu_buffer);
-            io_send_sw(SWO_WRONG_DATA_LENGTH);
-            continue;
-        }
+        if (comm_enabled()) {
+            // Parse APDU command from G_io_apdu_buffer
+            if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
+                PRINTF("=> /!\\ BAD LENGTH: %.*H\n", input_len, G_io_apdu_buffer);
+                io_send_sw(SWO_WRONG_DATA_LENGTH);
+                continue;
+            }
 
-        PRINTF("=> CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=%.*H\n",
-               cmd.cla,
-               cmd.ins,
-               cmd.p1,
-               cmd.p2,
-               cmd.lc,
-               cmd.lc,
-               cmd.data);
+            PRINTF("=> CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=%.*H\n",
+                   cmd.cla,
+                   cmd.ins,
+                   cmd.p1,
+                   cmd.p2,
+                   cmd.lc,
+                   cmd.lc,
+                   cmd.data);
 
-        // Dispatch structured APDU command to handler
-        if (apdu_dispatcher(&cmd) < 0) {
-            PRINTF("=> apdu_dispatcher failure\n");
-            return;
+            // Dispatch structured APDU command to handler
+            if (apdu_dispatcher(&cmd) < 0) {
+                PRINTF("=> apdu_dispatcher failure\n");
+                return;
+            }
+        } else {
+            io_send_sw(SWO_COMMAND_ERROR_NO_INFO);
         }
     }
 }
