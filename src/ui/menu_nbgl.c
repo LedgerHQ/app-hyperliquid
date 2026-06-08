@@ -36,8 +36,8 @@ void app_quit(void) {
 //  --------------------- SETTINGS MENU -----------------------
 //  -----------------------------------------------------------
 #define SETTING_INFO_NB 2
-static const char* const INFO_TYPES[SETTING_INFO_NB] = {"Version", "Developer"};
-static const char* const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Ledger"};
+static const char *const INFO_TYPES[SETTING_INFO_NB] = {"Version", "Developer"};
+static const char *const INFO_CONTENTS[SETTING_INFO_NB] = {APPVERSION, "Ledger"};
 
 static const nbgl_contentInfoList_t infoList = {
     .nbInfos = SETTING_INFO_NB,
