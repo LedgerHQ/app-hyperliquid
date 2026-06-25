@@ -187,18 +187,19 @@ This command signs a previously given hyperliquid action (in the same order).
 | STRUCT_VERSION | 0x02 | uint8                          |          |
 | ACTION_TYPE    | 0xd0 | [ActionType](#actiontype-enum) |          |
 | NONCE          | 0xda | uint64                         |          |
-| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) \|<br>[UPDATE_ISOLATED_MARGIN](#update_isolated_margin) |          |
+| ACTION         | 0xdb | [BULK_ORDER](#bulk_order) \|<br>[BULK_MODIFY](#bulk_modify) \|<br>[BULK_CANCEL](#bulk_cancel) \|<br>[UPDATE_LEVERAGE](#update_leverage) \|<br>[APPROVE_BUILDER_FEE](#approve_builder_fee) \|<br>[UPDATE_ISOLATED_MARGIN](#update_isolated_margin) \|<br>[USER_SET_ABSTRACTION](#user_set_abstraction) |          |
 
 #### ActionType enum
 
-| Name                   | Value |
-| ----                   | ----- |
-| BULK_ORDER             | 0x00  |
-| BULK_MODIFY            | 0x01  |
-| BULK_CANCEL            | 0x02  |
-| UPDATE_LEVERAGE        | 0x03  |
-| APPROVE_BUILDER_FEE    | 0x04  |
-| UPDATE_ISOLATED_MARGIN | 0x05  |
+| Name                    | Value |
+| ----                    | ----- |
+| BULK_ORDER              | 0x00  |
+| BULK_MODIFY             | 0x01  |
+| BULK_CANCEL             | 0x02  |
+| UPDATE_LEVERAGE         | 0x03  |
+| APPROVE_BUILDER_FEE     | 0x04  |
+| UPDATE_ISOLATED_MARGIN  | 0x05  |
+| USER_SET_ABSTRACTION    | 0x06  |
 
 ### BULK_ORDER
 
@@ -327,3 +328,20 @@ This command signs a previously given hyperliquid action (in the same order).
 | ASSET              | 0xd1 | uint32    |          |
 | IS_BUY             | 0xe2 | bool      |          |
 | NTLI               | 0xd6 | int64     |          |
+
+### USER_SET_ABSTRACTION
+
+:information_source: `USER_SET_ABSTRACTION` may accompany a `BULK_ORDER` action (OP_TYPE `ORDER`). It is co-signed silently alongside the order — the user approves the batch via a single review screen.
+
+| Name               | Tag  | Type                               | Optional |
+| ----               | ---  | ----                               | -------- |
+| SIGNATURE_CHAIN_ID | 0x23 | uint64                             |          |
+| ABSTRACTION        | 0xdf | [Abstraction](#abstraction-enum)   |          |
+
+#### Abstraction enum
+
+| Name             | Value |
+| ----             | ----- |
+| DISABLED         | 0x00  |
+| UNIFIED_ACCOUNT  | 0x01  |
+| PORTFOLIO_MARGIN | 0x02  |
