@@ -336,26 +336,31 @@ bool action_hash(const s_action *action,
     if ((action == NULL) || (metadata == NULL) || (domain_hash == NULL) || (message_hash == NULL)) {
         return false;
     }
-    if (action->type == ACTION_TYPE_APPROVE_BUILDER_FEE) {
-        if (!eip712_builder_fee_hash(&action->approve_builder_fee.signature_chain_id,
-                                     (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
-                                     action->approve_builder_fee.max_fee_rate,
-                                     action->approve_builder_fee.builder,
-                                     &action->nonce,
-                                     domain_hash,
-                                     message_hash)) {
-            return false;
-        }
-    } else {
-        if (!compute_connection_id(action, 0, connection_id)) {
-            return false;
-        }
-        if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
-                             connection_id,
-                             domain_hash,
-                             message_hash)) {
-            return false;
-        }
+    switch (action->type) {
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            if (!eip712_builder_fee_hash(
+                    &action->approve_builder_fee.signature_chain_id,
+                    (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
+                    action->approve_builder_fee.max_fee_rate,
+                    action->approve_builder_fee.builder,
+                    &action->nonce,
+                    domain_hash,
+                    message_hash)) {
+                return false;
+            }
+            break;
+
+        default:
+            if (!compute_connection_id(action, 0, connection_id)) {
+                return false;
+            }
+            if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
+                                 connection_id,
+                                 domain_hash,
+                                 message_hash)) {
+                return false;
+            }
+            break;
     }
     return true;
 }
