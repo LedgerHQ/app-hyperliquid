@@ -7,10 +7,12 @@
 #include "hl_context.h"
 #include "eip712_common.h"
 #include "display.h"
+#include "derive_addr_from_path.h"
 
 typedef struct {
     uint32_t bip32_path[MAX_BIP32_PATH];
     uint8_t bip32_path_length;
+    uint8_t wallet_addr[ADDRESS_LENGTH];
 } s_signing_ctx;
 
 static s_signing_ctx g_signing_ctx;
@@ -30,7 +32,11 @@ int sign_action(void) {
         PRINTF("Error: missing action metadata!\n");
         return io_send_sw(SWO_INCORRECT_DATA);
     }
-    if (!action_hash(action, metadata, eip712_ctx.domain_hash, eip712_ctx.message_hash)) {
+    if (!action_hash(action,
+                     metadata,
+                     g_signing_ctx.wallet_addr,
+                     eip712_ctx.domain_hash,
+                     eip712_ctx.message_hash)) {
         return io_send_sw(SWO_INCORRECT_DATA);
     }
     PRINTF("domain hash = 0x%.*h\n", sizeof(eip712_ctx.domain_hash), eip712_ctx.domain_hash);
@@ -93,13 +99,19 @@ int handler_sign_action(const buffer_t *payload) {
             // nothing to sign
             return io_send_sw(SWO_INCORRECT_DATA);
         }
+        if (!derive_addr_from_path(g_signing_ctx.bip32_path,
+                                   g_signing_ctx.bip32_path_length,
+                                   g_signing_ctx.wallet_addr)) {
+            return io_send_sw(SWO_INCORRECT_DATA);
+        }
         if (!handle_ui(ctx_get_action_metadata())) {
             return io_send_sw(SWO_INCORRECT_DATA);
         }
         return 0;
     }
 
-    if (memcmp(&tmp, &g_signing_ctx, sizeof(g_signing_ctx)) != 0) {
+    if ((tmp.bip32_path_length != g_signing_ctx.bip32_path_length) ||
+        (memcmp(tmp.bip32_path, g_signing_ctx.bip32_path, sizeof(g_signing_ctx.bip32_path)) != 0)) {
         PRINTF("Error: derivation path does not match!\n");
         return io_send_sw(SWO_INCORRECT_DATA);
     }

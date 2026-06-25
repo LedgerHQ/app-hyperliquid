@@ -317,10 +317,11 @@ static void test_action_hash_exercises_serialize(void **state) {
 
     uint8_t domain_hash[32]  = {0};
     uint8_t message_hash[32] = {0};
+    uint8_t wallet_addr[ADDRESS_LENGTH] = {0};
 
     /* eip712_cid_hash stub returns false, so action_hash returns false.
      * action_serialize (and bulk_cancel_serialize) are still executed. */
-    assert_false(action_hash(&action, &metadata, domain_hash, message_hash));
+    assert_false(action_hash(&action, &metadata, wallet_addr, domain_hash, message_hash));
 }
 
 /* ─── main ───────────────────────────────────────────────────────────────── */

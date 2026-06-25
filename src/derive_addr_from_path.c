@@ -3,7 +3,9 @@
 #include "derive_addr_from_path.h"
 #include "constants.h"
 
-bool derive_addr_from_path(const uint32_t *bip32_path, uint8_t path_length, uint8_t out[ADDRESS_LENGTH]) {
+bool derive_addr_from_path(const uint32_t *bip32_path,
+                           uint8_t path_length,
+                           uint8_t out[ADDRESS_LENGTH]) {
     uint8_t raw_pk[65];
     uint8_t hashed_pk[32];
 
@@ -24,4 +26,3 @@ bool derive_addr_from_path(const uint32_t *bip32_path, uint8_t path_length, uint
     memcpy(out, hashed_pk + sizeof(hashed_pk) - ADDRESS_LENGTH, ADDRESS_LENGTH);
     return true;
 }
-
