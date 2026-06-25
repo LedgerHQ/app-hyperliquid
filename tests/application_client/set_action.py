@@ -10,6 +10,7 @@ class ActionType(IntEnum):
     UPDATE_LEVERAGE = 0x03
     APPROVAL_BUILDER_FEE = 0x04
     UPDATE_ISOLATED_MARGIN = 0x05
+    USER_SET_ABSTRACTION = 0x06
 
 
 class SetAction(TlvSerializable):
