@@ -11,8 +11,6 @@ import struct
 import pytest
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.command_sender import CLA, CommandSender, InsType
-from application_client.set_action import ActionType, SetAction
-from application_client.update_leverage import UpdateLeverage
 from ragger.backend.interface import BackendInterface
 from ragger.bip import pack_derivation_path
 from ragger.error import ExceptionRAPDU, StatusWords
