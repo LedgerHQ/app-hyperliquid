@@ -26,7 +26,9 @@ class Key(Enum):
 def _load_key(key: Key) -> SigningKey:
     """Load signing key from PEM file."""
     keychain_path = os.path.join(
-        os.path.dirname(__file__), "keychain", f"{key.name.lower()}.pem",
+        os.path.dirname(__file__),
+        "keychain",
+        f"{key.name.lower()}.pem",
     )
 
     if not os.path.exists(keychain_path):
