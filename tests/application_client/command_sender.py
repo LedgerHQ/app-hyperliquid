@@ -13,17 +13,20 @@ MAX_APDU_LEN: int = 255
 
 CLA: int = 0xE0
 
+
 class InsType(IntEnum):
     GET_ADDRESS = 0x01
     PROVIDE_ACTION_METADATA = 0x02
     SET_ACTION = 0x03
     SIGN_ACTION = 0x04
 
-P1_FIRST:     int = 0x01
+
+P1_FIRST: int = 0x01
 P1_FOLLOWING: int = 0x00
 
+
 def split_message(message: bytes) -> list[bytes]:
-    return [message[x:x + MAX_APDU_LEN] for x in range(0, len(message), MAX_APDU_LEN)]
+    return [message[x : x + MAX_APDU_LEN] for x in range(0, len(message), MAX_APDU_LEN)]
 
 
 class CommandSender:
@@ -31,18 +34,20 @@ class CommandSender:
         self.backend = backend
 
     def get_address(self, bip32_path: str) -> RAPDU:
-        return self.backend.exchange(cla=CLA,
-                                     ins=InsType.GET_ADDRESS,
-                                     p1=0x00,
-                                     p2=0x00,
-                                     data=pack_derivation_path(bip32_path))
+        return self.backend.exchange(
+            cla=CLA,
+            ins=InsType.GET_ADDRESS,
+            p1=0x00,
+            p2=0x00,
+            data=pack_derivation_path(bip32_path),
+        )
 
     def provide_action_metadata(self, obj: TlvSerializable) -> RAPDU:
         cert_apdu = PKI_CERTIFICATES.get(self.backend.device.type)
         if cert_apdu:
             PKIClient(self.backend).send_certificate(
-                    CertificatePubKeyUsage.CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA,
-                    bytes.fromhex(cert_apdu),
+                CertificatePubKeyUsage.CERTIFICATE_PUBLIC_KEY_USAGE_PERPS_DATA,
+                bytes.fromhex(cert_apdu),
             )
         return self._send_chunked(InsType.PROVIDE_ACTION_METADATA, obj.serialize())
 
@@ -69,9 +74,11 @@ class CommandSender:
 
     @contextmanager
     def sign_action(self, bip32_path: str) -> Generator[None, None, None]:
-        with self.backend.exchange_async(cla=CLA,
-                                         ins=InsType.SIGN_ACTION,
-                                         p1=0x00,
-                                         p2=0x00,
-                                         data=pack_derivation_path(bip32_path)) as resp:
+        with self.backend.exchange_async(
+            cla=CLA,
+            ins=InsType.SIGN_ACTION,
+            p1=0x00,
+            p2=0x00,
+            data=pack_derivation_path(bip32_path),
+        ) as resp:
             yield resp

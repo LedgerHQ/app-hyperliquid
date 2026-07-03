@@ -3,6 +3,7 @@ def unpack_get_address_response(response: bytes) -> bytes:
     # the address is sent back as-is, nothing to do
     return response
 
+
 def unpack_sign_action_response(response: bytes) -> tuple[int, int, bytes, bytes]:
     assert len(response) == 1 + 1 + 32 + 32
 

@@ -6,17 +6,14 @@ class UpdateLeverage(TlvSerializable):
     is_cross: bool
     leverage: int
 
-    def __init__(self,
-                 asset: int,
-                 is_cross: bool,
-                 leverage: int) -> None:
+    def __init__(self, asset: int, is_cross: bool, leverage: int) -> None:
         self.asset = asset
         self.is_cross = is_cross
         self.leverage = leverage
 
     def serialize(self) -> bytes:
         payload = bytearray()
-        payload += self.serialize_field(0xd1, self.asset)
-        payload += self.serialize_field(0xde, self.is_cross)
-        payload += self.serialize_field(0xed, self.leverage)
+        payload += self.serialize_field(0xD1, self.asset)
+        payload += self.serialize_field(0xDE, self.is_cross)
+        payload += self.serialize_field(0xED, self.leverage)
         return bytes(payload)

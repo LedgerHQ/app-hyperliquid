@@ -11,17 +11,16 @@ class ActionType(IntEnum):
     APPROVAL_BUILDER_FEE = 0x04
     UPDATE_ISOLATED_MARGIN = 0x05
 
+
 class SetAction(TlvSerializable):
     version: int
     action_type: ActionType
     nonce: int
     action: TlvSerializable
 
-    def __init__(self,
-                 version: int,
-                 action_type: ActionType,
-                 nonce: int,
-                 action: TlvSerializable) -> None:
+    def __init__(
+        self, version: int, action_type: ActionType, nonce: int, action: TlvSerializable
+    ) -> None:
         self.version = version
         self.action_type = action_type
         self.nonce = nonce
@@ -29,9 +28,9 @@ class SetAction(TlvSerializable):
 
     def serialize(self) -> bytes:
         payload = bytearray()
-        payload += self.serialize_field(0x01, 0x2c)
+        payload += self.serialize_field(0x01, 0x2C)
         payload += self.serialize_field(0x02, self.version)
-        payload += self.serialize_field(0xd0, self.action_type)
-        payload += self.serialize_field(0xda, self.nonce)
-        payload += self.serialize_field(0xdb, self.action.serialize())
+        payload += self.serialize_field(0xD0, self.action_type)
+        payload += self.serialize_field(0xDA, self.nonce)
+        payload += self.serialize_field(0xDB, self.action.serialize())
         return bytes(payload)

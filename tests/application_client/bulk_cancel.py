@@ -5,17 +5,16 @@ class CancelRequest(TlvSerializable):
     asset: int
     oid: int
 
-    def __init__(self,
-                 asset: int,
-                 oid: int) -> None:
+    def __init__(self, asset: int, oid: int) -> None:
         self.asset = asset
         self.oid = oid
 
     def serialize(self) -> bytes:
         payload = bytearray()
-        payload += self.serialize_field(0xd1, self.asset)
-        payload += self.serialize_field(0xdc, self.oid)
+        payload += self.serialize_field(0xD1, self.asset)
+        payload += self.serialize_field(0xDC, self.oid)
         return bytes(payload)
+
 
 class BulkCancel(TlvSerializable):
     cancels: list[CancelRequest]
@@ -26,5 +25,5 @@ class BulkCancel(TlvSerializable):
     def serialize(self) -> bytes:
         payload = bytearray()
         for cancel in self.cancels:
-            payload += self.serialize_field(0xd9, cancel.serialize())
+            payload += self.serialize_field(0xD9, cancel.serialize())
         return bytes(payload)

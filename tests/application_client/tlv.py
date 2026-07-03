@@ -20,7 +20,9 @@ class TlvSerializable:
         elif isinstance(value, bytearray):
             value = bytes(value)
 
-        assert isinstance(value, bytes), f"Unhandled TLV formatting for type : {type(value)}"
+        assert isinstance(value, bytes), (
+            f"Unhandled TLV formatting for type : {type(value)}"
+        )
 
         tlv = bytearray()
         tlv += TlvSerializable.der_encode(tag)

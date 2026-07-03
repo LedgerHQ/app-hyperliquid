@@ -57,7 +57,9 @@ class PKIClient:
     def __init__(self, client: BackendInterface) -> None:
         self._client = client
 
-    def send_certificate(self, key_usage: CertificatePubKeyUsage, payload: bytes) -> RAPDU:
+    def send_certificate(
+        self, key_usage: CertificatePubKeyUsage, payload: bytes
+    ) -> RAPDU:
         """Send PKI certificate to device."""
         return self.send_raw(key_usage, payload)
 
