@@ -10,11 +10,12 @@ Status word constants come from $BOLOS_SDK/include/status_words.h.
 import struct
 
 import pytest
-from application_client.action_metadata import ActionMetadata, Network, OperationType
-from application_client.command_sender import CLA, CommandSender, InsType
 from ragger.backend.interface import BackendInterface
 from ragger.bip import pack_derivation_path
 from ragger.error import ExceptionRAPDU, StatusWords
+
+from application_client.action_metadata import ActionMetadata, Network, OperationType
+from application_client.command_sender import CLA, CommandSender, InsType
 
 # ── CLA / INS validation ──────────────────────────────────────────────────────
 
@@ -48,15 +49,11 @@ def test_error_wrong_p1_p2(backend: BackendInterface) -> None:
     Dispatcher checks P1/P2 before data length, so minimal payloads are fine here.
     """
     path_data = pack_derivation_path("m/44'/60'/0'/0/0")
-    two_zero = struct.pack(
-        ">H", 0
-    )  # two-byte length prefix expected by METADATA/SET_ACTION
+    two_zero = struct.pack(">H", 0)  # two-byte length prefix expected by METADATA/SET_ACTION
 
     # GET_ADDRESS: expects P1=0x00, P2=0x00
     with pytest.raises(ExceptionRAPDU) as exc_info:
-        backend.exchange(
-            cla=CLA, ins=InsType.GET_ADDRESS, p1=0x01, p2=0x00, data=path_data
-        )
+        backend.exchange(cla=CLA, ins=InsType.GET_ADDRESS, p1=0x01, p2=0x00, data=path_data)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
     # PROVIDE_ACTION_METADATA: expects P1=0x01 or P1=0x00, P2=0x00
@@ -72,16 +69,12 @@ def test_error_wrong_p1_p2(backend: BackendInterface) -> None:
 
     # SET_ACTION: expects P1=0x01 or P1=0x00, P2=0x00 — test bad P2
     with pytest.raises(ExceptionRAPDU) as exc_info:
-        backend.exchange(
-            cla=CLA, ins=InsType.SET_ACTION, p1=0x01, p2=0x01, data=two_zero
-        )
+        backend.exchange(cla=CLA, ins=InsType.SET_ACTION, p1=0x01, p2=0x01, data=two_zero)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
     # SIGN_ACTION: expects P1=0x00, P2=0x00
     with pytest.raises(ExceptionRAPDU) as exc_info:
-        backend.exchange(
-            cla=CLA, ins=InsType.SIGN_ACTION, p1=0x01, p2=0x00, data=path_data
-        )
+        backend.exchange(cla=CLA, ins=InsType.SIGN_ACTION, p1=0x01, p2=0x00, data=path_data)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
 

@@ -18,9 +18,7 @@ class SetAction(TlvSerializable):
     nonce: int
     action: TlvSerializable
 
-    def __init__(
-        self, version: int, action_type: ActionType, nonce: int, action: TlvSerializable
-    ) -> None:
+    def __init__(self, version: int, action_type: ActionType, nonce: int, action: TlvSerializable) -> None:
         self.version = version
         self.action_type = action_type
         self.nonce = nonce

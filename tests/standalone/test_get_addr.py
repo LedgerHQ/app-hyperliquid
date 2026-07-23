@@ -1,5 +1,6 @@
-from application_client.command_sender import CommandSender
 from ragger.backend.interface import BackendInterface
+
+from application_client.command_sender import CommandSender
 
 
 def test_get_address(backend: BackendInterface) -> None:
