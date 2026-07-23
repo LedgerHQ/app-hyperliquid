@@ -1,4 +1,7 @@
 import pytest
+from ragger.error import ExceptionRAPDU, StatusWords
+from ragger.navigator.navigation_scenario import NavigateWithScenario
+
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel, CancelRequest
@@ -17,8 +20,6 @@ from application_client.response_unpacker import unpack_sign_action_response
 from application_client.set_action import ActionType, SetAction
 from application_client.update_isolated_margin import UpdateIsolatedMargin
 from application_client.update_leverage import UpdateLeverage
-from ragger.error import ExceptionRAPDU, StatusWords
-from ragger.navigator.navigation_scenario import NavigateWithScenario
 
 _BUILDER = BuilderInfo(
     bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
