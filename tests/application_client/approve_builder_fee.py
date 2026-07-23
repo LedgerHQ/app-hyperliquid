@@ -6,9 +6,7 @@ class ApproveBuilderFee(TlvSerializable):
     max_fee_rate: str
     builder: bytes
 
-    def __init__(
-        self, signature_chain_id: int, max_fee_rate: str, builder: bytes
-    ) -> None:
+    def __init__(self, signature_chain_id: int, max_fee_rate: str, builder: bytes) -> None:
         self.signature_chain_id = signature_chain_id
         self.max_fee_rate = max_fee_rate
         self.builder = builder

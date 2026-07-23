@@ -33,22 +33,16 @@ def common_sign(
 ) -> None:
     with client.sign_action(path):
         scenario_navigator.review_approve(custom_screen_text="Sign message to")
-    remaining, _, _, _ = unpack_sign_action_response(
-        client.backend.last_async_response.data
-    )
+    remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
     while remaining > 0:
         with client.sign_action(path):
             pass
-        remaining, _, _, _ = unpack_sign_action_response(
-            client.backend.last_async_response.data
-        )
+        remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
 
 
 def test_sign_market_order(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -103,9 +97,7 @@ def test_sign_market_order(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_limit_order(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -186,9 +178,7 @@ def test_sign_limit_order(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_edit(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.MODIFY, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.MODIFY, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -217,9 +207,7 @@ def test_sign_edit(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_set_tp_sl(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.MODIFY, 1, "ETH", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.MODIFY, 1, "ETH", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -267,9 +255,7 @@ def test_sign_set_tp_sl(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_cancel(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -287,9 +273,7 @@ def test_sign_cancel(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_cancel_tp(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL_TP, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL_TP, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -307,9 +291,7 @@ def test_sign_cancel_tp(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_cancel_sl(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL_SL, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL_SL, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -327,9 +309,7 @@ def test_sign_cancel_sl(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_cancel_tpsl(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL_TP_SL, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL_TP_SL, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -348,9 +328,7 @@ def test_sign_cancel_tpsl(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_close(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CLOSE, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CLOSE, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -381,9 +359,7 @@ def test_sign_close(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_add_margin(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.UPDATE_MARGIN, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.UPDATE_MARGIN, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -401,9 +377,7 @@ def test_sign_add_margin(scenario_navigator: NavigateWithScenario) -> None:
 
 def test_sign_remove_margin(scenario_navigator: NavigateWithScenario) -> None:
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.UPDATE_MARGIN, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.UPDATE_MARGIN, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -425,9 +399,7 @@ def test_sign_remove_margin(scenario_navigator: NavigateWithScenario) -> None:
 def test_sign_reject(scenario_navigator: NavigateWithScenario) -> None:
     """Rejecting a sign request at the review screen must return SW 0x6985."""
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.MAINNET))
     client.set_action(
         SetAction(
             1,
@@ -459,9 +431,7 @@ def test_sign_testnet(scenario_navigator: NavigateWithScenario) -> None:
     do_comparison=False because the UI screens are visually identical to mainnet.
     """
     client = CommandSender(scenario_navigator.backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.TESTNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.CANCEL, 0, "BTC", Network.TESTNET))
     client.set_action(
         SetAction(
             1,

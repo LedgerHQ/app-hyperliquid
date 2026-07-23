@@ -5,6 +5,4 @@ from ragger.backend.interface import BackendInterface
 
 def test_action_metadata(backend: BackendInterface) -> None:
     client = CommandSender(backend)
-    client.provide_action_metadata(
-        ActionMetadata(1, OperationType.ORDER, 42, "BTC", Network.MAINNET)
-    )
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 42, "BTC", Network.MAINNET))
