@@ -16,6 +16,8 @@ from ragger.error import ExceptionRAPDU, StatusWords
 
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.command_sender import CLA, CommandSender, InsType
+from application_client.set_action import ActionType, SetAction
+from application_client.user_set_abstraction import UserSetAbstraction
 
 # ── CLA / INS validation ──────────────────────────────────────────────────────
 
@@ -24,11 +26,7 @@ def test_error_wrong_cla(backend: BackendInterface) -> None:
     """Any command with a wrong CLA must be rejected with SWO_INVALID_CLA (0x6e00)."""
     with pytest.raises(ExceptionRAPDU) as exc_info:
         backend.exchange(
-            cla=0xA0,
-            ins=InsType.GET_ADDRESS,
-            p1=0x00,
-            p2=0x00,
-            data=pack_derivation_path("m/44'/60'/0'/0/0"),
+            cla=0xA0, ins=InsType.GET_ADDRESS, p1=0x00, p2=0x00, data=pack_derivation_path("m/44'/60'/0'/0/0")
         )
     assert exc_info.value.status == StatusWords.SWO_INVALID_CLA
 
@@ -58,13 +56,7 @@ def test_error_wrong_p1_p2(backend: BackendInterface) -> None:
 
     # PROVIDE_ACTION_METADATA: expects P1=0x01 or P1=0x00, P2=0x00
     with pytest.raises(ExceptionRAPDU) as exc_info:
-        backend.exchange(
-            cla=CLA,
-            ins=InsType.PROVIDE_ACTION_METADATA,
-            p1=0x02,
-            p2=0x00,
-            data=two_zero,
-        )
+        backend.exchange(cla=CLA, ins=InsType.PROVIDE_ACTION_METADATA, p1=0x02, p2=0x00, data=two_zero)
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_P1_P2
 
     # SET_ACTION: expects P1=0x01 or P1=0x00, P2=0x00 — test bad P2
@@ -89,11 +81,7 @@ def test_sign_action_without_metadata(backend: BackendInterface) -> None:
     """
     with pytest.raises(ExceptionRAPDU) as exc_info:
         backend.exchange(
-            cla=CLA,
-            ins=InsType.SIGN_ACTION,
-            p1=0x00,
-            p2=0x00,
-            data=pack_derivation_path("m/44'/60'/0'/0/0"),
+            cla=CLA, ins=InsType.SIGN_ACTION, p1=0x00, p2=0x00, data=pack_derivation_path("m/44'/60'/0'/0/0")
         )
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
 
@@ -118,6 +106,41 @@ def test_error_bad_metadata_signature(backend: BackendInterface) -> None:
                 asset_ticker="ETH",
                 network=Network.MAINNET,
                 signature=bad_sig,
+            )
+        )
+    assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
+
+
+# ── USER_SET_ABSTRACTION validation ───────────────────────────────────────────
+
+
+def test_error_user_set_abstraction_invalid_value(backend: BackendInterface) -> None:
+    """An abstraction value outside {0x00, 0x01, 0x02} must be rejected at SET_ACTION time."""
+    client = CommandSender(backend)
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
+    with pytest.raises(ExceptionRAPDU) as exc_info:
+        client.set_action(
+            SetAction(
+                1,
+                ActionType.USER_SET_ABSTRACTION,
+                1772544778962,
+                UserSetAbstraction(42161, 0x03),  # first value outside the valid range
+            )
+        )
+    assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
+
+
+def test_error_user_set_abstraction_max_invalid_value(backend: BackendInterface) -> None:
+    """The maximum byte value 0xFF for abstraction must also be rejected at SET_ACTION time."""
+    client = CommandSender(backend)
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
+    with pytest.raises(ExceptionRAPDU) as exc_info:
+        client.set_action(
+            SetAction(
+                1,
+                ActionType.USER_SET_ABSTRACTION,
+                1772544778962,
+                UserSetAbstraction(42161, 0xFF),
             )
         )
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA

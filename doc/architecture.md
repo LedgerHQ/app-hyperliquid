@@ -28,6 +28,7 @@ graph TD
         update_leverage["update_leverage.c"]
         update_iso_margin["update_isolated_margin.c"]
         approve_builder_fee["approve_builder_fee.c"]
+        user_set_abstraction["user_set_abstraction.c"]
     end
 
     subgraph Context["State (src/hl_context.c)"]
@@ -38,6 +39,8 @@ graph TD
         eip712_common["eip712_common.c\nDomain hash + sign"]
         eip712_cid["eip712_cid.c\nAgent / connectionId hash"]
         eip712_builder["eip712_builder_fee.c\nApproveBuilderFee hash"]
+        eip712_abstraction["eip712_abstraction.c\nUserSetAbstraction hash"]
+        derive_addr["derive_addr_from_path.c\nBIP-32 → Ethereum address"]
     end
 
     subgraph UI["UI layer (src/ui/)"]
@@ -58,7 +61,7 @@ graph TD
 
     h_meta --> action_metadata
     h_set  --> action
-    action --> bulk_order & bulk_modify & bulk_cancel & update_leverage & update_iso_margin & approve_builder_fee
+    action --> bulk_order & bulk_modify & bulk_cancel & update_leverage & update_iso_margin & approve_builder_fee & user_set_abstraction
     bulk_order --> order_request
     bulk_modify --> order_request
 
@@ -68,8 +71,11 @@ graph TD
     h_sign --> hl_context
     h_sign --> eip712_cid
     h_sign --> eip712_builder
+    h_sign --> eip712_abstraction
+    h_sign --> derive_addr
     eip712_cid --> eip712_common
     eip712_builder --> eip712_common
+    eip712_abstraction --> eip712_common
 
     h_sign --> operation
     operation --> op_order & op_modify & op_cancel & op_close & op_margin
@@ -109,6 +115,7 @@ Each file implements a TLV parser for one action type using the SDK `lib_tlv` li
 | `update_leverage.c` | `s_update_leverage` |
 | `update_isolated_margin.c` | `s_update_isolated_margin` |
 | `approve_builder_fee.c` | `s_approve_builder_fee` |
+| `user_set_abstraction.c` | `s_user_set_abstraction` |
 
 ### Context (`src/hl_context.c`)
 

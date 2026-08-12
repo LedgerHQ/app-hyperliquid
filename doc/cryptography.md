@@ -10,8 +10,9 @@ Two distinct EIP-712 schemas are used depending on the action type:
 
 | Action type | Schema |
 |---|---|
-| All except `APPROVE_BUILDER_FEE` | `Agent(string source, bytes32 connectionId)` |
+| All except `APPROVE_BUILDER_FEE` and `USER_SET_ABSTRACTION` | `Agent(string source, bytes32 connectionId)` |
 | `APPROVE_BUILDER_FEE` | `HyperliquidTransaction:ApproveBuilderFee(string hyperliquidChain, string maxFeeRate, address builder, uint64 nonce)` |
+| `USER_SET_ABSTRACTION` | `HyperliquidTransaction:UserSetAbstraction(string hyperliquidChain, address user, string abstraction, uint64 nonce)` |
 
 ## Standard action signing (`Agent` schema)
 
@@ -81,6 +82,27 @@ flowchart TD
 ```
 
 The domain for `APPROVE_BUILDER_FEE` uses a different `name` and a dynamic `chainId` taken from the action's `SIGNATURE_CHAIN_ID` field (rather than the fixed `1337` used for standard actions).
+
+## `USER_SET_ABSTRACTION` signing
+
+```mermaid
+flowchart TD
+    A["user_set_abstraction fields\n(chain, user, abstraction, nonce)"] --> B["EIP-712 message hash\nkeccak256(typeHash ‖ keccak256(chain) ‖ user_padded ‖ keccak256(abstraction) ‖ nonce_BE8_padded)"]
+
+    META["metadata.network\n+ action.signature_chain_id"] --> CHAIN["hyperliquidChain\nMainnet → 'Mainnet'\nTestnet → 'Testnet'"]
+    CHAIN --> B
+
+    PATH["bip32_path (from SIGN_ACTION)"] --> ADDR["Ethereum address\nkeccak256(pubkey[1..64])[-20:]"]
+    ADDR --> B
+
+    DOMAIN3["EIP-712 domain\nname='HyperliquidSignTransaction'\nversion='1'\nchainId=action.signature_chain_id\nverifyingContract=0x0"] --> D["domain hash"]
+
+    D & B --> G["keccak256(0x1901 ‖ domain_hash ‖ message_hash)"]
+    G --> H["ecdsa_sign(secp256k1, bip32_path, hash)"]
+    H --> I["(v, r, s)"]
+```
+
+`USER_SET_ABSTRACTION` uses the same `HyperliquidSignTransaction` domain as `APPROVE_BUILDER_FEE`. The `user` field is the Ethereum address derived from the signing BIP-32 path (computed once at the first `SIGN_ACTION` call and cached in the signing context). This action is co-signed silently alongside a `BULK_ORDER` — no dedicated UI screen is shown.
 
 ## EIP-712 encoding primitives
 

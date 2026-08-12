@@ -12,12 +12,15 @@ static int fuzz_action(const uint8_t *data, size_t size) {
     };
     uint8_t domain_hash[32];
     uint8_t message_hash[32];
+    /* Dummy wallet address — used only for USER_SET_ABSTRACTION hashing */
+    uint8_t wallet_addr[ADDRESS_LENGTH] = {0};
 
     if (!parse_action(&buf)) {
         return 1;
     }
     return action_hash(ctx_get_current_action(),
                        ctx_get_action_metadata(),
+                       wallet_addr,
                        domain_hash,
                        message_hash);
 }

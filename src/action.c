@@ -7,6 +7,7 @@
 #include "action.h"
 #include "hl_context.h"
 #include "eip712_builder_fee.h"
+#include "eip712_abstraction.h"
 #include "eip712_cid.h"
 
 #define STRUCT_TYPE 0x2c
@@ -23,6 +24,7 @@ typedef struct {
         s_update_leverage_ctx update_leverage_ctx;
         s_approve_builder_fee_ctx approve_builder_fee_ctx;
         s_update_isolated_margin_ctx update_isolated_margin_ctx;
+        s_user_set_abstraction_ctx user_set_abstraction_ctx;
     };
 } s_action_ctx;
 
@@ -67,6 +69,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
         case ACTION_TYPE_UPDATE_LEVERAGE:
         case ACTION_TYPE_APPROVE_BUILDER_FEE:
         case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
+        case ACTION_TYPE_USER_SET_ABSTRACTION:
             break;
         default:
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
@@ -124,6 +127,10 @@ static bool handle_action(const tlv_data_t *data, s_action_ctx *out) {
                 &out->action.update_isolated_margin;
             ret = parse_update_isolated_margin(&data->value, &out->update_isolated_margin_ctx);
             break;
+        case ACTION_TYPE_USER_SET_ABSTRACTION:
+            out->user_set_abstraction_ctx.user_set_abstraction = &out->action.user_set_abstraction;
+            ret = parse_user_set_abstraction(&data->value, &out->user_set_abstraction_ctx);
+            break;
         default:
             ret = false;
     }
@@ -169,6 +176,9 @@ static void dump_action(const s_action *action) {
         case ACTION_TYPE_UPDATE_ISOLATED_MARGIN:
             dump_update_isolated_margin(&action->update_isolated_margin);
             break;
+        case ACTION_TYPE_USER_SET_ABSTRACTION:
+            dump_user_set_abstraction(&action->user_set_abstraction);
+            break;
         default:
             PRINTF("Error: cannot dump unknown action type\n");
     }
@@ -189,12 +199,13 @@ static void dump_action(const s_action *action) {
 static bool is_action_compatible(e_action_type action_type, e_operation_type op_type) {
     switch (op_type) {
         case OP_TYPE_ORDER:
-            // UPDATE_LEVERAGE and APPROVE_BUILDER_FEE may accompany a bulk
-            // order. The builder fee approval is signed silently by design —
-            // see the comment in bulk_order.c handle_builder().
+            // UPDATE_LEVERAGE, APPROVE_BUILDER_FEE and USER_SET_ABSTRACTION
+            // may accompany a bulk order. Both the builder fee approval and
+            // the abstraction change are signed silently by design.
             return action_type == ACTION_TYPE_BULK_ORDER ||
                    action_type == ACTION_TYPE_UPDATE_LEVERAGE ||
-                   action_type == ACTION_TYPE_APPROVE_BUILDER_FEE;
+                   action_type == ACTION_TYPE_APPROVE_BUILDER_FEE ||
+                   action_type == ACTION_TYPE_USER_SET_ABSTRACTION;
         case OP_TYPE_MODIFY:
             // A modify is represented by exactly one action: either BULK_MODIFY
             // or BULK_ORDER.  Reject if a compatible action is already present
@@ -329,6 +340,7 @@ static bool compute_connection_id(const s_action *action, uint8_t end_byte, uint
 
 bool action_hash(const s_action *action,
                  const s_action_metadata *metadata,
+                 const uint8_t wallet_addr[ADDRESS_LENGTH],
                  uint8_t *domain_hash,
                  uint8_t *message_hash) {
     uint8_t connection_id[32];
@@ -336,26 +348,44 @@ bool action_hash(const s_action *action,
     if ((action == NULL) || (metadata == NULL) || (domain_hash == NULL) || (message_hash == NULL)) {
         return false;
     }
-    if (action->type == ACTION_TYPE_APPROVE_BUILDER_FEE) {
-        if (!eip712_builder_fee_hash(&action->approve_builder_fee.signature_chain_id,
-                                     (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
-                                     action->approve_builder_fee.max_fee_rate,
-                                     action->approve_builder_fee.builder,
-                                     &action->nonce,
-                                     domain_hash,
-                                     message_hash)) {
-            return false;
-        }
-    } else {
-        if (!compute_connection_id(action, 0, connection_id)) {
-            return false;
-        }
-        if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
-                             connection_id,
-                             domain_hash,
-                             message_hash)) {
-            return false;
-        }
+    switch (action->type) {
+        case ACTION_TYPE_APPROVE_BUILDER_FEE:
+            if (!eip712_builder_fee_hash(
+                    &action->approve_builder_fee.signature_chain_id,
+                    (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
+                    action->approve_builder_fee.max_fee_rate,
+                    action->approve_builder_fee.builder,
+                    &action->nonce,
+                    domain_hash,
+                    message_hash)) {
+                return false;
+            }
+            break;
+
+        case ACTION_TYPE_USER_SET_ABSTRACTION:
+            if (!eip712_abstraction_hash(
+                    &action->user_set_abstraction.signature_chain_id,
+                    (metadata->network == NETWORK_MAINNET) ? "Mainnet" : "Testnet",
+                    wallet_addr,
+                    get_abstraction_string(&action->user_set_abstraction),
+                    &action->nonce,
+                    domain_hash,
+                    message_hash)) {
+                return false;
+            }
+            break;
+
+        default:
+            if (!compute_connection_id(action, 0, connection_id)) {
+                return false;
+            }
+            if (!eip712_cid_hash((metadata->network == NETWORK_MAINNET) ? "a" : "b",
+                                 connection_id,
+                                 domain_hash,
+                                 message_hash)) {
+                return false;
+            }
+            break;
     }
     return true;
 }

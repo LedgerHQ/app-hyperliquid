@@ -1,16 +1,13 @@
 #include "io.h"
 #include "status_words.h"
 #include "bip32.h"
-#include "cx.h"
-#include "crypto_helpers.h"
 #include "get_addr.h"
-#include "constants.h"
+#include "derive_addr_from_path.h"
 
 int handler_get_addr(const buffer_t *payload) {
     uint32_t bip32_path[MAX_BIP32_PATH];
     uint8_t path_length;
-    uint8_t raw_pk[65];
-    uint8_t hashed_pk[32];
+    uint8_t addr[ADDRESS_LENGTH];
 
     if (payload->size < sizeof(path_length)) {
         return io_send_sw(SWO_WRONG_DATA_LENGTH);
@@ -22,18 +19,8 @@ int handler_get_addr(const buffer_t *payload) {
                          path_length)) {
         return io_send_sw(SWO_INCORRECT_DATA);
     }
-    if (bip32_derive_get_pubkey_256(CX_CURVE_256K1,
-                                    bip32_path,
-                                    path_length,
-                                    raw_pk,
-                                    NULL,
-                                    CX_SHA512) != CX_OK) {
-        return io_send_sw(SWO_PARAMETER_ERROR_NO_INFO);
-    }
-    if (cx_keccak_256_hash(&raw_pk[1], sizeof(raw_pk) - 1, hashed_pk) != CX_OK) {
+    if (!derive_addr_from_path(bip32_path, path_length, addr)) {
         return io_send_sw(SWO_INCORRECT_DATA);
     }
-    return io_send_response_pointer(hashed_pk + sizeof(hashed_pk) - ADDRESS_LENGTH,
-                                    ADDRESS_LENGTH,
-                                    SWO_SUCCESS);
+    return io_send_response_pointer(addr, sizeof(addr), SWO_SUCCESS);
 }

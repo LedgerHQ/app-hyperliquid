@@ -74,7 +74,8 @@ add_library(bulk_modify    SHARED ../src/bulk_modify.c)
 add_library(bulk_order     SHARED ../src/bulk_order.c)
 add_library(stubs_cx       SHARED stubs/cx_stubs.c)
 add_library(stubs_eip712   SHARED stubs/eip712_stubs.c)
-add_library(action         SHARED ../src/action.c)
+add_library(action                SHARED ../src/action.c)
+add_library(user_set_abstraction  SHARED ../src/user_set_abstraction.c)
 
 # Common link set for tests that use TLV parsing
 set(COMMON_LIBS buffer bip32 read write varint format tlv_library cmocka gcov)
@@ -102,6 +103,12 @@ add_executable(test_update_isolated_margin test_update_isolated_margin.c)
 target_link_libraries(test_update_isolated_margin PUBLIC
     update_isolated_margin ${APP_LIBS} ${COMMON_LIBS})
 add_test(test_update_isolated_margin test_update_isolated_margin)
+
+# ── test_user_set_abstraction ─────────────────────────────────────────────────
+add_executable(test_user_set_abstraction test_user_set_abstraction.c)
+target_link_libraries(test_user_set_abstraction PUBLIC
+    user_set_abstraction ${APP_LIBS} ${COMMON_LIBS})
+add_test(test_user_set_abstraction test_user_set_abstraction)
 
 # ── test_bulk_cancel ─────────────────────────────────────────────────────────
 add_executable(test_bulk_cancel test_bulk_cancel.c)
@@ -131,7 +138,7 @@ add_test(test_bulk_order test_bulk_order)
 add_executable(test_action test_action.c)
 target_link_libraries(test_action PUBLIC
     action bulk_cancel bulk_order bulk_modify order_request
-    update_leverage update_isolated_margin approve_builder_fee
+    update_leverage update_isolated_margin approve_builder_fee user_set_abstraction
     stubs_cx stubs_eip712 stubs_os_utils ${APP_LIBS} ${COMMON_LIBS} write)
 add_test(test_action test_action)
 

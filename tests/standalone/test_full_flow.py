@@ -8,18 +8,12 @@ from application_client.bulk_cancel import BulkCancel, CancelRequest
 from application_client.bulk_modify import BulkModify, ModifyRequest
 from application_client.bulk_order import BuilderInfo, BulkOrder, Grouping
 from application_client.command_sender import CommandSender
-from application_client.order_request import (
-    Limit,
-    OrderRequest,
-    OrderType,
-    Tif,
-    Trigger,
-    TriggerType,
-)
+from application_client.order_request import Limit, OrderRequest, OrderType, Tif, Trigger, TriggerType
 from application_client.response_unpacker import unpack_sign_action_response
 from application_client.set_action import ActionType, SetAction
 from application_client.update_isolated_margin import UpdateIsolatedMargin
 from application_client.update_leverage import UpdateLeverage
+from application_client.user_set_abstraction import Abstraction, UserSetAbstraction
 
 _BUILDER = BuilderInfo(
     bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
@@ -31,9 +25,10 @@ def common_sign(
     client: CommandSender,
     scenario_navigator: NavigateWithScenario,
     path: str = "m/44'/60'/0'/0/0",
+    do_comparison: bool = True,
 ) -> None:
     with client.sign_action(path):
-        scenario_navigator.review_approve(custom_screen_text="Sign message to")
+        scenario_navigator.review_approve(custom_screen_text="Sign message to", do_comparison=do_comparison)
     remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
     while remaining > 0:
         with client.sign_action(path):
@@ -394,6 +389,85 @@ def test_sign_remove_margin(scenario_navigator: NavigateWithScenario) -> None:
     common_sign(client, scenario_navigator)
 
 
+# ── USER_SET_ABSTRACTION ──────────────────────────────────────────────────────
+
+_ABSTRACTION_ORDER = BulkOrder(
+    [
+        OrderRequest(
+            OrderType.LIMIT,
+            1,
+            False,
+            "2200",
+            "0.5128",
+            False,
+            Limit(Tif.GTC),
+        ),
+    ],
+    Grouping.NA,
+    _BUILDER,
+)
+
+
+def test_sign_user_set_abstraction_unified_account(scenario_navigator: NavigateWithScenario) -> None:
+    """UNIFIED_ACCOUNT abstraction change is co-signed silently alongside an order.
+
+    No snapshot comparison: the UI shows the accompanying BULK_ORDER review screen,
+    not anything specific to the abstraction change.
+    """
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
+    client.set_action(
+        SetAction(
+            1,
+            ActionType.USER_SET_ABSTRACTION,
+            1772544778962,
+            UserSetAbstraction(42161, Abstraction.UNIFIED_ACCOUNT),
+        )
+    )
+    client.set_action(SetAction(1, ActionType.BULK_ORDER, 1772544778963, _ABSTRACTION_ORDER))
+    common_sign(client, scenario_navigator, do_comparison=False)
+
+
+def test_sign_user_set_abstraction_disabled(scenario_navigator: NavigateWithScenario) -> None:
+    """DISABLED abstraction change is co-signed silently alongside an order.
+
+    No snapshot comparison: the UI shows the accompanying BULK_ORDER review screen,
+    not anything specific to the abstraction change.
+    """
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
+    client.set_action(
+        SetAction(
+            1,
+            ActionType.USER_SET_ABSTRACTION,
+            1772544778962,
+            UserSetAbstraction(42161, Abstraction.DISABLED),
+        )
+    )
+    client.set_action(SetAction(1, ActionType.BULK_ORDER, 1772544778963, _ABSTRACTION_ORDER))
+    common_sign(client, scenario_navigator, do_comparison=False)
+
+
+def test_sign_user_set_abstraction_portfolio_margin(scenario_navigator: NavigateWithScenario) -> None:
+    """PORTFOLIO_MARGIN abstraction change is co-signed silently alongside an order.
+
+    No snapshot comparison: the UI shows the accompanying BULK_ORDER review screen,
+    not anything specific to the abstraction change.
+    """
+    client = CommandSender(scenario_navigator.backend)
+    client.provide_action_metadata(ActionMetadata(1, OperationType.ORDER, 1, "ETH", Network.MAINNET))
+    client.set_action(
+        SetAction(
+            1,
+            ActionType.USER_SET_ABSTRACTION,
+            1772544778962,
+            UserSetAbstraction(42161, Abstraction.PORTFOLIO_MARGIN),
+        )
+    )
+    client.set_action(SetAction(1, ActionType.BULK_ORDER, 1772544778963, _ABSTRACTION_ORDER))
+    common_sign(client, scenario_navigator, do_comparison=False)
+
+
 # ── User rejection ────────────────────────────────────────────────────────────
 
 
@@ -413,10 +487,7 @@ def test_sign_reject(scenario_navigator: NavigateWithScenario) -> None:
             ),
         )
     )
-    with (
-        pytest.raises(ExceptionRAPDU) as exc_info,
-        client.sign_action("m/44'/60'/0'/0/0"),
-    ):
+    with pytest.raises(ExceptionRAPDU) as exc_info, client.sign_action("m/44'/60'/0'/0/0"):
         scenario_navigator.review_reject(do_comparison=False)
     assert exc_info.value.status == StatusWords.SWO_CONDITIONS_NOT_SATISFIED
 
