@@ -8,12 +8,13 @@ Status word constants come from $BOLOS_SDK/include/status_words.h.
 """
 
 import struct
+from typing import cast
 
 import pytest
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.command_sender import CLA, CommandSender, InsType
 from application_client.set_action import ActionType, SetAction
-from application_client.user_set_abstraction import UserSetAbstraction
+from application_client.user_set_abstraction import Abstraction, UserSetAbstraction
 from ragger.backend.interface import BackendInterface
 from ragger.bip import pack_derivation_path
 from ragger.error import ExceptionRAPDU, StatusWords
@@ -123,7 +124,7 @@ def test_error_user_set_abstraction_invalid_value(backend: BackendInterface) -> 
                 1,
                 ActionType.USER_SET_ABSTRACTION,
                 1772544778962,
-                UserSetAbstraction(42161, 0x03),  # first value outside the valid range
+                UserSetAbstraction(42161, cast(Abstraction, 0x03)),  # first value outside the valid range
             )
         )
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA
@@ -139,7 +140,7 @@ def test_error_user_set_abstraction_max_invalid_value(backend: BackendInterface)
                 1,
                 ActionType.USER_SET_ABSTRACTION,
                 1772544778962,
-                UserSetAbstraction(42161, 0xFF),
+                UserSetAbstraction(42161, cast(Abstraction, 0xFF)),
             )
         )
     assert exc_info.value.status == StatusWords.SWO_INCORRECT_DATA

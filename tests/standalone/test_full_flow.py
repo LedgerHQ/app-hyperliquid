@@ -28,10 +28,12 @@ def common_sign(
 ) -> None:
     with client.sign_action(path):
         scenario_navigator.review_approve(custom_screen_text="Sign message to", do_comparison=do_comparison)
+    assert client.backend.last_async_response is not None
     remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
     while remaining > 0:
         with client.sign_action(path):
             pass
+        assert client.backend.last_async_response is not None
         remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
 
 
