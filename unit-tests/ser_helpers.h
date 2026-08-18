@@ -19,8 +19,8 @@
 
 typedef struct {
     uint8_t data[512];
-    size_t  len;
-    size_t  rpos;
+    size_t len;
+    size_t rpos;
 } ser_buf_t;
 
 static size_t ser_writer(cmp_ctx_t *ctx, const void *data, size_t count) {
@@ -63,8 +63,8 @@ static inline cmp_ctx_t make_writer(ser_buf_t *sb) {
  * Reads and asserts the next msgpack value is a fixstr matching expected.
  */
 static inline void assert_cmp_str(cmp_ctx_t *r, const char *expected) {
-    char    buf[64] = {0};
-    uint32_t sz     = sizeof(buf) - 1;
+    char buf[64] = {0};
+    uint32_t sz = sizeof(buf) - 1;
     assert_true(cmp_read_str(r, buf, &sz));
     assert_string_equal(buf, expected);
 }
@@ -72,8 +72,10 @@ static inline void assert_cmp_str(cmp_ctx_t *r, const char *expected) {
 /**
  * Return pointer to the first occurrence of needle in buf, or NULL.
  */
-static inline const uint8_t *find_bytes(const uint8_t *buf, size_t buf_len,
-                                         const uint8_t *needle, size_t needle_len) {
+static inline const uint8_t *find_bytes(const uint8_t *buf,
+                                        size_t buf_len,
+                                        const uint8_t *needle,
+                                        size_t needle_len) {
     if (needle_len == 0 || needle_len > buf_len) return NULL;
     for (size_t i = 0; i <= buf_len - needle_len; ++i) {
         if (memcmp(&buf[i], needle, needle_len) == 0) return &buf[i];
@@ -86,11 +88,12 @@ static inline const uint8_t *find_bytes(const uint8_t *buf, size_t buf_len,
  * somewhere in the serialized buffer sb (.data / .len fields).
  * Strings must be ≤ 31 bytes (fixstr range); all app key/value strings qualify.
  */
-#define ASSERT_SERIALIZED_STR(sb, s) do {                                   \
-    static const char _s[] = (s);                                           \
-    size_t _len = sizeof(_s) - 1;                                           \
-    uint8_t _enc[33];                                                        \
-    _enc[0] = (uint8_t)(0xa0u | _len);                                      \
-    memcpy(&_enc[1], _s, _len);                                             \
-    assert_non_null(find_bytes((sb).data, (sb).len, _enc, 1u + _len));      \
-} while (0)
+#define ASSERT_SERIALIZED_STR(sb, s)                                       \
+    do {                                                                   \
+        static const char _s[] = (s);                                      \
+        size_t _len = sizeof(_s) - 1;                                      \
+        uint8_t _enc[33];                                                  \
+        _enc[0] = (uint8_t) (0xa0u | _len);                                \
+        memcpy(&_enc[1], _s, _len);                                        \
+        assert_non_null(find_bytes((sb).data, (sb).len, _enc, 1u + _len)); \
+    } while (0)
