@@ -10,14 +10,13 @@ Status word constants come from $BOLOS_SDK/include/status_words.h.
 import struct
 
 import pytest
-from ragger.backend.interface import BackendInterface
-from ragger.bip import pack_derivation_path
-from ragger.error import ExceptionRAPDU, StatusWords
-
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.command_sender import CLA, CommandSender, InsType
 from application_client.set_action import ActionType, SetAction
 from application_client.user_set_abstraction import UserSetAbstraction
+from ragger.backend.interface import BackendInterface
+from ragger.bip import pack_derivation_path
+from ragger.error import ExceptionRAPDU, StatusWords
 
 # ── CLA / INS validation ──────────────────────────────────────────────────────
 
