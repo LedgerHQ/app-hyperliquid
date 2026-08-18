@@ -1,6 +1,10 @@
 target-version = "py311"
 line-length = 120
 
+# Vendored third-party packages: not our code to lint.
+exclude = [
+]
+
 [lint]
 select = [
     "E",    # pycodestyle errors
@@ -9,4 +13,7 @@ select = [
     "B",    # bugbear
     "UP",   # pyupgrade
     "RUF",  # ruff-native rules
+]
+
+ignore = [
 ]

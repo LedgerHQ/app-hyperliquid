@@ -13,16 +13,16 @@
 
 static s_action_metadata make_metadata(uint32_t asset_id) {
     s_action_metadata m = {0};
-    m.op_type  = OP_TYPE_ORDER;
+    m.op_type = OP_TYPE_ORDER;
     m.asset_id = asset_id;
-    m.network  = NETWORK_MAINNET;
+    m.network = NETWORK_MAINNET;
     strncpy(m.asset_ticker, "BTC", sizeof(m.asset_ticker) - 1);
     return m;
 }
 
 static s_action make_action(e_action_type type) {
     s_action a = {0};
-    a.type  = type;
+    a.type = type;
     a.nonce = 12345;
     return a;
 }
@@ -167,7 +167,7 @@ static void test_reset_clears_state(void **state) {
     (void) state;
 
     s_action_metadata m = make_metadata(7);
-    s_action          a = make_action(ACTION_TYPE_BULK_MODIFY);
+    s_action a = make_action(ACTION_TYPE_BULK_MODIFY);
     ctx_save_action_metadata(&m);
     ctx_push_action(&a);
 

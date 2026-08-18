@@ -18,10 +18,10 @@
 
 /* ─── mock handlers ──────────────────────────────────────────────────────── */
 
-static bool             g_handler_called;
-static bool             g_handler_return_value;
-static uint8_t          g_handler_received[PAYLOAD_BUFFER_SIZE];
-static size_t           g_handler_received_size;
+static bool g_handler_called;
+static bool g_handler_return_value;
+static uint8_t g_handler_received[PAYLOAD_BUFFER_SIZE];
+static size_t g_handler_received_size;
 
 static bool mock_handler(const buffer_t *buf) {
     g_handler_called = true;
@@ -43,10 +43,10 @@ static bool mock_handler_alt(const buffer_t *buf) {
  * Writes a first-chunk APDU into @out: 2-byte BE total-size prefix followed by
  * @data_len bytes from @data.  Returns the total number of bytes written.
  */
-static size_t make_first_chunk(uint8_t       *out,
-                                const uint8_t *data,
-                                size_t         data_len,
-                                uint16_t       total_len) {
+static size_t make_first_chunk(uint8_t *out,
+                               const uint8_t *data,
+                               size_t data_len,
+                               uint16_t total_len) {
     out[0] = (uint8_t) (total_len >> 8);
     out[1] = (uint8_t) (total_len & 0xFF);
     if (data && data_len) {
@@ -59,8 +59,8 @@ static size_t make_first_chunk(uint8_t       *out,
 
 static int setup(void **state) {
     (void) state;
-    g_handler_called        = false;
-    g_handler_return_value  = true;
+    g_handler_called = false;
+    g_handler_return_value = true;
     g_handler_received_size = 0;
     memset(g_handler_received, 0, sizeof(g_handler_received));
     return 0;
@@ -87,7 +87,7 @@ static void test_single_chunk_happy_path(void **state) {
     (void) state;
     uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
     uint8_t apdu[2 + sizeof(payload)];
-    size_t  apdu_len = make_first_chunk(apdu, payload, sizeof(payload), sizeof(payload));
+    size_t apdu_len = make_first_chunk(apdu, payload, sizeof(payload), sizeof(payload));
 
     buffer_t buf = {.ptr = apdu, .size = apdu_len, .offset = 0};
     assert_true(process_chunked_payload(true, &buf, mock_handler));
@@ -103,10 +103,10 @@ static void test_two_chunks_happy_path(void **state) {
 
     /* First chunk: header + first half */
     uint8_t apdu1[2 + half];
-    size_t  len1 = make_first_chunk(apdu1, payload, half, sizeof(payload));
+    size_t len1 = make_first_chunk(apdu1, payload, half, sizeof(payload));
     buffer_t buf1 = {.ptr = apdu1, .size = len1, .offset = 0};
     assert_true(process_chunked_payload(true, &buf1, mock_handler));
-    assert_false(g_handler_called);  /* not complete yet */
+    assert_false(g_handler_called); /* not complete yet */
 
     /* Second chunk: remaining half */
     buffer_t buf2 = {.ptr = payload + half, .size = sizeof(payload) - half, .offset = 0};
@@ -122,7 +122,7 @@ static void test_many_chunks_happy_path(void **state) {
     const size_t chunk = 3;
 
     uint8_t apdu1[2 + chunk];
-    size_t  len1 = make_first_chunk(apdu1, payload, chunk, sizeof(payload));
+    size_t len1 = make_first_chunk(apdu1, payload, chunk, sizeof(payload));
     buffer_t buf1 = {.ptr = apdu1, .size = len1, .offset = 0};
     assert_true(process_chunked_payload(true, &buf1, mock_handler));
     assert_false(g_handler_called);
@@ -142,7 +142,7 @@ static void test_oversized_declared_size_fails(void **state) {
     (void) state;
     /* Declared size one byte beyond the buffer capacity — must be rejected */
     uint16_t oversized = PAYLOAD_BUFFER_SIZE + 1;
-    uint8_t  apdu[2]   = {(uint8_t)(oversized >> 8), (uint8_t)(oversized & 0xFF)};
+    uint8_t apdu[2] = {(uint8_t) (oversized >> 8), (uint8_t) (oversized & 0xFF)};
     buffer_t buf = {.ptr = apdu, .size = sizeof(apdu), .offset = 0};
     assert_false(process_chunked_payload(true, &buf, mock_handler));
     assert_false(g_handler_called);
@@ -156,7 +156,7 @@ static void test_exact_max_size_accepted(void **state) {
      * Abort the dangling session at the end so subsequent tests start clean.
      */
     uint16_t max = PAYLOAD_BUFFER_SIZE;
-    uint8_t  apdu[2] = {(uint8_t)(max >> 8), (uint8_t)(max & 0xFF)};
+    uint8_t apdu[2] = {(uint8_t) (max >> 8), (uint8_t) (max & 0xFF)};
     buffer_t buf = {.ptr = apdu, .size = sizeof(apdu), .offset = 0};
     assert_true(process_chunked_payload(true, &buf, mock_handler));
     assert_false(g_handler_called);
@@ -168,9 +168,9 @@ static void test_exact_max_size_accepted(void **state) {
 static void test_chunk_exceeds_declared_size_fails(void **state) {
     (void) state;
     /* Declare 3 bytes but embed 5 bytes of data in the first chunk */
-    uint8_t payload[]      = {0x01, 0x02, 0x03, 0x04, 0x05};
+    uint8_t payload[] = {0x01, 0x02, 0x03, 0x04, 0x05};
     uint8_t apdu[2 + sizeof(payload)];
-    size_t  apdu_len = make_first_chunk(apdu, payload, sizeof(payload), 3 /* declared */);
+    size_t apdu_len = make_first_chunk(apdu, payload, sizeof(payload), 3 /* declared */);
     buffer_t buf = {.ptr = apdu, .size = apdu_len, .offset = 0};
     assert_false(process_chunked_payload(true, &buf, mock_handler));
     assert_false(g_handler_called);
@@ -182,7 +182,7 @@ static void test_following_without_first_fails(void **state) {
      * After setup the internal handler field is NULL.  Sending P1_FOLLOWING
      * with any non-NULL handler must be rejected by the mismatch check.
      */
-    uint8_t  data[] = {0x01, 0x02};
+    uint8_t data[] = {0x01, 0x02};
     buffer_t buf = {.ptr = data, .size = sizeof(data), .offset = 0};
     assert_false(process_chunked_payload(false, &buf, mock_handler));
     assert_false(g_handler_called);
@@ -193,7 +193,7 @@ static void test_cross_command_interleave_fails(void **state) {
     /* Begin a session for mock_handler */
     uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
     uint8_t apdu1[2 + 2];
-    size_t  len1 = make_first_chunk(apdu1, payload, 2, sizeof(payload));
+    size_t len1 = make_first_chunk(apdu1, payload, 2, sizeof(payload));
     buffer_t buf1 = {.ptr = apdu1, .size = len1, .offset = 0};
     assert_true(process_chunked_payload(true, &buf1, mock_handler));
     assert_false(g_handler_called);
@@ -209,7 +209,7 @@ static void test_empty_following_chunk_fails(void **state) {
     /* Start a valid 4-byte session */
     uint8_t payload[] = {0x01, 0x02, 0x03, 0x04};
     uint8_t apdu1[2 + 2];
-    size_t  len1 = make_first_chunk(apdu1, payload, 2, sizeof(payload));
+    size_t len1 = make_first_chunk(apdu1, payload, 2, sizeof(payload));
     buffer_t buf1 = {.ptr = apdu1, .size = len1, .offset = 0};
     assert_true(process_chunked_payload(true, &buf1, mock_handler));
     assert_false(g_handler_called);
@@ -227,28 +227,28 @@ static void test_handler_failure_propagated(void **state) {
 
     uint8_t payload[] = {0xDE, 0xAD};
     uint8_t apdu[2 + sizeof(payload)];
-    size_t  apdu_len = make_first_chunk(apdu, payload, sizeof(payload), sizeof(payload));
+    size_t apdu_len = make_first_chunk(apdu, payload, sizeof(payload), sizeof(payload));
     buffer_t buf = {.ptr = apdu, .size = apdu_len, .offset = 0};
     assert_false(process_chunked_payload(true, &buf, mock_handler));
-    assert_true(g_handler_called);  /* handler was invoked but returned false */
+    assert_true(g_handler_called); /* handler was invoked but returned false */
 }
 
 /* ─── main ───────────────────────────────────────────────────────────────── */
 
 int main(void) {
     const struct CMUnitTest tests[] = {
-        cmocka_unit_test_setup(test_null_data_returns_false,                    setup),
+        cmocka_unit_test_setup(test_null_data_returns_false, setup),
         cmocka_unit_test_setup(test_first_chunk_too_small_for_size_field_fails, setup),
-        cmocka_unit_test_setup(test_single_chunk_happy_path,                    setup),
-        cmocka_unit_test_setup(test_two_chunks_happy_path,                      setup),
-        cmocka_unit_test_setup(test_many_chunks_happy_path,                     setup),
-        cmocka_unit_test_setup(test_oversized_declared_size_fails,              setup),
-        cmocka_unit_test_setup(test_exact_max_size_accepted,                    setup),
-        cmocka_unit_test_setup(test_chunk_exceeds_declared_size_fails,          setup),
-        cmocka_unit_test_setup(test_following_without_first_fails,              setup),
-        cmocka_unit_test_setup(test_cross_command_interleave_fails,             setup),
-        cmocka_unit_test_setup(test_empty_following_chunk_fails,                setup),
-        cmocka_unit_test_setup(test_handler_failure_propagated,                 setup),
+        cmocka_unit_test_setup(test_single_chunk_happy_path, setup),
+        cmocka_unit_test_setup(test_two_chunks_happy_path, setup),
+        cmocka_unit_test_setup(test_many_chunks_happy_path, setup),
+        cmocka_unit_test_setup(test_oversized_declared_size_fails, setup),
+        cmocka_unit_test_setup(test_exact_max_size_accepted, setup),
+        cmocka_unit_test_setup(test_chunk_exceeds_declared_size_fails, setup),
+        cmocka_unit_test_setup(test_following_without_first_fails, setup),
+        cmocka_unit_test_setup(test_cross_command_interleave_fails, setup),
+        cmocka_unit_test_setup(test_empty_following_chunk_fails, setup),
+        cmocka_unit_test_setup(test_handler_failure_propagated, setup),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

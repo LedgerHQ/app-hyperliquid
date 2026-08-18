@@ -1,7 +1,4 @@
 import pytest
-from ragger.error import ExceptionRAPDU, StatusWords
-from ragger.navigator.navigation_scenario import NavigateWithScenario
-
 from application_client.action_metadata import ActionMetadata, Network, OperationType
 from application_client.approve_builder_fee import ApproveBuilderFee
 from application_client.bulk_cancel import BulkCancel, CancelRequest
@@ -14,6 +11,8 @@ from application_client.set_action import ActionType, SetAction
 from application_client.update_isolated_margin import UpdateIsolatedMargin
 from application_client.update_leverage import UpdateLeverage
 from application_client.user_set_abstraction import Abstraction, UserSetAbstraction
+from ragger.error import ExceptionRAPDU, StatusWords
+from ragger.navigator.navigation_scenario import NavigateWithScenario
 
 _BUILDER = BuilderInfo(
     bytes.fromhex("c0708cdd6cd166d51da264e3f49a0422be26e35b"),
@@ -29,10 +28,12 @@ def common_sign(
 ) -> None:
     with client.sign_action(path):
         scenario_navigator.review_approve(custom_screen_text="Sign message to", do_comparison=do_comparison)
+    assert client.backend.last_async_response is not None
     remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
     while remaining > 0:
         with client.sign_action(path):
             pass
+        assert client.backend.last_async_response is not None
         remaining, _, _, _ = unpack_sign_action_response(client.backend.last_async_response.data)
 
 

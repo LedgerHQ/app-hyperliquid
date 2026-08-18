@@ -6,33 +6,46 @@
 #include <stdint.h>
 
 bool eip712_builder_fee_hash(const uint64_t *chain_id,
-                             const char     *chain,
-                             const char     *max_fee_rate,
-                             const uint8_t  *builder,
+                             const char *chain,
+                             const char *max_fee_rate,
+                             const uint8_t *builder,
                              const uint64_t *nonce,
-                             uint8_t        *domain_hash,
-                             uint8_t        *message_hash) {
-    (void) chain_id; (void) chain; (void) max_fee_rate;
-    (void) builder; (void) nonce; (void) domain_hash; (void) message_hash;
+                             uint8_t *domain_hash,
+                             uint8_t *message_hash) {
+    (void) chain_id;
+    (void) chain;
+    (void) max_fee_rate;
+    (void) builder;
+    (void) nonce;
+    (void) domain_hash;
+    (void) message_hash;
     return false;
 }
 
-bool eip712_cid_hash(const char    *source,
+bool eip712_cid_hash(const char *source,
                      const uint8_t *cid,
-                     uint8_t       *domain_hash,
-                     uint8_t       *message_hash) {
-    (void) source; (void) cid; (void) domain_hash; (void) message_hash;
+                     uint8_t *domain_hash,
+                     uint8_t *message_hash) {
+    (void) source;
+    (void) cid;
+    (void) domain_hash;
+    (void) message_hash;
     return false;
 }
 
 bool eip712_abstraction_hash(const uint64_t *chain_id,
-                             const char     *chain,
-                             const uint8_t  *user,
-                             const char     *abstraction,
+                             const char *chain,
+                             const uint8_t *user,
+                             const char *abstraction,
                              const uint64_t *nonce,
-                             uint8_t        *domain_hash,
-                             uint8_t        *message_hash) {
-    (void) chain_id; (void) chain; (void) user; (void) abstraction;
-    (void) nonce; (void) domain_hash; (void) message_hash;
+                             uint8_t *domain_hash,
+                             uint8_t *message_hash) {
+    (void) chain_id;
+    (void) chain;
+    (void) user;
+    (void) abstraction;
+    (void) nonce;
+    (void) domain_hash;
+    (void) message_hash;
     return false;
 }

@@ -44,7 +44,7 @@ static inline size_t der_encode(uint8_t *buf, uint32_t value) {
  */
 static inline size_t encode_int_be(uint8_t *buf, uint64_t value) {
     uint8_t tmp[8];
-    size_t  len = 0;
+    size_t len = 0;
 
     tmp[7] = (uint8_t) value;
     tmp[6] = (uint8_t) (value >> 8);
@@ -78,10 +78,10 @@ static inline size_t encode_int_be(uint8_t *buf, uint64_t value) {
  * @param vlen    Length of value bytes
  */
 static inline void tlv_append_field(uint8_t *buf,
-                                    size_t  *offset,
+                                    size_t *offset,
                                     uint32_t tag,
                                     const uint8_t *value,
-                                    size_t         vlen) {
+                                    size_t vlen) {
     *offset += der_encode(&buf[*offset], tag);
     *offset += der_encode(&buf[*offset], (uint32_t) vlen);
     memcpy(&buf[*offset], value, vlen);
@@ -93,7 +93,7 @@ static inline void tlv_append_field(uint8_t *buf,
  */
 static inline void tlv_append_uint(uint8_t *buf, size_t *offset, uint32_t tag, uint64_t value) {
     uint8_t vbuf[8];
-    size_t  vlen = encode_int_be(vbuf, value);
+    size_t vlen = encode_int_be(vbuf, value);
     tlv_append_field(buf, offset, tag, vbuf, vlen);
 }
 
@@ -108,10 +108,7 @@ static inline void tlv_append_bool(uint8_t *buf, size_t *offset, uint32_t tag, i
 /**
  * Appends a string TLV field to buf at *offset (not NUL-terminated in TLV).
  */
-static inline void tlv_append_str(uint8_t    *buf,
-                                   size_t     *offset,
-                                   uint32_t    tag,
-                                   const char *str) {
+static inline void tlv_append_str(uint8_t *buf, size_t *offset, uint32_t tag, const char *str) {
     size_t len = strlen(str);
     tlv_append_field(buf, offset, tag, (const uint8_t *) str, len);
 }
@@ -119,11 +116,11 @@ static inline void tlv_append_str(uint8_t    *buf,
 /**
  * Appends a raw bytes TLV field (fixed-length blob) to buf at *offset.
  */
-static inline void tlv_append_bytes(uint8_t       *buf,
-                                    size_t         *offset,
-                                    uint32_t        tag,
-                                    const uint8_t  *bytes,
-                                    size_t          len) {
+static inline void tlv_append_bytes(uint8_t *buf,
+                                    size_t *offset,
+                                    uint32_t tag,
+                                    const uint8_t *bytes,
+                                    size_t len) {
     tlv_append_field(buf, offset, tag, bytes, len);
 }
 
@@ -131,10 +128,7 @@ static inline void tlv_append_bytes(uint8_t       *buf,
  * Appends a signed int64 TLV field as full 8 bytes big-endian to buf at *offset.
  * Use this for ntli which Python encodes via struct.pack(">q").
  */
-static inline void tlv_append_int64_be(uint8_t *buf,
-                                        size_t  *offset,
-                                        uint32_t tag,
-                                        int64_t  value) {
+static inline void tlv_append_int64_be(uint8_t *buf, size_t *offset, uint32_t tag, int64_t value) {
     uint8_t vbuf[8];
     uint64_t u;
 
@@ -155,5 +149,5 @@ static inline void tlv_append_int64_be(uint8_t *buf,
  */
 #include "buffer.h"
 static inline buffer_t make_buffer(uint8_t *ptr, size_t size) {
-    return (buffer_t){.ptr = ptr, .size = size, .offset = 0};
+    return (buffer_t) {.ptr = ptr, .size = size, .offset = 0};
 }

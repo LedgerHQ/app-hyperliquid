@@ -6,7 +6,7 @@
 
 int bytes_to_lowercase_hex(char *out, size_t outl, const void *value, size_t len) {
     const uint8_t *bytes = (const uint8_t *) value;
-    const char    *hex   = "0123456789abcdef";
+    const char *hex = "0123456789abcdef";
 
     if (outl < 2 * len + 1) {
         *out = '\0';
