@@ -1,4 +1,2 @@
 # SDK macros to exclude from the fuzz build.
 # One macro per line.  Lines starting with # are ignored.
-HAVE_SHA512_WITH_BLOCK_ALT_METHOD
-PRINTF(...)=

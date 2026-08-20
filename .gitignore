@@ -21,6 +21,8 @@ fuzzing/build/
 fuzzing/corpus/
 fuzzing/out/
 .fuzz-artifacts/
+# Generated per build; records absolute source paths.
+fuzzing/invariants/fuzz_globals.zon
 
 # Python
 *.pyc[cod]

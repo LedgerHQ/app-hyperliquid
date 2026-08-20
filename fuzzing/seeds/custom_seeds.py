@@ -1,25 +1,10 @@
 #!/usr/bin/env python3
-"""Hyperliquid-specific seed corpus generator.
+"""Hyperliquid seed corpus.
 
-Produces well-formed APDU seeds that drive the fuzzer past the surface-level
-discriminator gates and into the deep TLV parsers (bulk_order, bulk_modify,
-bulk_cancel, update_leverage, update_isolated_margin, approve_builder_fee,
-order_request, eip712_*). These are the files at 0% line coverage after the
-1-hour baseline.
-
-Each seed is a full fuzzer input: Absolution prefix (which restores the app's
-global state) followed by a 4-byte tail header and an APDU payload.
-
-For SET_ACTION seeds the prefix is patched to set:
-  - g_ctx.has_metadata     = true       (prefix byte 0, FM_VAL_0 selector)
-  - g_ctx.metadata.op_type = op_type    (prefix byte 1, raw uint8)
-  - g_ctx.metadata.asset_id= 1          (prefix bytes 2..6, raw uint32 LE)
-  - fuzz_ctrl[0]           = 0xFF       (structured lane)
-  - fuzz_ctrl[1]           = cmd_idx    (command selector)
-
-This layout is taken from the Absolution-generated fuzzer.c sample_invariant()
-in build/<flavor>/_absolution/<fuzzer>/fuzzer.c. If g_ctx layout changes, the
-constants below must be reviewed.
+One well-formed APDU per INS, to carry the fuzzer past the discriminator
+gates and into the TLV parsers. Each seed is Absolution's zero prefix, the
+four control bytes, then the payload: the seed supplies payload only and
+never writes state, so there is no prefix layout to track.
 """
 
 import os
@@ -34,17 +19,11 @@ SDK_SCRIPTS = os.environ.get(
 sys.path.insert(0, SDK_SCRIPTS)
 
 from fuzz_seed_utils import (
-    parse_layout_header,
     resolve_prefix_size,
     resolve_seed_prefix,
-    validate_prefix_size,
-    get_layout_header_path,
+    ctrl_bytes,
 )
 
-LAYOUT_HEADER = get_layout_header_path()
-_LAYOUT_DEFS = parse_layout_header(LAYOUT_HEADER)
-CTRL_OFF = _LAYOUT_DEFS.get("SCEN_CTRL_OFF", 0)
-CTRL_LEN = _LAYOUT_DEFS.get("SCEN_CTRL_LEN", 16)
 
 # fuzz_commands[] order in fuzz_dispatcher.c (must stay aligned).
 CMD_GET_ADDRESS = 0
@@ -128,105 +107,25 @@ DEFAULT_BUILDER = bytes(range(20))
 SIGNATURE_70B = bytes(70)
 
 
-# ── Prefix offsets ──────────────────────────────────────────────────────────
-#
-# These mirror sample_invariant() in
-# build/<flavor>/_absolution/fuzz_globals/fuzzer.c. The current layout (after
-# making g_signing_ctx fuzzable in invariants/) consumes 326 bytes:
-#
-#   [0..39]      g_signing_ctx.bip32_path        (40 bytes)
-#   [40]         g_signing_ctx.bip32_path_length (1 byte)
-#   [41]         g_ctx.has_metadata              (selector mod 2)
-#   [42]         g_ctx.metadata.op_type
-#   [43..46]     g_ctx.metadata.asset_id         (uint32 host-order)
-#   [47..96]     g_ctx.metadata.asset_ticker     (50 bytes)
-#   [97]         g_ctx.metadata.network          (selector mod 2)
-#   [98..117]    g_ctx.metadata.builder_addr     (20 bytes)
-#   [118]        g_ctx.metadata.has_margin       (selector mod 2)
-#   [119..126]   g_ctx.metadata.margin           (8 bytes)
-#   [127]        g_ctx.metadata.has_leverage     (selector mod 2)
-#   [128..131]   g_ctx.metadata.leverage         (4 bytes)
-#   [132..141]   g_ctx.actions[0..9].type        (10 bytes)
-#   [142..221]   g_ctx.actions[0..9].nonce       (80 bytes)
-#   [222]        g_ctx.action_count              (selector mod 11)
-#   [223]        g_ctx.action_index              (selector mod 11)
-#   [224..239]   fuzz_ctrl                       (16 bytes)
-#   [240..255]   current_tlv_fuzz_config         (16 bytes)
-#   [256]        fuzz_mock_crypto_fail           (selector mod 2)
-#   [257]        fuzz_mock_nbgl_reject           (selector mod 2)
-#   [258..325]   remaining SDK globals (small ones)
-#
-# Action union bodies (the 448-byte payload after .type and .nonce in each
-# s_action) are NOT fuzzable — Absolution classifies them as padding and
-# sample_invariant() verifies they stay zero. This caps the bulk_*_serialize
-# / order_request_serialize coverage at the "empty count" path.
-#
-# If `update-scenario-layout.py` reports a different SCEN_PREFIX_SIZE /
-# SCEN_CTRL_OFF, sync these offsets to match.
-
-PFX_SIGN_PATH_OFF       = 0    # g_signing_ctx.bip32_path        — 40 raw bytes
-PFX_SIGN_PATH_LEN_OFF   = 40   # g_signing_ctx.bip32_path_length — 1 raw byte
-PFX_HAS_METADATA_OFF    = 41   # selector mod 2 over {0x00, 0x01}
-PFX_OP_TYPE_OFF         = 42   # uint8
-PFX_ASSET_ID_OFF        = 43   # uint32, little-endian (host order)
-PFX_ACTION_TYPE_OFF     = 132  # actions[i].type at 132 + i  (10 entries)
-PFX_ACTION_NONCE_OFF    = 142  # actions[i].nonce at 142 + i*8 (10 entries × 8 bytes)
-PFX_ACTION_COUNT_OFF    = 222  # selector mod 11 over [0..10]
-PFX_ACTION_INDEX_OFF    = 223  # selector mod 11 over [0..10]
-PFX_CRYPTO_FAIL_OFF     = 256  # selector mod 2 over {0x00, 0x01}
-PFX_NBGL_REJECT_OFF     = 257  # selector mod 2 over {0x00, 0x01}
-
-
 # ── Prefix builder ──────────────────────────────────────────────────────────
 
 
-def build_prefix(base_prefix, *, has_metadata=False, op_type=0, asset_id=DEFAULT_ASSET_ID,
-                 cmd_idx=0, action_count=0, action_index=0, network=0,
-                 crypto_fail=0, nbgl_reject=0,
-                 action_types=None, action_nonces=None,
-                 signing_path=None, signing_path_length=None):
-    """Build a base prefix with the requested g_ctx state pre-set.
+def build_head(base_prefix, *, p1=0, p2=0,
+               has_metadata=False, op_type=0, asset_id=DEFAULT_ASSET_ID,
+               cmd_idx=0, action_count=0, action_index=0, network=0,
+               crypto_fail=0, nbgl_reject=0,
+               action_types=None, action_nonces=None,
+               signing_path=None, signing_path_length=None):
+    """Return the prefix plus control bytes that precede the APDU payload.
 
-    Patches the Absolution prefix at the offsets documented above. `cmd_idx`
-    selects which `fuzz_commands[]` entry runs (CMD_*); `action_types` /
-    `action_nonces` overlay actions[i] entries (lists indexed by i).
-    `signing_path` / `signing_path_length` populate g_signing_ctx so that the
-    non-first SIGN_ACTION branch (memcmp(tmp, g_signing_ctx)) can be satisfied
-    by an APDU sending the same path bytes.
+    State keyword arguments are accepted and ignored: they record which scenario
+    a call site intended, but the invariant owns that state. Only cmd_idx, p1 and
+    p2 are honoured, being fuzzer control bytes rather than application state.
     """
-    buf = bytearray(base_prefix)
-    buf[PFX_HAS_METADATA_OFF] = 1 if has_metadata else 0
-    buf[PFX_OP_TYPE_OFF] = op_type & 0xFF
-    struct.pack_into("<I", buf, PFX_ASSET_ID_OFF, asset_id & 0xFFFFFFFF)
-    buf[PFX_ACTION_COUNT_OFF] = action_count & 0x0F
-    buf[PFX_ACTION_INDEX_OFF] = action_index & 0x0F
-    buf[PFX_CRYPTO_FAIL_OFF] = crypto_fail & 0x01
-    buf[PFX_NBGL_REJECT_OFF] = nbgl_reject & 0x01
-    if action_types:
-        for i, t in enumerate(action_types[:10]):
-            buf[PFX_ACTION_TYPE_OFF + i] = t & 0xFF
-    if action_nonces:
-        for i, n in enumerate(action_nonces[:10]):
-            struct.pack_into("<Q", buf, PFX_ACTION_NONCE_OFF + i * 8,
-                             n & 0xFFFFFFFFFFFFFFFF)
-    if signing_path is not None:
-        # g_signing_ctx.bip32_path is a uint32_t array; the prefix bytes are
-        # memcpy'd straight into it so the in-memory layout is host-endian
-        # (little-endian on x86_64). bip32_path_read() in the APDU branch
-        # reads the same path as big-endian and stores the parsed uint32 in
-        # tmp.bip32_path. To make memcmp(tmp, g_signing_ctx) succeed we have
-        # to write the prefix slot in host order, not in the APDU wire order.
-        for i, seg in enumerate(signing_path[:10]):
-            struct.pack_into("<I", buf, PFX_SIGN_PATH_OFF + i * 4,
-                             seg & 0xFFFFFFFF)
-    if signing_path_length is not None:
-        buf[PFX_SIGN_PATH_LEN_OFF] = signing_path_length & 0xFF
-    # Structured lane: fuzz_ctrl[0] > FUZZ_STRUCTURED_LANE_THRESHOLD (=102),
-    # fuzz_ctrl[1] selects the command.
-    if CTRL_OFF and CTRL_OFF + CTRL_LEN <= len(buf):
-        buf[CTRL_OFF + 0] = 0xFF
-        buf[CTRL_OFF + 1] = cmd_idx
-    return bytes(buf)
+    del (has_metadata, op_type, asset_id, action_count, action_index, network,
+         crypto_fail, nbgl_reject, action_types, action_nonces,
+         signing_path, signing_path_length)
+    return bytes(base_prefix) + ctrl_bytes(True, cmd_idx, p1, p2)
 
 
 # ── TLV helpers ─────────────────────────────────────────────────────────────
@@ -428,15 +327,6 @@ def build_apdu_payload_tlv(tlv_body):
     return struct.pack(">H", len(tlv_body)) + tlv_body
 
 
-def build_tail(p1, p2, payload):
-    """Build the 4-byte tail header + payload.
-
-    In structured lane the harness pulls CLA/INS from fuzz_commands[cmd_idx]
-    based on fuzz_ctrl[1]; tail[0..1] are ignored and tail[2..3] are p1/p2.
-    """
-    return bytes([0x00, 0x00, p1 & 0xFF, p2 & 0xFF]) + payload
-
-
 # ── Seed factories ──────────────────────────────────────────────────────────
 
 
@@ -445,22 +335,22 @@ def make_seed_metadata(base_prefix, name, op_type, *, with_optional=False):
     # from the APDU body, so start with has_metadata=False (the natural
     # pre-call state). op_type/asset_id in the prefix are ignored on this
     # path; the parser writes them from TAG_OPERATION_TYPE / TAG_ASSET_ID.
-    prefix = build_prefix(base_prefix, has_metadata=False, op_type=0,
-                          cmd_idx=CMD_PROVIDE_METADATA)
+    head = build_head(base_prefix, p1=1, has_metadata=False, op_type=0,
+                      cmd_idx=CMD_PROVIDE_METADATA)
     body = build_metadata_envelope(op_type, with_optional=with_optional)
-    return name, prefix + build_tail(1, 0, build_apdu_payload_tlv(body))
+    return name, head + build_apdu_payload_tlv(body)
 
 
 def make_seed_action(base_prefix, name, op_type, action_type, body):
-    prefix = build_prefix(base_prefix, has_metadata=True, op_type=op_type,
-                          cmd_idx=CMD_SET_ACTION)
+    head = build_head(base_prefix, p1=1, has_metadata=True, op_type=op_type,
+                      cmd_idx=CMD_SET_ACTION)
     envelope = build_action_envelope(action_type, body)
-    return name, prefix + build_tail(1, 0, build_apdu_payload_tlv(envelope))
+    return name, head + build_apdu_payload_tlv(envelope)
 
 
 def make_seed_get_address(base_prefix):
-    prefix = build_prefix(base_prefix, cmd_idx=CMD_GET_ADDRESS)
-    return "get_address_p2pkh", prefix + build_tail(0, 0, build_bip32_path())
+    head = build_head(base_prefix, cmd_idx=CMD_GET_ADDRESS)
+    return "get_address_p2pkh", head + build_bip32_path()
 
 
 # Compatibility table: which op_type each action type is paired with under
@@ -507,7 +397,7 @@ def make_seed_sign_action_eip712(base_prefix, action_type, *, network=0, path=No
     else:
         placeholder = ACTION_TYPE_BULK_ORDER
     action_types = [placeholder, action_type]
-    prefix = build_prefix(
+    head = build_head(
         base_prefix,
         has_metadata=True,
         op_type=op_type,
@@ -521,34 +411,32 @@ def make_seed_sign_action_eip712(base_prefix, action_type, *, network=0, path=No
         crypto_fail=0,
         nbgl_reject=0,
     )
-    return prefix + build_tail(0, 0, build_bip32_path(path))
+    return head + build_bip32_path(path)
 
 
 def _flip_crypto_fail(blob):
-    """Patch a sign_action seed to force fuzz_mock_crypto_fail=1.
+    """Previously patched a prefix byte to force fuzz_mock_crypto_fail=1.
 
-    Used to reach the error-return branches inside eip712_*.c (e.g.
-    `if (cx_keccak_init_no_throw(...) != CX_OK) return false;`).
+    That switch is an Absolution-sampled global, so the fuzzer reaches it by
+    sampling rather than by a seed poking a hardcoded offset. Constrain the
+    symbol's domain in invariants/ if those error branches need more weight.
     """
-    buf = bytearray(blob)
-    buf[PFX_CRYPTO_FAIL_OFF] = 1
-    return bytes(buf)
+    return blob
 
 
 def make_seed_sign_action(base_prefix):
     # Legacy seed kept for the first-action path coverage in handler_sign_action.
     # It exits at SWO_INCORRECT_DATA after ctx_get_action_metadata fails because
     # the action list is empty, but still touches the BIP32 read + ctx checks.
-    prefix = build_prefix(base_prefix, has_metadata=True, op_type=OP_TYPE_ORDER,
-                          cmd_idx=CMD_SIGN_ACTION)
-    return "sign_action_bip32", prefix + build_tail(0, 0, build_bip32_path())
+    head = build_head(base_prefix, has_metadata=True, op_type=OP_TYPE_ORDER,
+                      cmd_idx=CMD_SIGN_ACTION)
+    return "sign_action_bip32", head + build_bip32_path()
 
 
 def generate_seeds(output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     prefix_size = resolve_prefix_size()
-    validate_prefix_size(prefix_size, _LAYOUT_DEFS)
     base_prefix = resolve_seed_prefix(prefix_size)
 
     seeds = []
