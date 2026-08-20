@@ -1,20 +1,16 @@
-# App-local symbols to zero out in the invariant (merged with the SDK's
-# default zero list). These globals are pure scratch / display buffers: the
-# app reads back from them only after writing, so leaving them fuzzable
-# would just inflate the prefix without unlocking new branches.
+# App globals removed from sampling, merged with the SDK list. Each is written
+# before it is read, so sampling them only inflates the prefix.
 
-# Action serialization scratch buffer (1024 bytes).
+# Action serialization scratch, 1024 bytes.
 g_raw_buf@action.c
 
-# NBGL display formatting buffer; reset on every UI flow.
+# NBGL display formatting buffer.
 g_ui_ctx@operation.c
 
-# g_signing_ctx@sign_action.c is intentionally NOT zeroed: the non-first
-# action branch in handler_sign_action() does memcmp(tmp, g_signing_ctx)
-# before calling sign_action(). When this global is zeroed and the APDU
-# carries a non-empty BIP32 path, the memcmp always fails and sign_action()
-# (along with action_hash, eip712_*_hash, eip712_sign, action_serialize, and
-# the msgpack writers in src_msgpack/cmp.c) is unreachable. Leaving it
-# fuzzable lets seeds pre-populate a path that matches the APDU payload,
-# unlocking ~185 lines of EIP-712 code and ~150+ lines of msgpack writers
-# behind action_hash. Cost: 44 extra prefix bytes per input.
+# handler_sign_action() writes this on the first action of a session and
+# memcmp's it on later ones. Sampling it would require 44 tail bytes to equal 44
+# prefix bytes, which no mutation reaches, and a zero path cannot match either
+# because bip32_path_read() rejects a zero length. sign_action() is reached
+# through the first-action UI path instead, which does not read the restored
+# value, so sampling it only costs prefix budget.
+g_signing_ctx@sign_action.c
