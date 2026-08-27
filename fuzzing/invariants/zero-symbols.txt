@@ -1,0 +1,16 @@
+# App globals removed from sampling, merged with the SDK list. Each is written
+# before it is read, so sampling them only inflates the prefix.
+
+# Action serialization scratch, 1024 bytes.
+g_raw_buf@action.c
+
+# NBGL display formatting buffer.
+g_ui_ctx@operation.c
+
+# handler_sign_action() writes this on the first action of a session and
+# memcmp's it on later ones. Sampling it would require 44 tail bytes to equal 44
+# prefix bytes, which no mutation reaches, and a zero path cannot match either
+# because bip32_path_read() rejects a zero length. sign_action() is reached
+# through the first-action UI path instead, which does not read the restored
+# value, so sampling it only costs prefix budget.
+g_signing_ctx@sign_action.c

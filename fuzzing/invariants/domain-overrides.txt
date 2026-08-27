@@ -1,0 +1,23 @@
+# Domain overrides applied after invariant sync. Selectors are GLOBAL.FIELD,
+# with a trailing dot for a flat global (SYMBOL. = ...). A selector matching
+# nothing fails the build.
+#
+# A prefix byte selects by index into the value list, so the first value is
+# what an all-zero prefix restores. Seeds ship a zero prefix, so the productive
+# value goes first: otherwise every seed starts with no metadata and no actions,
+# and handler_sign_action() returns before handle_ui().
+
+# Session state machine, g_ctx in src/hl_context.c. action_count and
+# action_index are uint8 bounded by MAX_ACTION_COUNT.
+g_ctx.has_metadata = values \x01 \x00
+g_ctx.action_count = values \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a \x00
+g_ctx.action_index = values \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08 \x09 \x0a
+
+# Metadata drives the handle_ui() switch; an out-of-range op_type falls to the
+# default branch and rejects before any parser runs.
+g_ctx.metadata.op_type = values \x00 \x01 \x02 \x03 \x04 \x05 \x06 \x07 \x08
+g_ctx.metadata.network = values \x00 \x01
+
+# SDK mock toggles.
+fuzz_mock_nbgl_reject. = values \x00 \x01
+fuzz_mock_crypto_fail. = values \x00 \x01
