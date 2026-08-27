@@ -175,6 +175,12 @@ bool ui_order(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
         return false;
     }
 
+    if (((tp_order != NULL) && !check_trigger_matches_limit(tp_order, limit_order)) ||
+        ((sl_order != NULL) && !check_trigger_matches_limit(sl_order, limit_order))) {
+        PRINTF("Error: TP/SL trigger does not match parent order\n");
+        return false;
+    }
+
     switch (limit_order->limit.tif) {
         case TIF_IOC:
             ret = ui_market_order(

@@ -59,10 +59,12 @@ static bool handle_struct_version(const tlv_data_t *data, s_action_ctx *out) {
 }
 
 static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->action.type)) {
+    uint8_t type;
+
+    if (!get_uint8_t_from_tlv_data(data, &type)) {
         return false;
     }
-    switch (out->action.type) {
+    switch (type) {
         case ACTION_TYPE_BULK_ORDER:
         case ACTION_TYPE_BULK_MODIFY:
         case ACTION_TYPE_BULK_CANCEL:
@@ -75,6 +77,7 @@ static bool handle_action_type(const tlv_data_t *data, s_action_ctx *out) {
             PRINTF("Error: unsupported action type (%u)!\n", out->action.type);
             return false;
     }
+    out->action.type = (e_action_type) type;
     return true;
 }
 

@@ -1,9 +1,21 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "os_print.h"
+#include "format.h"
 #include "ui_context.h"
 #include "ui_common.h"
 #include "hl_context.h"
+
+static void show_cancel_oids(s_ui_ctx *ui_ctx, const s_bulk_cancel *bulk_cancel) {
+    for (uint8_t i = 0; i < bulk_cancel->cancel_count; ++i) {
+        format_u64(ui_ctx->cancel.oid[i],
+                   sizeof(ui_ctx->cancel.oid[i]),
+                   bulk_cancel->cancels[i].oid);
+        ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "Order ID";
+        ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->cancel.oid[i];
+        ui_ctx->pair_list.nbPairs += 1;
+    }
+}
 
 bool ui_cancel(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     const s_action *action;
@@ -29,6 +41,8 @@ bool ui_cancel(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                            metadata,
                            ui_ctx->cancel.leverage,
                            sizeof(ui_ctx->cancel.leverage));
+
+    show_cancel_oids(ui_ctx, &action->bulk_cancel);
 
     snprintf(ui_ctx->intent,
              sizeof(ui_ctx->intent),
@@ -102,6 +116,8 @@ bool ui_cancel_tp_sl(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                            metadata,
                            ui_ctx->cancel.leverage,
                            sizeof(ui_ctx->cancel.leverage));
+
+    show_cancel_oids(ui_ctx, &action->bulk_cancel);
 
     snprintf(ui_ctx->intent,
              sizeof(ui_ctx->intent),

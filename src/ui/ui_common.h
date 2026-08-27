@@ -28,3 +28,8 @@ bool get_trigger_sl(const s_order_request *req);
 
 const char *get_short_long_string(const s_order_request *req);
 const char *get_short_long_string_capitalized(const s_order_request *req);
+
+// TP/SL triggers are signed but only their trigger price is shown during review, so their
+// remaining signed fields must follow canonical close-order semantics to stay harmless.
+bool check_trigger_close_order(const s_order_request *trigger);
+bool check_trigger_matches_limit(const s_order_request *trigger, const s_order_request *limit);

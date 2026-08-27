@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "format.h"
 #include "ui_common.h"
 
@@ -85,4 +86,15 @@ const char *get_short_long_string(const s_order_request *req) {
 
 const char *get_short_long_string_capitalized(const s_order_request *req) {
     return short_long_string(req, "Short", "Long");
+}
+
+bool check_trigger_close_order(const s_order_request *trigger) {
+    // market triggers carry limit_px == trigger_px by convention
+    return trigger->reduce_only && trigger->trigger.is_market &&
+           (strcmp(trigger->limit_px, trigger->trigger.trigger_px) == 0);
+}
+
+bool check_trigger_matches_limit(const s_order_request *trigger, const s_order_request *limit) {
+    return check_trigger_close_order(trigger) && (trigger->is_buy != limit->is_buy) &&
+           (strcmp(trigger->sz, limit->sz) == 0);
 }

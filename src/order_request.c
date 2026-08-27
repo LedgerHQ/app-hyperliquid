@@ -6,10 +6,12 @@
 #include "hl_context.h"
 
 static bool handle_tif(const tlv_data_t *data, s_limit_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->limit->tif)) {
+    uint8_t tif;
+
+    if (!get_uint8_t_from_tlv_data(data, &tif)) {
         return false;
     }
-    switch (out->limit->tif) {
+    switch (tif) {
         case TIF_ALO:
         case TIF_IOC:
         case TIF_GTC:
@@ -17,6 +19,7 @@ static bool handle_tif(const tlv_data_t *data, s_limit_ctx *out) {
         default:
             return false;
     }
+    out->limit->tif = (e_tif) tif;
     return true;
 }
 
@@ -92,16 +95,19 @@ static bool handle_trigger_px(const tlv_data_t *data, s_trigger_ctx *out) {
 }
 
 static bool handle_tpsl(const tlv_data_t *data, s_trigger_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->trigger->tpsl)) {
+    uint8_t tpsl;
+
+    if (!get_uint8_t_from_tlv_data(data, &tpsl)) {
         return false;
     }
-    switch (out->trigger->tpsl) {
+    switch (tpsl) {
         case TRIGGER_TYPE_TP:
         case TRIGGER_TYPE_SL:
             break;
         default:
             return false;
     }
+    out->trigger->tpsl = (e_trigger_type) tpsl;
     return true;
 }
 
@@ -183,16 +189,19 @@ static bool parse_trigger_order(const buffer_t *payload, s_trigger_ctx *out) {
 }
 
 static bool handle_order_type(const tlv_data_t *data, s_order_request_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->order_request->order_type)) {
+    uint8_t order_type;
+
+    if (!get_uint8_t_from_tlv_data(data, &order_type)) {
         return false;
     }
-    switch (out->order_request->order_type) {
+    switch (order_type) {
         case ORDER_TYPE_LIMIT:
         case ORDER_TYPE_TRIGGER:
             break;
         default:
             return false;
     }
+    out->order_request->order_type = (e_order_type) order_type;
     return true;
 }
 
