@@ -4,6 +4,7 @@
 #include <string.h>
 #include "os_print.h"
 #include "action.h"
+#include "format.h"
 #include "hl_context.h"
 #include "ui_context.h"
 #include "ui_common.h"
@@ -161,6 +162,12 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                  COUNTERVALUE_TICKER);
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.tp_price;
         ui_ctx->pair_list.nbPairs += 1;
+        if (action->type == ACTION_TYPE_BULK_MODIFY) {
+            format_u64(ui_ctx->modify.tp_oid, sizeof(ui_ctx->modify.tp_oid), mod_tp_req->oid);
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "TP Order ID";
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.tp_oid;
+            ui_ctx->pair_list.nbPairs += 1;
+        }
     } else {
         // only SL
         snprintf(target_tmp,
@@ -183,6 +190,12 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                  COUNTERVALUE_TICKER);
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.sl_price;
         ui_ctx->pair_list.nbPairs += 1;
+        if (action->type == ACTION_TYPE_BULK_MODIFY) {
+            format_u64(ui_ctx->modify.sl_oid, sizeof(ui_ctx->modify.sl_oid), mod_sl_req->oid);
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "SL Order ID";
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.sl_oid;
+            ui_ctx->pair_list.nbPairs += 1;
+        }
     } else {
         // only TP
         snprintf(target_tmp,
