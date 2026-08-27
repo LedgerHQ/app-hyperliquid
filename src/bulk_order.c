@@ -104,10 +104,12 @@ static bool handle_order(const tlv_data_t *data, s_bulk_order_ctx *out) {
 }
 
 static bool handle_grouping(const tlv_data_t *data, s_bulk_order_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->bulk_order->grouping)) {
+    uint8_t grouping;
+
+    if (!get_uint8_t_from_tlv_data(data, &grouping)) {
         return false;
     }
-    switch (out->bulk_order->grouping) {
+    switch (grouping) {
         case GROUPING_NA:
         case GROUPING_NORMAL_TPSL:
         case GROUPING_POSITION_TPSL:
@@ -115,6 +117,7 @@ static bool handle_grouping(const tlv_data_t *data, s_bulk_order_ctx *out) {
         default:
             return false;
     }
+    out->bulk_order->grouping = (e_grouping) grouping;
     return true;
 }
 
