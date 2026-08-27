@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include "os_print.h"
 #include "action.h"
 #include "hl_context.h"
@@ -114,6 +115,14 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     }
 
     if ((tp_req == NULL) && (sl_req == NULL)) {
+        return false;
+    }
+    // position side is unknown here, but reduce-only market triggers with a shared size
+    // can only close, whichever hidden direction they carry
+    if (((tp_req != NULL) && !check_trigger_close_order(tp_req)) ||
+        ((sl_req != NULL) && !check_trigger_close_order(sl_req)) ||
+        ((tp_req != NULL) && (sl_req != NULL) && (strcmp(tp_req->sz, sl_req->sz) != 0))) {
+        PRINTF("Error: inconsistent TP/SL trigger orders\n");
         return false;
     }
     any_req = (tp_req == NULL) ? sl_req : tp_req;
