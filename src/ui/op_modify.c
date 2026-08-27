@@ -1,8 +1,10 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include "os_print.h"
 #include "action.h"
+#include "format.h"
 #include "hl_context.h"
 #include "ui_context.h"
 #include "ui_common.h"
@@ -116,6 +118,14 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
     if ((tp_req == NULL) && (sl_req == NULL)) {
         return false;
     }
+    // position side is unknown here, but reduce-only market triggers with a shared size
+    // can only close, whichever hidden direction they carry
+    if (((tp_req != NULL) && !check_trigger_close_order(tp_req)) ||
+        ((sl_req != NULL) && !check_trigger_close_order(sl_req)) ||
+        ((tp_req != NULL) && (sl_req != NULL) && (strcmp(tp_req->sz, sl_req->sz) != 0))) {
+        PRINTF("Error: inconsistent TP/SL trigger orders\n");
+        return false;
+    }
     any_req = (tp_req == NULL) ? sl_req : tp_req;
 
     ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "Active Position";
@@ -152,6 +162,12 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                  COUNTERVALUE_TICKER);
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.tp_price;
         ui_ctx->pair_list.nbPairs += 1;
+        if (action->type == ACTION_TYPE_BULK_MODIFY) {
+            format_u64(ui_ctx->modify.tp_oid, sizeof(ui_ctx->modify.tp_oid), mod_tp_req->oid);
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "TP Order ID";
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.tp_oid;
+            ui_ctx->pair_list.nbPairs += 1;
+        }
     } else {
         // only SL
         snprintf(target_tmp,
@@ -174,6 +190,12 @@ bool ui_modify(s_ui_ctx *ui_ctx, const s_action_metadata *metadata) {
                  COUNTERVALUE_TICKER);
         ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.sl_price;
         ui_ctx->pair_list.nbPairs += 1;
+        if (action->type == ACTION_TYPE_BULK_MODIFY) {
+            format_u64(ui_ctx->modify.sl_oid, sizeof(ui_ctx->modify.sl_oid), mod_sl_req->oid);
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].item = "SL Order ID";
+            ui_ctx->pairs[ui_ctx->pair_list.nbPairs].value = ui_ctx->modify.sl_oid;
+            ui_ctx->pair_list.nbPairs += 1;
+        }
     } else {
         // only TP
         snprintf(target_tmp,

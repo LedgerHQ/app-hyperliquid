@@ -48,10 +48,12 @@ static bool handle_struct_version(const tlv_data_t *data, s_action_metadata_ctx 
 }
 
 static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->metadata.op_type)) {
+    uint8_t op_type;
+
+    if (!get_uint8_t_from_tlv_data(data, &op_type)) {
         return false;
     }
-    switch (out->metadata.op_type) {
+    switch (op_type) {
         case OP_TYPE_ORDER:
         case OP_TYPE_MODIFY:
         case OP_TYPE_CANCEL:
@@ -66,6 +68,7 @@ static bool handle_operation_type(const tlv_data_t *data, s_action_metadata_ctx 
             PRINTF("Error: unknown operation type (%u)!\n", out->metadata.op_type);
             return false;
     }
+    out->metadata.op_type = (e_operation_type) op_type;
     return true;
 }
 
@@ -81,10 +84,12 @@ static bool handle_asset_ticker(const tlv_data_t *data, s_action_metadata_ctx *o
 }
 
 static bool handle_network(const tlv_data_t *data, s_action_metadata_ctx *out) {
-    if (!get_uint8_t_from_tlv_data(data, &out->metadata.network)) {
+    uint8_t network;
+
+    if (!get_uint8_t_from_tlv_data(data, &network)) {
         return false;
     }
-    switch (out->metadata.network) {
+    switch (network) {
         case NETWORK_MAINNET:
         case NETWORK_TESTNET:
             break;
@@ -92,6 +97,7 @@ static bool handle_network(const tlv_data_t *data, s_action_metadata_ctx *out) {
             PRINTF("Error: unknown network (%u)!\n", out->metadata.network);
             return false;
     }
+    out->metadata.network = (e_network) network;
     return true;
 }
 
